@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-16T03:30:31+08:00",
+  "generatedAt": "2026-06-16T03:34:27+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -502,12 +502,12 @@
       "title": "chunk_dv_local 深融合优化",
       "scope": "",
       "target": "",
-      "owner": "陈琳鑫",
+      "owner": "陈琳鑫/叶倩雯",
       "status": "todo",
       "risk": "中",
       "priority": "P0",
       "group_id": "M-2026-06-18",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-15",
       "end_date": "2026-06-18",
       "evidence": [],
@@ -515,7 +515,7 @@
       "notes": "",
       "position": 8,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T03:34:27+08:00",
       "segments": [
         {
           "id": "seg-f6b0d1664a",
