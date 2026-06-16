@@ -65,7 +65,8 @@ https://weinachuan.github.io/flash-linear-attention-npu-io/
 - 不要把 token 写入仓库。
 - 页面只把 token 保存在当前浏览器会话的 `sessionStorage`。
 - 退出编辑或关闭浏览器会话后需要重新输入。
-- 每次保存会创建一次 GitHub commit，同时更新 `data/` 和 `docs/` 下的数据快照和审计日志。
+- 可以单行保存，也可以连续修改多行后点击“保存全部”，一次 GitHub commit 写回所有待保存任务。
+- 每次写回都会更新 `data/` 和 `docs/` 下的数据快照和审计日志。
 
 ## API
 

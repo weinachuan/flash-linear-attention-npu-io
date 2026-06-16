@@ -11,6 +11,7 @@ const state = {
   data: null,
   audit: [],
   token: sessionStorage.getItem("flashPagesToken") || "",
+  dirtyTaskIds: new Set(),
   filters: { q: "", risk: "", priority: "", status: "" },
 };
 
@@ -62,7 +63,7 @@ function render() {
   $("#token").value = state.token ? "********" : "";
   $("#logout").classList.toggle("hidden", !state.token);
   $("#editMode").classList.toggle("hidden", Boolean(state.token));
-  $("#editStatus").textContent = state.token ? "编辑模式：保存会写入 GitHub 仓库" : "只读模式";
+  updateEditStatus();
   renderGantt(tasks);
   renderRows(tasks);
   renderAdmin();
@@ -127,6 +128,7 @@ function renderRows(tasks) {
     `;
   }).join("");
   document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => handleTaskAction(button).catch(showError)));
+  document.querySelectorAll("#rows [data-field]").forEach((control) => control.addEventListener("change", () => markTaskDirty(control)));
 }
 
 function renderAdmin() {
@@ -160,11 +162,7 @@ async function handleTaskAction(button) {
   if (!task) return;
   const action = button.dataset.action;
   if (action === "save") {
-    row.querySelectorAll("[data-field]").forEach((input) => {
-      task[input.dataset.field] = input.value.trim();
-    });
-    task.updated_at = nowIso();
-    normalizeTaskSegments(task);
+    applyRowToTask(row);
     await saveRepository(`更新任务：${task.title}`, "task.update", "task", task.id, { title: task.title });
   }
   if (action === "split") {
@@ -175,6 +173,36 @@ async function handleTaskAction(button) {
     state.data.tasks = state.data.tasks.filter((item) => item.id !== task.id);
     await saveRepository(`删除任务：${task.title}`, "task.delete", "task", task.id, { title: task.title });
   }
+}
+
+function markTaskDirty(control) {
+  const row = control.closest("tr");
+  if (!row?.dataset.taskId) return;
+  applyRowToTask(row, false);
+  row.classList.add("dirty");
+  state.dirtyTaskIds.add(row.dataset.taskId);
+  updateEditStatus();
+}
+
+function applyRowToTask(row, normalizeSegments = true) {
+  const task = state.data.tasks.find((item) => item.id === row.dataset.taskId);
+  if (!task) return null;
+  row.querySelectorAll("[data-field]").forEach((input) => {
+    task[input.dataset.field] = input.value.trim();
+  });
+  task.updated_at = nowIso();
+  if (normalizeSegments) normalizeTaskSegments(task);
+  return task;
+}
+
+async function saveAllTasks() {
+  if (!state.dirtyTaskIds.size) {
+    alert("没有待保存的任务变更。");
+    return;
+  }
+  document.querySelectorAll("#rows tr.dirty").forEach((row) => applyRowToTask(row));
+  const ids = [...state.dirtyTaskIds];
+  await saveRepository(`批量更新任务：${ids.length}项`, "task.batch_update", "task", "batch", { ids });
 }
 
 async function addTask() {
@@ -307,8 +335,18 @@ async function saveRepository(summary, action, entity, id, detail = {}) {
     [DATA_PATHS.audit]: auditText,
     [DATA_PATHS.pageAudit]: auditText,
   }, `记录数据变更: ${summary}`);
+  state.dirtyTaskIds.clear();
   $("#editStatus").textContent = "已写入 GitHub 仓库，Pages 稍后刷新";
   render();
+}
+
+function updateEditStatus() {
+  if (!state.token) {
+    $("#editStatus").textContent = "只读模式";
+    return;
+  }
+  const dirtyCount = state.dirtyTaskIds.size;
+  $("#editStatus").textContent = dirtyCount ? `编辑模式：${dirtyCount} 项待保存` : "编辑模式：保存会写入 GitHub 仓库";
 }
 
 async function commitFiles(files, message) {
@@ -440,6 +478,7 @@ $("#refresh").addEventListener("click", load);
 $("#editMode").addEventListener("click", enableEditMode);
 $("#logout").addEventListener("click", logout);
 $("#addTask").addEventListener("click", () => addTask().catch(showError));
+$("#saveAll").addEventListener("click", () => saveAllTasks().catch(showError));
 $("#addGroup").addEventListener("click", () => addGroup().catch(showError));
 $("#addSpecial").addEventListener("click", () => addSpecial().catch(showError));
 
