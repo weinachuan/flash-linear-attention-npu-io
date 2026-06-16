@@ -167,6 +167,7 @@ function uniqueTaskValues(field) {
 
 function ownerFilterOptions() {
   return uniqueStrings([
+    ...(state.data.people || []).map((person) => person.name),
     ...(state.data.tasks || []).flatMap((task) => taskOwnerNames(task)),
     ...operatorOwnerRuleNames(),
   ])
@@ -488,12 +489,12 @@ function renderGantt(tasks) {
 function renderPeopleView(tasks) {
   const days = dateList(state.view.start, state.view.end);
   const people = peopleForTasks(tasks);
-  if (!tasks.length) {
+  if (!people.length) {
     $("#peopleView").innerHTML = `<p class="empty">当前时间窗口内没有符合筛选条件的人力安排。</p>`;
     return;
   }
   $("#peopleView").innerHTML = `
-    <div class="view-note">按当前时间窗口展示每日人力占用；同一天多个事项会叠放显示。</div>
+    <div class="view-note">按当前时间窗口展示每日人力占用；同一天多个事项会叠放显示。空闲人员固定排在待排人力下方。</div>
     <div class="people-grid-wrap">
       <table class="people-grid">
         <thead>
@@ -571,8 +572,17 @@ function tasksForPersonOnDay(tasks, person, day) {
   return tasks.filter((task) => taskPeople(task, day).some((item) => item.id === person.id) && taskSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day));
 }
 
+function tasksForPerson(person) {
+  return (state.data.tasks || []).filter((task) => taskOwnerNames(task).includes(person.name));
+}
+
 function taskChipHtml(task) {
-  return `<span class="work-chip ${riskClass(task.risk)}" title="${escapeAttr(displayTaskTitle(task))}">${escapeHtml(compactTaskTitle(task))}</span>`;
+  const operators = taskOperators(task);
+  const operatorLabel = operators.length ? operators.map((operator) => operator.label).join(" / ") : specialTitle(task.special_id);
+  return `<span class="work-chip ${riskClass(task.risk)}" title="${escapeAttr(displayTaskTitle(task))}">
+    <em>${escapeHtml(operatorLabel || groupTitle(task.group_id))}</em>
+    <b>${escapeHtml(compactTaskTitle(task))}</b>
+  </span>`;
 }
 
 function featureTitle(task, operator = taskOperators(task)[0]) {
@@ -660,7 +670,14 @@ function compactTaskTitle(task) {
 
 function ensurePeopleCatalog() {
   const existing = new Map((state.data.people || []).map((person) => [person.name, person]));
-  const names = [];
+  const names = ["待排人力"];
+  (state.data.people || []).forEach((person) => {
+    const name = normalizeOwnerName(person.name);
+    if (!names.includes(name)) names.push(name);
+  });
+  operatorOwnerRuleNames().forEach((name) => {
+    if (!names.includes(name)) names.push(name);
+  });
   (state.data.tasks || []).forEach((task) => taskOwnerNames(task).forEach((name) => {
     if (!names.includes(name)) names.push(name);
   }));
@@ -702,13 +719,32 @@ function taskPeople(task, referenceDate = "") {
 }
 
 function peopleForTasks(tasks) {
-  return uniqueBy(tasks.flatMap(taskPeople), "id").sort(comparePeople);
+  ensurePeopleCatalog();
+  const people = uniqueBy([
+    ...(state.data.people || []),
+    ...tasks.flatMap(taskPeople),
+  ], "id");
+  return people.sort((a, b) => comparePeopleForView(a, b, tasks));
 }
 
 function comparePeople(a, b) {
   const waitingA = a.name === "待排人力" ? 0 : 1;
   const waitingB = b.name === "待排人力" ? 0 : 1;
   return waitingA - waitingB || a.position - b.position || a.id.localeCompare(b.id);
+}
+
+function comparePeopleForView(a, b, tasks) {
+  const base = comparePeople(a, b);
+  if (a.name === "待排人力" || b.name === "待排人力") return base;
+  const idleA = personIsIdleInView(a, tasks) ? 0 : 1;
+  const idleB = personIsIdleInView(b, tasks) ? 0 : 1;
+  return idleA - idleB || base;
+}
+
+function personIsIdleInView(person, tasks) {
+  const days = dateList(state.view.start, state.view.end);
+  return !tasks.some((task) => days.some((day) => taskPeople(task, day).some((item) => item.id === person.id)
+    && taskSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day)));
 }
 
 function personChipHtml(person) {
@@ -885,6 +921,24 @@ function renderAdmin() {
       <span class="ops"><button data-admin="edit-special">编辑</button><button class="danger" data-admin="delete-special">删除</button></span>
     </div>
   `).join("");
+  ensurePeopleCatalog();
+  $("#personAdmin").innerHTML = state.data.people.map((person) => {
+    const assignmentCount = tasksForPerson(person).length;
+    const idle = personIsIdleInView(person, filteredTasks().filter(taskIntersectsView));
+    const locked = person.placeholder;
+    return `
+      <div class="admin-item" data-person-id="${escapeAttr(person.id)}">
+        <div>
+          <strong>${personChipHtml(person)}</strong>
+          <small>${locked ? "系统占位" : `${assignmentCount} 项关联任务 · ${idle ? "当前窗口空闲" : "当前窗口有排期"}`}</small>
+        </div>
+        <span class="ops">
+          <button data-admin="edit-person" ${locked ? "disabled" : ""}>编辑</button>
+          <button class="danger" data-admin="delete-person" ${locked ? "disabled" : ""}>删除</button>
+        </span>
+      </div>
+    `;
+  }).join("");
   document.querySelectorAll("[data-admin]").forEach((button) => button.addEventListener("click", () => handleAdminAction(button).catch(showError)));
 }
 
@@ -1038,10 +1092,22 @@ async function addSpecial() {
   await saveRepository(`新增专项：${title}`, "special.create", "special", special.id, { title });
 }
 
+async function addPerson() {
+  const name = normalizeOwnerName(prompt("人员姓名：", ""));
+  if (!name || isPlaceholderOwner(name)) return alert("人员姓名不能为空，也不能使用系统占位名称。");
+  ensurePeopleCatalog();
+  if ((state.data.people || []).some((person) => person.name === name)) return alert("人员已存在。");
+  const maxPosition = Math.max(-1, ...(state.data.people || []).map((person) => Number(person.position) || 0));
+  const person = { id: `person-${crypto.randomUUID().slice(0, 10)}`, name, position: maxPosition + 1, placeholder: false };
+  state.data.people.push(person);
+  await saveRepository(`新增人员：${name}`, "person.create", "person", person.id, { name });
+}
+
 async function handleAdminAction(button) {
   const action = button.dataset.admin;
   const groupId = button.closest("[data-group-id]")?.dataset.groupId;
   const specialId = button.closest("[data-special-id]")?.dataset.specialId;
+  const personId = button.closest("[data-person-id]")?.dataset.personId;
   if (action === "edit-group") {
     const group = state.data.groups.find((item) => item.id === groupId);
     const title = prompt("分组名称：", group.title);
@@ -1075,6 +1141,39 @@ async function handleAdminAction(button) {
     state.data.specials = state.data.specials.filter((item) => item.id !== special.id);
     await saveRepository(`删除专项：${special.title}`, "special.delete", "special", special.id, { title: special.title });
   }
+  if (action === "edit-person") {
+    const person = state.data.people.find((item) => item.id === personId);
+    if (!person || person.placeholder) return;
+    const name = normalizeOwnerName(prompt("人员姓名：", person.name));
+    if (!name || isPlaceholderOwner(name)) return alert("人员姓名不能为空，也不能使用系统占位名称。");
+    if (name !== person.name && state.data.people.some((item) => item.name === name)) return alert("人员已存在。");
+    const oldName = person.name;
+    person.name = name;
+    person.placeholder = false;
+    renameOwnerInTasks(oldName, name);
+    await saveRepository(`更新人员：${oldName} -> ${name}`, "person.update", "person", person.id, { old_name: oldName, name });
+  }
+  if (action === "delete-person") {
+    const person = state.data.people.find((item) => item.id === personId);
+    if (!person || person.placeholder) return;
+    const assignments = tasksForPerson(person);
+    if (assignments.length) return alert(`该人员仍关联 ${assignments.length} 项任务，请先调整任务责任人。`);
+    if (!confirm(`确认删除人员：${person.name}？`)) return;
+    state.data.people = state.data.people.filter((item) => item.id !== person.id);
+    await saveRepository(`删除人员：${person.name}`, "person.delete", "person", person.id, { name: person.name });
+  }
+}
+
+function renameOwnerInTasks(oldName, newName) {
+  (state.data.tasks || []).forEach((task) => {
+    if (!task.owner) return;
+    const parts = String(task.owner).split(/([、/,，;；&]+)/);
+    const next = parts.map((part) => normalizeOwnerName(part) === oldName ? newName : part).join("");
+    if (next !== task.owner) {
+      task.owner = next;
+      task.updated_at = nowIso();
+    }
+  });
 }
 
 async function saveRepository(summary, action, entity, id, detail = {}) {
@@ -1271,6 +1370,7 @@ $("#addTask").addEventListener("click", () => addTask().catch(showError));
 $("#saveAll").addEventListener("click", () => saveAllTasks().catch(showError));
 $("#addGroup").addEventListener("click", () => addGroup().catch(showError));
 $("#addSpecial").addEventListener("click", () => addSpecial().catch(showError));
+$("#addPerson").addEventListener("click", () => addPerson().catch(showError));
 
 function showError(error) {
   $("#editStatus").textContent = `写入失败：${error.message}`;

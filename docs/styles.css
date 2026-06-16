@@ -103,7 +103,7 @@ td .link-input { min-width:220px; }
 .audit-item { display:grid; grid-template-columns:190px 1fr; gap:10px; padding:9px 10px; border:1px solid var(--line); background:#fffaf1; }
 .audit-item time { color:var(--muted); font-size:12px; }
 .empty { color:var(--muted); }
-.admin-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.admin-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
 .admin-grid h3 { margin:0 0 8px; font-size:14px; color:#514638; }
 .admin-list { display:grid; gap:8px; }
 .admin-item { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; padding:9px 10px; border:1px solid var(--line); background:#fffaf1; }
@@ -142,7 +142,10 @@ td .link-input { min-width:220px; }
 .people-grid thead small { display:block; margin-top:2px; color:var(--muted); font-size:10px; }
 .people-grid .people-owner-head,.people-grid .people-owner { position:sticky; left:0; min-width:150px; z-index:4; background:#efe4d0; color:#3b342d; }
 .people-grid .people-owner { z-index:2; font-size:13px; }
-.work-chip { display:block; margin:0 0 4px; padding:4px 6px; border-radius:8px; color:white; font-size:11px; font-weight:900; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.work-chip { display:block; margin:0 0 4px; padding:4px 6px; border-radius:8px; color:white; font-size:11px; font-weight:900; line-height:1.18; overflow:hidden; }
+.work-chip em,.work-chip b { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.work-chip em { margin-bottom:2px; font-size:9px; font-style:normal; opacity:.86; }
+.work-chip b { font-size:11px; }
 .person-chip { display:inline-flex; align-items:center; max-width:100%; padding:4px 10px; border-radius:999px; border:1px solid rgba(39,117,96,.22); background:#ecf6f1; color:#174f41; font-weight:900; }
 .person-chip em { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-style:normal; font-size:12px; }
 .person-chip.placeholder { border-color:rgba(186,121,14,.28); background:#fff3db; color:#8a570c; }
