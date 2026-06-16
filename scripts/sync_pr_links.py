@@ -227,9 +227,6 @@ def collect_changes(data, pull_requests):
         old_links = task.get("pr_link", "")
         old_risk = task.get("risk", "")
         if old_links != next_links or old_risk != next_risk:
-            task["pr_link"] = next_links
-            task["risk"] = next_risk
-            task["updated_at"] = timestamp
             changed.append({
                 "id": task.get("id"),
                 "title": task.get("title"),
