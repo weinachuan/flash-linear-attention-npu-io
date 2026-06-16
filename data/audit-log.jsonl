@@ -5,3 +5,4 @@
 {"ts":"2026-06-16T14:23:45+08:00","action":"owner_rule.update","entity":"project","id":"operator-owner-rules","summary":"更新对应算子责任人规则，并将相关任务命名为一键编包","detail":{"rule":"按算子与日期阈值自动解析对应算子责任人"},"source":"codex"}
 {"ts":"2026-06-16T14:32:07+08:00","action":"task.delete","entity":"task","id":"t37","summary":"删除重复任务：dv_local <<<>>> 调用示例","detail":{"kept":"dv_local <<<>>> 方式调用"},"source":"codex"}
 {"ts":"2026-06-16T14:35:25+08:00","action":"task.delete","entity":"task","id":"t35","summary":"删除重复任务：fwd_o <<<>>> 调用示例","detail":{"kept":"fwd_o <<<>>> 方式调用"},"source":"codex"}
+{"ts": "2026-06-16T14:41:42+08:00", "action": "priority.batch_update", "entity": "project", "id": "priority-rules-20260616", "summary": "按规则批量更新任务优先级和 ops 完成状态", "detail": {"rules": ["GVA/Vdim256=P0", "ops目录整改=done/P0", "<<<>>>调用方式=P1", "文档=P1", "一键编包=P0", "性能看板=P1", "新增算子=P0"]}, "source": "codex"}
