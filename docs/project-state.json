@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-16T23:50:51+08:00",
+  "generatedAt": "2026-06-16T16:31:53+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -275,7 +275,7 @@
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-15",
       "end_date": "2026-06-18",
       "evidence": [],
@@ -283,7 +283,7 @@
       "notes": "",
       "position": 0,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-ad6ef8526b",
@@ -293,7 +293,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/1",
+      "test_report": ""
     },
     {
       "id": "t02",
@@ -305,7 +306,7 @@
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-15",
       "end_date": "2026-06-18",
       "evidence": [],
@@ -313,7 +314,7 @@
       "notes": "",
       "position": 1,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-9f801d9dcb",
@@ -323,7 +324,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/1",
+      "test_report": ""
     },
     {
       "id": "t03",
@@ -335,7 +337,7 @@
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-15",
       "end_date": "2026-06-18",
       "evidence": [],
@@ -343,7 +345,7 @@
       "notes": "",
       "position": 2,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-0801e04687",
@@ -353,7 +355,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/44",
+      "test_report": ""
     },
     {
       "id": "t04",
@@ -373,7 +376,7 @@
       "notes": "",
       "position": 3,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-4d160c57ee",
@@ -383,7 +386,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/51",
+      "test_report": ""
     },
     {
       "id": "t05",
@@ -395,7 +399,7 @@
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-15",
       "end_date": "2026-06-18",
       "evidence": [],
@@ -403,7 +407,7 @@
       "notes": "",
       "position": 4,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-71650b131f",
@@ -413,7 +417,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/18",
+      "test_report": ""
     },
     {
       "id": "t06",
@@ -425,7 +430,7 @@
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-15",
       "end_date": "2026-06-18",
       "evidence": [],
@@ -433,7 +438,7 @@
       "notes": "",
       "position": 5,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-5ebbafe401",
@@ -443,7 +448,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/49",
+      "test_report": ""
     },
     {
       "id": "t07",
@@ -455,7 +461,7 @@
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-15",
       "end_date": "2026-06-18",
       "evidence": [],
@@ -463,7 +469,7 @@
       "notes": "",
       "position": 6,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:29:43+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-9b4561eff2",
@@ -473,7 +479,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/14",
+      "test_report": ""
     },
     {
       "id": "t08",
@@ -485,7 +492,7 @@
       "risk": "高",
       "priority": "P2",
       "group_id": "M-2026-06-18",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-15",
       "end_date": "2026-06-18",
       "evidence": [],
@@ -493,7 +500,7 @@
       "notes": "",
       "position": 7,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-5063433fe7",
@@ -503,7 +510,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/19",
+      "test_report": ""
     },
     {
       "id": "t09",
@@ -523,7 +531,7 @@
       "notes": "",
       "position": 8,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-f6b0d1664a",
@@ -533,7 +541,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/51",
+      "test_report": ""
     },
     {
       "id": "t10",
@@ -545,7 +554,7 @@
       "risk": "低",
       "priority": "P2",
       "group_id": "M-2026-06-18",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-15",
       "end_date": "2026-06-18",
       "evidence": [],
@@ -553,7 +562,7 @@
       "notes": "",
       "position": 9,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-dcd9523a43",
@@ -563,7 +572,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34",
+      "test_report": ""
     },
     {
       "id": "t11",
@@ -575,7 +585,7 @@
       "risk": "低",
       "priority": "P2",
       "group_id": "M-2026-06-18",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-15",
       "end_date": "2026-06-18",
       "evidence": [],
@@ -583,7 +593,7 @@
       "notes": "",
       "position": 10,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-ba848d33d5",
@@ -593,7 +603,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/48",
+      "test_report": ""
     },
     {
       "id": "t12",
@@ -613,7 +624,7 @@
       "notes": "",
       "position": 11,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T06:45:56+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-3f969da999",
@@ -623,7 +634,7 @@
           "position": 0
         }
       ],
-      "pr_link": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/8",
       "test_report": ""
     },
     {
@@ -644,7 +655,7 @@
       "notes": "",
       "position": 12,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-15b69a8629",
@@ -654,7 +665,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45",
+      "test_report": ""
     },
     {
       "id": "t14",
@@ -674,7 +686,7 @@
       "notes": "",
       "position": 13,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-c0b280b344",
@@ -684,7 +696,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/22",
+      "test_report": ""
     },
     {
       "id": "t15",
@@ -696,7 +709,7 @@
       "risk": "中",
       "priority": "P0",
       "group_id": "M-2026-06-25",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-19",
       "end_date": "2026-06-25",
       "evidence": [],
@@ -704,7 +717,7 @@
       "notes": "临时插入其它任务",
       "position": 14,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-4783e662-d",
@@ -714,7 +727,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "",
+      "test_report": ""
     },
     {
       "id": "t16",
@@ -726,7 +740,7 @@
       "risk": "中",
       "priority": "P0",
       "group_id": "M-2026-06-25",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-19",
       "end_date": "2026-06-25",
       "evidence": [],
@@ -734,7 +748,7 @@
       "notes": "",
       "position": 15,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-7f49a81021",
@@ -744,7 +758,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/61",
+      "test_report": ""
     },
     {
       "id": "t17",
@@ -816,7 +831,7 @@
       "risk": "中",
       "priority": "P0",
       "group_id": "M-2026-06-25",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-19",
       "end_date": "2026-06-25",
       "evidence": [],
@@ -824,7 +839,7 @@
       "notes": "",
       "position": 18,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-057cf6f872",
@@ -834,7 +849,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/54",
+      "test_report": ""
     },
     {
       "id": "t20",
@@ -1271,7 +1287,7 @@
       "notes": "",
       "position": 33,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:29:43+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-ef7acb84aa",
@@ -1281,7 +1297,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/65",
+      "test_report": ""
     },
     {
       "id": "t36",
@@ -1421,7 +1438,7 @@
       "notes": "",
       "position": 40,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:24:28+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-9c104cb6fd",
@@ -1431,7 +1448,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/64",
+      "test_report": ""
     },
     {
       "id": "t42",
@@ -1472,7 +1490,7 @@
       "risk": "中",
       "priority": "P2",
       "group_id": "M-2026-07-15",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-26",
       "end_date": "2026-07-15",
       "evidence": [],
@@ -1480,7 +1498,7 @@
       "notes": "",
       "position": 42,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T16:31:53+08:00",
       "segments": [
         {
           "id": "seg-4e2c4c818c",
@@ -1490,10 +1508,17 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/53",
+      "test_report": ""
     }
   ],
   "people": [
+    {
+      "id": "P16",
+      "name": "待排人力",
+      "position": 15,
+      "placeholder": true
+    },
     {
       "id": "P01",
       "name": "方梓阳",
@@ -1585,12 +1610,6 @@
       "placeholder": false
     },
     {
-      "id": "P16",
-      "name": "待排人力",
-      "position": 15,
-      "placeholder": true
-    },
-    {
       "id": "P17",
       "name": "张硕累",
       "position": 16,
@@ -1600,6 +1619,18 @@
       "id": "P18",
       "name": "法振尧",
       "position": 17,
+      "placeholder": false
+    },
+    {
+      "id": "P19",
+      "name": "周云飞",
+      "position": 18,
+      "placeholder": false
+    },
+    {
+      "id": "P20",
+      "name": "李佳敏",
+      "position": 19,
       "placeholder": false
     }
   ]
