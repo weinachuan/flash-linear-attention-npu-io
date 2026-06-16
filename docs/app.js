@@ -495,7 +495,7 @@ function updateEditStatus() {
     return;
   }
   const dirtyCount = state.dirtyTaskIds.size;
-  $("#editStatus").textContent = dirtyCount ? `编辑模式：${dirtyCount} 项待保存` : "编辑模式：保存会写入 GitHub 仓库";
+  $("#editStatus").textContent = dirtyCount ? `编辑模式：${dirtyCount} 项待保存` : "编辑模式：甘特条可拖动，边缘可拉伸；保存会写入 GitHub 仓库";
 }
 
 async function commitFiles(files, message) {
