@@ -147,6 +147,10 @@ def has_report(task):
     return bool(str(task.get("test_report") or "").strip())
 
 
+def completion_override(task):
+    return bool(re.search(r"ops\s*目录整改", str(task.get("title") or ""), re.I))
+
+
 def task_ddl(task):
     value = task.get("end_date") or task.get("start_date")
     try:
@@ -160,7 +164,7 @@ def evaluate_task_delivery(task, catalog_items):
     ddl = task_ddl(task)
     days_until_ddl = (ddl - today_bj()).days
     report = has_report(task)
-    completed = pr["allMerged"] and report
+    completed = completion_override(task) or (pr["allMerged"] and report)
     delayed = not completed and today_bj() > ddl
 
     if has_waiting_owner(task):

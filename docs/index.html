@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>flash-linear-attention-npu 项目看板</title>
-  <link rel="stylesheet" href="./styles.css?v=20260617-risk-rules">
+  <link rel="stylesheet" href="./styles.css?v=20260617-ops-done">
 </head>
 <body>
   <main class="shell">
@@ -56,7 +56,7 @@
             <tr><td>有匹配 PR 但未合入，距离 DDL > 5 天</td><td><span class="tag low">低</span></td><td>保持原状态</td></tr>
             <tr><td>未匹配 PR，距离 DDL ≤ 10 天</td><td><span class="tag high">高</span></td><td>超过 DDL 标记交付延期</td></tr>
             <tr><td>未匹配 PR，距离 DDL > 10 天</td><td><span class="tag medium">中</span></td><td>保持原状态</td></tr>
-            <tr><td>责任人为待排人力</td><td><span class="tag high">高</span></td><td>状态仍按 PR / 报告 / DDL 判定</td></tr>
+            <tr><td>责任人为待排人力 / 待填写（优先级最高，覆盖 DDL 距离判断）</td><td><span class="tag high">高</span></td><td>状态仍按 PR / 报告 / DDL 判定</td></tr>
           </tbody>
         </table>
       </div>
@@ -131,6 +131,6 @@
       <div id="audit" class="audit"></div>
     </section>
   </main>
-  <script src="./app.js?v=20260617-risk-rules"></script>
+  <script src="./app.js?v=20260617-ops-done"></script>
 </body>
 </html>

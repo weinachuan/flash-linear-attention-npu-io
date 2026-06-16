@@ -822,6 +822,10 @@ function taskHasReport(task) {
   return Boolean(String(task.test_report || "").trim());
 }
 
+function taskIsCompletionOverride(task) {
+  return /ops\s*目录整改/i.test(String(task.title || ""));
+}
+
 function taskDdl(task) {
   return isYmd(task.end_date) ? task.end_date : (isYmd(task.start_date) ? task.start_date : todayBjYmd());
 }
@@ -845,8 +849,9 @@ function taskHasWaitingOwner(task) {
 function evaluateTaskDelivery(task) {
   const pr = prLinkSummary(task.pr_link);
   const hasReport = taskHasReport(task);
+  const forceCompleted = taskIsCompletionOverride(task);
   const daysUntilDdl = taskDaysUntilDdl(task);
-  const completed = pr.allMerged && hasReport;
+  const completed = forceCompleted || (pr.allMerged && hasReport);
   const delayed = !completed && taskPastDdlMidnight(task);
   let risk = "中";
   if (taskHasWaitingOwner(task)) {
