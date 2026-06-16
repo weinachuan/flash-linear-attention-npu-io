@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-16T23:24:28+08:00",
+  "generatedAt": "2026-06-16T23:29:43+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -463,7 +463,7 @@
       "notes": "",
       "position": 6,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:24:28+08:00",
+      "updated_at": "2026-06-16T23:29:43+08:00",
       "segments": [
         {
           "id": "seg-9b4561eff2",
@@ -473,7 +473,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/14"
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/14 https://github.com/flashserve/flash-linear-attention-npu/pull/13"
     },
     {
       "id": "t08",
@@ -1271,7 +1271,7 @@
       "notes": "",
       "position": 33,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-16T23:29:43+08:00",
       "segments": [
         {
           "id": "seg-ef7acb84aa",
@@ -1281,7 +1281,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60"
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60 https://github.com/flashserve/flash-linear-attention-npu/pull/58"
     },
     {
       "id": "t36",
