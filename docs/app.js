@@ -35,6 +35,7 @@ const OPERATOR_OWNER_RULES = {
 
 const state = {
   data: null,
+  prCatalog: { generatedAt: "", sourceRepo: "", total: 0, items: [] },
   audit: [],
   token: sessionStorage.getItem("flashPagesToken") || "",
   dirtyTaskIds: new Set(),
@@ -49,13 +50,15 @@ const $ = (selector) => document.querySelector(selector);
 
 async function load() {
   const stamp = Date.now();
-  const [dataRes, auditRes] = await Promise.all([
+  const [dataRes, auditRes, prCatalogRes] = await Promise.all([
     fetch(`./project-state.json?v=${stamp}`),
     fetch(`./audit-log.jsonl?v=${stamp}`).catch(() => null),
+    fetch(`./pr-catalog.json?v=${stamp}`).catch(() => null),
   ]);
   if (!dataRes.ok) throw new Error("未读取到 project-state.json");
   state.data = await dataRes.json();
   state.audit = auditRes && auditRes.ok ? parseAudit(await auditRes.text()) : [];
+  state.prCatalog = prCatalogRes && prCatalogRes.ok ? await prCatalogRes.json() : { generatedAt: "", sourceRepo: "", total: 0, items: [] };
   ensurePeopleCatalog();
   render();
 }
@@ -794,6 +797,40 @@ function parseLinks(value) {
   return String(value || "").split(/[\s,，;；]+/).map((item) => item.trim()).filter((item) => /^https?:\/\//i.test(item));
 }
 
+function prLinkEditorHtml(task) {
+  return `
+    <div class="pr-link-editor">
+      <input class="link-input" data-field="pr_link" placeholder="PR URL，可填多个" value="${escapeAttr(task.pr_link || "")}">
+      ${prCatalogSelectHtml()}
+    </div>
+  `;
+}
+
+function prCatalogSelectHtml() {
+  const items = state.prCatalog?.items || [];
+  if (!items.length) {
+    return `<select class="pr-picker" data-pr-picker disabled><option value="">暂无 PR 候选</option></select>`;
+  }
+  const options = items.map((pr) => `<option value="${escapeAttr(pr.url)}">${escapeHtml(prOptionLabel(pr))}</option>`).join("");
+  return `<select class="pr-picker" data-pr-picker title="从定时同步的 PR 候选池追加"><option value="">从 PR 候选池追加</option>${options}</select>`;
+}
+
+function prOptionLabel(pr) {
+  const status = pr.statusText || (pr.status === "merged" ? "已合入" : "未合入");
+  return `#${pr.number} ${status} ${pr.title || ""}`.trim();
+}
+
+function appendPrFromPicker(select) {
+  const row = select.closest("tr");
+  const input = row?.querySelector('[data-field="pr_link"]');
+  if (!input || !select.value) return;
+  const links = String(input.value || "").split(/[\s,，;；]+/).map((item) => item.trim()).filter(Boolean);
+  if (!links.includes(select.value)) links.push(select.value);
+  input.value = links.join(" ");
+  select.value = "";
+  markTaskDirty(input);
+}
+
 function renderRows(tasks) {
   $("#rows").innerHTML = tasks.map((task) => {
     if (!state.token) {
@@ -822,7 +859,7 @@ function renderRows(tasks) {
         <td>${selectHtml("group_id", state.data.groups.map((g) => [g.id, g.title]), task.group_id)}</td>
         <td>${selectHtml("special_id", [["","普通事项"], ...state.data.specials.map((s) => [s.id, s.title])], task.special_id || "")}</td>
         <td><input type="date" data-field="start_date" value="${escapeAttr(task.start_date)}"> ~ <input type="date" data-field="end_date" value="${escapeAttr(task.end_date)}"></td>
-        <td><input class="link-input" data-field="pr_link" placeholder="PR URL" value="${escapeAttr(task.pr_link || "")}"></td>
+        <td>${prLinkEditorHtml(task)}</td>
         <td><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
         <td>${selectHtml("status", [["todo","todo"],["doing","doing"],["blocked","blocked"],["done","done"]], task.status)}</td>
         <td class="edit-only"><span class="ops"><button data-action="save">保存</button><button data-action="split">切分</button><button class="danger" data-action="delete">删除</button></span></td>
@@ -831,6 +868,7 @@ function renderRows(tasks) {
   }).join("");
   document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => handleTaskAction(button).catch(showError)));
   document.querySelectorAll("#rows [data-field]").forEach((control) => control.addEventListener("change", () => markTaskDirty(control)));
+  document.querySelectorAll("#rows [data-pr-picker]").forEach((control) => control.addEventListener("change", () => appendPrFromPicker(control)));
 }
 
 function attachGanttDrag(bar) {

@@ -91,6 +91,10 @@ tr.dirty td { background:#fff1cf; }
 td input,td select { width:100%; min-width:86px; }
 td .title-input { min-width:260px; }
 td .link-input { min-width:220px; }
+.pr-link-editor { display:grid; gap:6px; min-width:360px; }
+.pr-link-editor .link-input { min-width:360px; }
+.pr-picker { min-width:360px; background:#fffdf8; color:var(--ink); }
+.pr-picker option { background:#fffdf8; color:var(--ink); }
 .ops { display:flex; gap:6px; flex-wrap:wrap; }
 .tag { display:inline-flex; justify-content:center; min-width:42px; padding:4px 8px; border-radius:999px; color:white; font-weight:900; }
 .high { background:var(--high); }
