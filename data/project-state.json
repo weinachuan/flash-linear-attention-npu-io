@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-16T14:41:42+08:00",
+  "generatedAt": "2026-06-16T06:45:56+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -594,24 +594,26 @@
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
-      "special_id": null,
-      "start_date": "2026-06-15",
-      "end_date": "2026-06-18",
+      "special_id": "",
+      "start_date": "2026-05-25",
+      "end_date": "2026-05-28",
       "evidence": [],
       "dependencies": [],
       "notes": "",
       "position": 11,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T06:45:56+08:00",
       "segments": [
         {
           "id": "seg-3f969da999",
-          "start_date": "2026-06-15",
-          "end_date": "2026-06-18",
+          "start_date": "2026-05-25",
+          "end_date": "2026-05-28",
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "",
+      "test_report": ""
     },
     {
       "id": "t13",
@@ -1453,6 +1455,116 @@
           "position": 0
         }
       ]
+    }
+  ],
+  "people": [
+    {
+      "id": "P01",
+      "name": "方梓阳",
+      "position": 0,
+      "placeholder": false
+    },
+    {
+      "id": "P02",
+      "name": "吴雨舒",
+      "position": 1,
+      "placeholder": false
+    },
+    {
+      "id": "P03",
+      "name": "陈琳鑫",
+      "position": 2,
+      "placeholder": false
+    },
+    {
+      "id": "P04",
+      "name": "叶倩雯",
+      "position": 3,
+      "placeholder": false
+    },
+    {
+      "id": "P05",
+      "name": "黄浚哲",
+      "position": 4,
+      "placeholder": false
+    },
+    {
+      "id": "P06",
+      "name": "杨子奇",
+      "position": 5,
+      "placeholder": false
+    },
+    {
+      "id": "P07",
+      "name": "陈市",
+      "position": 6,
+      "placeholder": false
+    },
+    {
+      "id": "P08",
+      "name": "龚翔宇",
+      "position": 7,
+      "placeholder": false
+    },
+    {
+      "id": "P09",
+      "name": "姜东明",
+      "position": 8,
+      "placeholder": false
+    },
+    {
+      "id": "P10",
+      "name": "江波",
+      "position": 9,
+      "placeholder": false
+    },
+    {
+      "id": "P11",
+      "name": "刘福疆",
+      "position": 10,
+      "placeholder": false
+    },
+    {
+      "id": "P12",
+      "name": "石俊杰",
+      "position": 11,
+      "placeholder": false
+    },
+    {
+      "id": "P13",
+      "name": "鲍超俊",
+      "position": 12,
+      "placeholder": false
+    },
+    {
+      "id": "P14",
+      "name": "江奇",
+      "position": 13,
+      "placeholder": false
+    },
+    {
+      "id": "P15",
+      "name": "张艺",
+      "position": 14,
+      "placeholder": false
+    },
+    {
+      "id": "P16",
+      "name": "待排人力",
+      "position": 15,
+      "placeholder": true
+    },
+    {
+      "id": "P17",
+      "name": "张硕累",
+      "position": 16,
+      "placeholder": false
+    },
+    {
+      "id": "P18",
+      "name": "法振尧",
+      "position": 17,
+      "placeholder": false
     }
   ]
 }
