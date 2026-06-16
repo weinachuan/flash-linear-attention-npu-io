@@ -33,6 +33,8 @@ const OPERATOR_OWNER_RULES = {
   prepare_wy_repr_bwd_full: [{ until: "2026-06-30", owner: "张硕累" }, { owner: "周云飞" }],
 };
 
+const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "blocked"], ["delayed", "交付延期"], ["done", "done"]];
+
 const state = {
   data: null,
   prCatalog: { generatedAt: "", sourceRepo: "", total: 0, items: [] },
@@ -142,7 +144,7 @@ function renderTableFilters() {
     `<th></th>`,
     `<th></th>`,
     `<th></th>`,
-    tableFilterSelect("status", [["", "全部"], ["todo", "todo"], ["doing", "doing"], ["blocked", "blocked"], ["done", "done"]]),
+    tableFilterSelect("status", [["", "全部"], ...STATUS_OPTIONS]),
     `<th class="edit-only"><button type="button" data-clear-filters>清空</button></th>`,
   ];
   $("#tableFilters").innerHTML = columns.join("");
@@ -803,21 +805,82 @@ function parsePrRefs(value) {
     .filter((item) => item && (/^https?:\/\//i.test(item) || /^#?\d+$/.test(item)));
 }
 
-function riskFromPrLinks(value) {
+function prLinkSummary(value) {
   const refs = parsePrRefs(value);
-  if (!refs.length) return "";
   const matches = refs.map((ref) => findPrCandidate(ref));
-  if (matches.some((item) => !item)) return "高";
-  if (matches.some((item) => item.status === "open")) return "中";
-  if (matches.every((item) => item.status === "merged")) return "低";
-  return "高";
+  const missing = !refs.length || matches.some((item) => !item);
+  return {
+    refs,
+    matches: matches.filter(Boolean),
+    missing,
+    allMerged: refs.length > 0 && !missing && matches.every((item) => item.status === "merged"),
+    hasOpen: refs.length > 0 && !missing && matches.some((item) => item.status === "open"),
+  };
 }
 
-function syncTaskRiskFromPrLinks(task) {
-  const nextRisk = riskFromPrLinks(task.pr_link);
-  if (!nextRisk || task.risk === nextRisk) return false;
-  task.risk = nextRisk;
-  return true;
+function taskHasReport(task) {
+  return Boolean(String(task.test_report || "").trim());
+}
+
+function taskDdl(task) {
+  return isYmd(task.end_date) ? task.end_date : (isYmd(task.start_date) ? task.start_date : todayBjYmd());
+}
+
+function todayBjYmd() {
+  return new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+function taskDaysUntilDdl(task) {
+  return daysBetween(todayBjYmd(), taskDdl(task));
+}
+
+function taskPastDdlMidnight(task) {
+  return todayBjYmd() > taskDdl(task);
+}
+
+function taskHasWaitingOwner(task) {
+  return taskOwnerNames(task).includes("待排人力");
+}
+
+function evaluateTaskDelivery(task) {
+  const pr = prLinkSummary(task.pr_link);
+  const hasReport = taskHasReport(task);
+  const daysUntilDdl = taskDaysUntilDdl(task);
+  const completed = pr.allMerged && hasReport;
+  const delayed = !completed && taskPastDdlMidnight(task);
+  let risk = "中";
+  if (taskHasWaitingOwner(task)) {
+    risk = "高";
+  } else if (pr.allMerged) {
+    risk = "低";
+  } else if (pr.hasOpen) {
+    risk = daysUntilDdl <= 5 ? "中" : "低";
+  } else {
+    risk = daysUntilDdl <= 10 ? "高" : "中";
+  }
+  let status = task.status || "todo";
+  if (completed) {
+    status = "done";
+  } else if (delayed) {
+    status = "delayed";
+  } else if (status === "done" || status === "delayed") {
+    status = "todo";
+  }
+  return { risk, status };
+}
+
+function syncTaskDeliveryRules(task) {
+  const next = evaluateTaskDelivery(task);
+  const changed = [];
+  if (task.risk !== next.risk) {
+    changed.push("risk");
+    task.risk = next.risk;
+  }
+  if (task.status !== next.status) {
+    changed.push("status");
+    task.status = next.status;
+  }
+  return changed;
 }
 
 function prLinkEditorHtml(task) {
@@ -911,7 +974,7 @@ function renderRows(tasks) {
           <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
           <td>${linkListHtml(task.pr_link, "PR")}</td>
           <td>${linkListHtml(task.test_report, "报告")}</td>
-          <td>${escapeHtml(task.status)}</td>
+          <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
           <td class="edit-only"></td>
         </tr>
       `;
@@ -927,7 +990,7 @@ function renderRows(tasks) {
         <td><input type="date" data-field="start_date" value="${escapeAttr(task.start_date)}"> ~ <input type="date" data-field="end_date" value="${escapeAttr(task.end_date)}"></td>
         <td>${prLinkEditorHtml(task)}</td>
         <td><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
-        <td>${selectHtml("status", [["todo","todo"],["doing","doing"],["blocked","blocked"],["done","done"]], task.status)}</td>
+        <td>${selectHtml("status", STATUS_OPTIONS, task.status)}</td>
         <td class="edit-only"><span class="ops"><button data-action="save">保存</button><button data-action="split">切分</button><button class="danger" data-action="delete">删除</button></span></td>
       </tr>
     `;
@@ -1098,9 +1161,14 @@ function applyRowToTask(row, normalizeSegments = true) {
   row.querySelectorAll("[data-field]").forEach((input) => {
     task[input.dataset.field] = input.value.trim();
   });
-  if (syncTaskRiskFromPrLinks(task)) {
+  const changed = syncTaskDeliveryRules(task);
+  if (changed.includes("risk")) {
     const riskControl = row.querySelector('[data-field="risk"]');
     if (riskControl) riskControl.value = task.risk;
+  }
+  if (changed.includes("status")) {
+    const statusControl = row.querySelector('[data-field="status"]');
+    if (statusControl) statusControl.value = task.status;
   }
   task.updated_at = nowIso();
   if (normalizeSegments && (!task.segments?.length || task.segments.length <= 1)) normalizeTaskSegments(task);
@@ -1292,6 +1360,7 @@ function renameOwnerInTasks(oldName, newName) {
 async function saveRepository(summary, action, entity, id, detail = {}) {
   requireToken();
   ensurePeopleCatalog();
+  syncAllTaskDeliveryRules();
   state.data.generatedAt = nowIso();
   const entry = { ts: nowIso(), action, entity, id, summary, detail, source: "github-pages" };
   state.audit.push(entry);
@@ -1380,6 +1449,13 @@ function normalizeTaskSegments(task) {
   task.segments = [{ id: task.segments?.[0]?.id || `seg-${crypto.randomUUID().slice(0, 10)}`, start_date: task.start_date, end_date: task.end_date, reason: task.notes || "", position: 0 }];
 }
 
+function syncAllTaskDeliveryRules() {
+  (state.data.tasks || []).forEach((task) => {
+    const changed = syncTaskDeliveryRules(task);
+    if (changed.length) task.updated_at = nowIso();
+  });
+}
+
 function selectHtml(field, options, value) {
   return `<select data-field="${field}">${options.map(([id, label]) => `<option value="${escapeAttr(id)}" ${id === value ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>`;
 }
@@ -1398,6 +1474,14 @@ function taskCountForSpecial(id) {
 
 function riskClass(value) {
   return ({ "高": "high", "中": "medium", "低": "low" })[value] || "medium";
+}
+
+function statusLabel(value) {
+  return Object.fromEntries(STATUS_OPTIONS)[value] || value || "todo";
+}
+
+function statusClass(value) {
+  return ({ done: "done", delayed: "delayed", blocked: "blocked", doing: "doing" })[value] || "todo";
 }
 
 function nowIso() {

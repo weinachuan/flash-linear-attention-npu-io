@@ -21,6 +21,10 @@ def now_bj():
     return datetime.now(BJ_TZ).replace(microsecond=0).isoformat()
 
 
+def today_bj():
+    return datetime.now(BJ_TZ).date()
+
+
 def github_get(path):
     token = os.environ.get("GITHUB_TOKEN", "")
     headers = {
@@ -105,10 +109,8 @@ def pr_number(ref):
     return None
 
 
-def risk_from_pr_links(value, catalog_items):
+def evaluate_pr_links(value, catalog_items):
     refs = parse_pr_refs(value)
-    if not refs:
-        return None
     by_number = {item["number"]: item for item in catalog_items}
     by_url = {str(item["url"]).rstrip("/"): item for item in catalog_items}
     matches = []
@@ -116,32 +118,93 @@ def risk_from_pr_links(value, catalog_items):
         number = pr_number(ref)
         item = by_number.get(number) if number is not None else by_url.get(ref.rstrip("/"))
         matches.append(item)
-    if any(item is None for item in matches):
-        return "高"
-    if any(item["status"] == "open" for item in matches):
-        return "中"
-    if all(item["status"] == "merged" for item in matches):
-        return "低"
-    return "高"
+    missing = not refs or any(item is None for item in matches)
+    return {
+        "refs": refs,
+        "matches": [item for item in matches if item is not None],
+        "missing": missing,
+        "allMerged": bool(refs) and not missing and all(item["status"] == "merged" for item in matches),
+        "hasOpen": bool(refs) and not missing and any(item["status"] == "open" for item in matches),
+        "risk": None,
+    }
 
 
-def sync_state_risks(catalog):
+def normalize_owner_name(name):
+    value = str(name or "").strip()
+    return "待排人力" if not value or value in ("待填写", "待排人力") else value
+
+
+def owner_names(task):
+    raw = normalize_owner_name(task.get("owner"))
+    return [normalize_owner_name(item) for item in re.split(r"[、/,，;；&]+", raw) if normalize_owner_name(item)]
+
+
+def has_waiting_owner(task):
+    return "待排人力" in owner_names(task)
+
+
+def has_report(task):
+    return bool(str(task.get("test_report") or "").strip())
+
+
+def task_ddl(task):
+    value = task.get("end_date") or task.get("start_date")
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except Exception:
+        return today_bj()
+
+
+def evaluate_task_delivery(task, catalog_items):
+    pr = evaluate_pr_links(task.get("pr_link", ""), catalog_items)
+    ddl = task_ddl(task)
+    days_until_ddl = (ddl - today_bj()).days
+    report = has_report(task)
+    completed = pr["allMerged"] and report
+    delayed = not completed and today_bj() > ddl
+
+    if has_waiting_owner(task):
+        risk = "高"
+    elif pr["allMerged"]:
+        risk = "低"
+    elif pr["hasOpen"]:
+        risk = "中" if days_until_ddl <= 5 else "低"
+    else:
+        risk = "高" if days_until_ddl <= 10 else "中"
+
+    status = task.get("status") or "todo"
+    if completed:
+        status = "done"
+    elif delayed:
+        status = "delayed"
+    elif status in ("done", "delayed"):
+        status = "todo"
+
+    return {"risk": risk, "status": status}
+
+
+def sync_state_delivery(catalog):
     state_path = STATE_PATHS[0]
     if not state_path.exists():
         return []
     state = json.loads(state_path.read_text(encoding="utf-8"))
     changed = []
     for task in state.get("tasks", []):
-        next_risk = risk_from_pr_links(task.get("pr_link", ""), catalog["items"])
-        if not next_risk or task.get("risk") == next_risk:
+        next_values = evaluate_task_delivery(task, catalog["items"])
+        diff = {}
+        if task.get("risk") != next_values["risk"]:
+            diff["risk"] = {"from": task.get("risk"), "to": next_values["risk"]}
+            task["risk"] = next_values["risk"]
+        if task.get("status") != next_values["status"]:
+            diff["status"] = {"from": task.get("status"), "to": next_values["status"]}
+            task["status"] = next_values["status"]
+        if not diff:
             continue
         changed.append({
             "id": task.get("id"),
             "title": task.get("title"),
-            "from": task.get("risk"),
-            "to": next_risk,
+            "changes": diff,
         })
-        task["risk"] = next_risk
         task["updated_at"] = now_bj()
     if not changed:
         return []
@@ -153,10 +216,10 @@ def sync_state_risks(catalog):
 
     entry = {
         "ts": now_bj(),
-        "action": "risk.pr_link_sync",
+        "action": "delivery.rule_sync",
         "entity": "project",
-        "id": "risk-pr-link-sync",
-        "summary": f"根据已关联 PR 状态同步风险：{len(changed)} 项",
+        "id": "delivery-rule-sync",
+        "summary": f"根据 PR / 报告 / DDL 规则同步风险状态：{len(changed)} 项",
         "detail": {"changed": changed},
         "source": "github-actions",
     }
@@ -172,8 +235,8 @@ def main():
     text = json.dumps(catalog, ensure_ascii=False, indent=2) + "\n"
     for path in CATALOG_PATHS:
         path.write_text(text, encoding="utf-8")
-    changed = sync_state_risks(catalog)
-    print(json.dumps({"sourceRepo": SOURCE_REPO, "items": catalog["total"], "riskChanges": len(changed)}, ensure_ascii=False))
+    changed = sync_state_delivery(catalog)
+    print(json.dumps({"sourceRepo": SOURCE_REPO, "items": catalog["total"], "deliveryChanges": len(changed)}, ensure_ascii=False))
 
 
 if __name__ == "__main__":

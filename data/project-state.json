@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-17T00:37:00+08:00",
+  "generatedAt": "2026-06-17T00:50:24+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -16,7 +16,7 @@
   "repoScan": {
     "scanDate": "2026-06-16",
     "repositoryHead": "4198b83e7e609333bf9d957520427ad751f8ef52",
-    "rule": "已合入 PR 标低风险；未合入但匹配到 PR 标中风险；未匹配到 PR 标高风险。",
+    "rule": "按 PR 合入状态、转测报告、DDL 距离和待排人力统一判定风险；PR 已合入且有转测报告标记完成；DDL 当天 24:00 后未合入或无转测报告标记交付延期。",
     "source": {
       "openPulls": "https://github.com/flashserve/flash-linear-attention-npu/pulls?q=is%3Apr+is%3Aopen",
       "closedPulls": "https://github.com/flashserve/flash-linear-attention-npu/pulls?q=is%3Apr+is%3Aclosed"
@@ -612,7 +612,7 @@
       "scope": "",
       "target": "",
       "owner": "方梓阳",
-      "status": "done",
+      "status": "delayed",
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
@@ -624,7 +624,7 @@
       "notes": "",
       "position": 11,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-3f969da999",
@@ -706,7 +706,7 @@
       "target": "",
       "owner": "龚翔宇",
       "status": "todo",
-      "risk": "中",
+      "risk": "高",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": "",
@@ -717,7 +717,7 @@
       "notes": "临时插入其它任务",
       "position": 14,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-4783e662-d",
@@ -737,7 +737,7 @@
       "target": "",
       "owner": "方梓阳",
       "status": "todo",
-      "risk": "中",
+      "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": "",
@@ -748,7 +748,7 @@
       "notes": "",
       "position": 15,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-7f49a81021",
@@ -768,7 +768,7 @@
       "target": "",
       "owner": "刘福疆",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": null,
@@ -779,7 +779,7 @@
       "notes": "",
       "position": 16,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-21513d9491",
@@ -798,7 +798,7 @@
       "target": "",
       "owner": "刘福疆",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": null,
@@ -809,7 +809,7 @@
       "notes": "",
       "position": 17,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-d973d56d97",
@@ -828,7 +828,7 @@
       "target": "",
       "owner": "石俊杰",
       "status": "todo",
-      "risk": "中",
+      "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": "",
@@ -839,7 +839,7 @@
       "notes": "",
       "position": 18,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-057cf6f872",
@@ -859,7 +859,7 @@
       "target": "",
       "owner": "鲍超俊",
       "status": "todo",
-      "risk": "中",
+      "risk": "高",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": null,
@@ -870,7 +870,7 @@
       "notes": "",
       "position": 19,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-2015742518",
@@ -889,7 +889,7 @@
       "target": "",
       "owner": "江奇",
       "status": "todo",
-      "risk": "中",
+      "risk": "高",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": null,
@@ -900,7 +900,7 @@
       "notes": "",
       "position": 20,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-46f78664fa",
@@ -919,7 +919,7 @@
       "target": "",
       "owner": "张艺/刘福疆",
       "status": "todo",
-      "risk": "中",
+      "risk": "高",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": null,
@@ -930,7 +930,7 @@
       "notes": "",
       "position": 21,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-d1bde83de6",
@@ -1036,7 +1036,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1047,7 +1047,7 @@
       "notes": "",
       "position": 25,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-a627326868",
@@ -1066,7 +1066,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1077,7 +1077,7 @@
       "notes": "",
       "position": 26,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-91bb5dea40",
@@ -1096,7 +1096,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1107,7 +1107,7 @@
       "notes": "",
       "position": 27,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-23fd52047e",
@@ -1126,7 +1126,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "中",
+      "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1137,7 +1137,7 @@
       "notes": "",
       "position": 28,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-a767a20051",
@@ -1156,7 +1156,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1167,7 +1167,7 @@
       "notes": "",
       "position": 29,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-3ec22781b8",
@@ -1186,7 +1186,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "中",
+      "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1197,7 +1197,7 @@
       "notes": "",
       "position": 30,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-017bc195b5",
@@ -1216,7 +1216,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1227,7 +1227,7 @@
       "notes": "",
       "position": 31,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-c40d713206",
@@ -1276,7 +1276,7 @@
       "target": "",
       "owner": "法振尧",
       "status": "todo",
-      "risk": "中",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1287,7 +1287,7 @@
       "notes": "",
       "position": 33,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-17T00:37:00+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-ef7acb84aa",
@@ -1307,7 +1307,7 @@
       "target": "",
       "owner": "方梓阳",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1318,7 +1318,7 @@
       "notes": "",
       "position": 35,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-31d82f9f10",
@@ -1337,7 +1337,7 @@
       "target": "",
       "owner": "黄浚哲",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1348,7 +1348,7 @@
       "notes": "",
       "position": 37,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-23a092ebd3",
@@ -1367,7 +1367,7 @@
       "target": "",
       "owner": "方梓阳",
       "status": "todo",
-      "risk": "中",
+      "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1378,7 +1378,7 @@
       "notes": "",
       "position": 38,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-797e0353b8",
@@ -1397,7 +1397,7 @@
       "target": "",
       "owner": "杨子奇",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1408,7 +1408,7 @@
       "notes": "",
       "position": 39,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T23:11:34+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-709935c665",
@@ -1427,7 +1427,7 @@
       "target": "",
       "owner": "吴雨舒",
       "status": "todo",
-      "risk": "中",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1438,7 +1438,7 @@
       "notes": "",
       "position": 40,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-9c104cb6fd",
@@ -1487,7 +1487,7 @@
       "target": "",
       "owner": "待填写",
       "status": "todo",
-      "risk": "中",
+      "risk": "高",
       "priority": "P2",
       "group_id": "M-2026-07-15",
       "special_id": "",
@@ -1498,7 +1498,7 @@
       "notes": "",
       "position": 42,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-17T00:50:24+08:00",
       "segments": [
         {
           "id": "seg-4e2c4c818c",
