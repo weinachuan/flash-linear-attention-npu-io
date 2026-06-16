@@ -25,17 +25,17 @@ jobs:
       - name: Scan upstream pull requests
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python scripts/sync_pr_links.py
+        run: python scripts/sync_pr_links.py --dry-run
 
-      - name: Commit changes
+      - name: Commit pending review table
         run: |
-          if git diff --quiet -- data/project-state.json docs/project-state.json data/audit-log.jsonl docs/audit-log.jsonl; then
-            echo "No PR link or risk changes."
+          if git diff --quiet -- data/pending-pr-sync.json docs/pending-pr-sync.json; then
+            echo "No pending PR sync changes."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/project-state.json docs/project-state.json data/audit-log.jsonl docs/audit-log.jsonl
-          git commit -m "自动同步上游 PR 链接和风险"
+          git add data/pending-pr-sync.json docs/pending-pr-sync.json
+          git commit -m "生成待确认 PR 同步表"
           git pull --rebase origin main
           git push
