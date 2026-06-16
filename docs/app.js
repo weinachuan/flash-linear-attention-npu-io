@@ -889,7 +889,7 @@ function renderAdmin() {
 }
 
 function renderAudit() {
-  const recent = state.audit.slice(-20).reverse();
+  const recent = state.audit.slice(-10).reverse();
   $("#audit").innerHTML = recent.length
     ? recent.map((item) => `<div class="audit-item"><time>${escapeHtml(item.ts)}</time><div>${escapeHtml(item.summary || item.action)}</div></div>`).join("")
     : `<p class="empty">暂无变更日志。</p>`;
