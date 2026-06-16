@@ -797,6 +797,29 @@ function parseLinks(value) {
   return String(value || "").split(/[\s,，;；]+/).map((item) => item.trim()).filter((item) => /^https?:\/\//i.test(item));
 }
 
+function parsePrRefs(value) {
+  return String(value || "").split(/[\s,，;；]+/)
+    .map((item) => item.trim())
+    .filter((item) => item && (/^https?:\/\//i.test(item) || /^#?\d+$/.test(item)));
+}
+
+function riskFromPrLinks(value) {
+  const refs = parsePrRefs(value);
+  if (!refs.length) return "";
+  const matches = refs.map((ref) => findPrCandidate(ref));
+  if (matches.some((item) => !item)) return "高";
+  if (matches.some((item) => item.status === "open")) return "中";
+  if (matches.every((item) => item.status === "merged")) return "低";
+  return "高";
+}
+
+function syncTaskRiskFromPrLinks(task) {
+  const nextRisk = riskFromPrLinks(task.pr_link);
+  if (!nextRisk || task.risk === nextRisk) return false;
+  task.risk = nextRisk;
+  return true;
+}
+
 function prLinkEditorHtml(task) {
   return `
     <div class="pr-link-editor">
@@ -1075,6 +1098,10 @@ function applyRowToTask(row, normalizeSegments = true) {
   row.querySelectorAll("[data-field]").forEach((input) => {
     task[input.dataset.field] = input.value.trim();
   });
+  if (syncTaskRiskFromPrLinks(task)) {
+    const riskControl = row.querySelector('[data-field="risk"]');
+    if (riskControl) riskControl.value = task.risk;
+  }
   task.updated_at = nowIso();
   if (normalizeSegments && (!task.segments?.length || task.segments.length <= 1)) normalizeTaskSegments(task);
   return task;

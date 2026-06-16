@@ -29,12 +29,12 @@ jobs:
 
       - name: Commit catalog changes
         run: |
-          if git diff --quiet -- data/pr-catalog.json docs/pr-catalog.json; then
-            echo "No PR catalog changes."
+          if git diff --quiet -- data/pr-catalog.json docs/pr-catalog.json data/project-state.json docs/project-state.json data/audit-log.jsonl docs/audit-log.jsonl; then
+            echo "No PR catalog or linked-risk changes."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/pr-catalog.json docs/pr-catalog.json
-          git commit -m "同步上游 PR 候选池"
+          git add data/pr-catalog.json docs/pr-catalog.json data/project-state.json docs/project-state.json data/audit-log.jsonl docs/audit-log.jsonl
+          git commit -m "同步上游 PR 候选池和关联风险"
           git push

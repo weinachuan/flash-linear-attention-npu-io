@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-16T16:31:53+08:00",
+  "generatedAt": "2026-06-17T00:37:00+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -489,7 +489,7 @@
       "target": "",
       "owner": "龚翔宇",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P2",
       "group_id": "M-2026-06-18",
       "special_id": "",
@@ -500,7 +500,7 @@
       "notes": "",
       "position": 7,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-17T00:37:00+08:00",
       "segments": [
         {
           "id": "seg-5063433fe7",
@@ -520,7 +520,7 @@
       "target": "",
       "owner": "陈琳鑫/叶倩雯",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
       "special_id": "",
@@ -531,7 +531,7 @@
       "notes": "",
       "position": 8,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-17T00:37:00+08:00",
       "segments": [
         {
           "id": "seg-f6b0d1664a",
@@ -675,7 +675,7 @@
       "target": "",
       "owner": "陈琳鑫",
       "status": "todo",
-      "risk": "中",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-18",
       "special_id": "launch",
@@ -686,7 +686,7 @@
       "notes": "",
       "position": 13,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-17T00:37:00+08:00",
       "segments": [
         {
           "id": "seg-c0b280b344",
@@ -1276,7 +1276,7 @@
       "target": "",
       "owner": "法振尧",
       "status": "todo",
-      "risk": "低",
+      "risk": "中",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1287,7 +1287,7 @@
       "notes": "",
       "position": 33,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-17T00:37:00+08:00",
       "segments": [
         {
           "id": "seg-ef7acb84aa",
