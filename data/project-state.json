@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-16T03:43:30+08:00",
+  "generatedAt": "2026-06-16T14:23:45+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -963,7 +963,7 @@
     },
     {
       "id": "t25",
-      "title": "一键编报",
+      "title": "一键编包",
       "scope": "",
       "target": "",
       "owner": "待排人力",

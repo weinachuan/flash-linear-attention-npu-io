@@ -22,6 +22,17 @@ const OPERATOR_RULES = [
   { id: "kimi_delta_attention_triton", label: "kimi_delta_attention_triton", aliases: ["kimi_delta_attention", "KDA triton", "KDA"] },
 ];
 
+const OPERATOR_OWNER_RULES = {
+  chunk_fwd_o: [{ owner: "吴雨舒" }],
+  chunk_gated_delta_rule_fwd_h: [{ owner: "方梓阳" }],
+  recompute_wu_fwd: [{ until: "2026-06-30", owner: "方梓阳" }, { owner: "周云飞" }],
+  chunk_bwd_dv_local: [{ until: "2026-06-18", owner: "陈琳鑫" }, { owner: "叶倩雯" }],
+  chunk_bwd_dqkwg: [{ until: "2026-06-30", owner: "黄浚哲" }, { owner: "李佳敏" }],
+  chunk_gated_delta_rule_bwd_dhu: [{ owner: "方梓阳" }],
+  prepare_wy_repr_bwd_da: [{ owner: "杨子奇" }],
+  prepare_wy_repr_bwd_full: [{ until: "2026-06-30", owner: "张硕累" }, { owner: "周云飞" }],
+};
+
 const state = {
   data: null,
   audit: [],
@@ -59,10 +70,11 @@ function filteredTasks() {
   const tasks = state.data?.tasks || [];
   return tasks.filter((task) => {
     const q = state.filters.q.toLowerCase();
-    return (!q || [task.title, task.owner, task.scope].some((value) => String(value || "").toLowerCase().includes(q)))
+    const ownerNames = taskOwnerNames(task);
+    return (!q || [task.title, task.owner, task.scope, ownerNames.join(" ")].some((value) => String(value || "").toLowerCase().includes(q)))
       && (!state.filters.risk || task.risk === state.filters.risk)
       && (!state.filters.priority || task.priority === state.filters.priority)
-      && (!state.filters.owner || splitOwnerNames(task.owner).includes(state.filters.owner))
+      && (!state.filters.owner || ownerNames.includes(state.filters.owner))
       && (!state.filters.group_id || task.group_id === state.filters.group_id)
       && (!state.filters.special_id || (state.filters.special_id === "__none__" ? !task.special_id : task.special_id === state.filters.special_id))
       && (!state.filters.status || task.status === state.filters.status);
@@ -155,7 +167,14 @@ function uniqueTaskValues(field) {
 
 function ownerFilterOptions() {
   ensurePeopleCatalog();
-  return (state.data.people || []).map((person) => [person.name, person.name]);
+  return uniqueStrings([
+    ...(state.data.people || []).map((person) => person.name),
+    ...operatorOwnerRuleNames(),
+  ]).map((name) => [name, name]);
+}
+
+function operatorOwnerRuleNames() {
+  return uniqueStrings(Object.values(OPERATOR_OWNER_RULES).flat().map((rule) => rule.owner));
 }
 
 function updateTableFilter(event) {
@@ -543,7 +562,7 @@ function operatorRows(tasks) {
 }
 
 function tasksForPersonOnDay(tasks, person, day) {
-  return tasks.filter((task) => taskPeople(task).some((item) => item.id === person.id) && taskSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day));
+  return tasks.filter((task) => taskPeople(task, day).some((item) => item.id === person.id) && taskSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day));
 }
 
 function taskChipHtml(task) {
@@ -563,7 +582,7 @@ function featureTitle(task, operator = taskOperators(task)[0]) {
 
 function taskOperators(task) {
   const title = task.title || "";
-  if (/性能看板|一键编报|ops\s*目录整改/i.test(title)) return [];
+  if (/性能看板|一键编报|一键编包|ops\s*目录整改/i.test(title)) return [];
   if (title.startsWith("多算子")) {
     return ["chunk_fwd_o", "chunk_gated_delta_rule_fwd_h", "chunk_gated_delta_rule_bwd_dhu", "recompute_wu_fwd", "chunk_bwd_dv_local", "chunk_bwd_dqkwg"].map(operatorById).filter(Boolean);
   }
@@ -577,6 +596,31 @@ function taskOperators(task) {
 
 function operatorById(id) {
   return OPERATOR_RULES.find((operator) => operator.id === id);
+}
+
+function operatorOwnerName(operatorId, referenceDate) {
+  const rules = OPERATOR_OWNER_RULES[operatorId] || [];
+  if (!rules.length) return "";
+  return (rules.find((rule) => !rule.until || !referenceDate || referenceDate <= rule.until) || rules[rules.length - 1]).owner || "";
+}
+
+function operatorOwnerNamesForTask(task, referenceDate = "") {
+  const operators = task ? taskOperators(task) : [];
+  if (!operators.length) return [];
+  const dates = referenceDate ? [referenceDate] : ownerReferenceDates(task);
+  return uniqueStrings(operators.flatMap((operator) => dates.map((date) => operatorOwnerName(operator.id, date))));
+}
+
+function ownerReferenceDates(task) {
+  const dates = [];
+  taskSegments(task).forEach((segment) => {
+    if (segment.start_date) dates.push(segment.start_date);
+    if (segment.end_date) dates.push(segment.end_date);
+    Object.values(OPERATOR_OWNER_RULES).flat().forEach((rule) => {
+      if (rule.until && segment.start_date <= rule.until && segment.end_date > rule.until) dates.push(addDays(rule.until, 1));
+    });
+  });
+  return uniqueStrings(dates.length ? dates : [task?.start_date || state.view.start]).filter(Boolean).sort();
 }
 
 function displayTaskTitle(task) {
@@ -611,7 +655,7 @@ function compactTaskTitle(task) {
 function ensurePeopleCatalog() {
   const existing = new Map((state.data.people || []).map((person) => [person.name, person]));
   const names = [];
-  (state.data.tasks || []).forEach((task) => splitOwnerNames(task.owner).forEach((name) => {
+  (state.data.tasks || []).forEach((task) => taskOwnerNames(task).forEach((name) => {
     if (!names.includes(name)) names.push(name);
   }));
   const people = [];
@@ -632,14 +676,23 @@ function normalizeOwnerName(name) {
   return !value || value === "待填写" || value === "待排人力" ? "待排人力" : value;
 }
 
-function splitOwnerNames(owner) {
+function splitOwnerNames(owner, task = null, referenceDate = "") {
   const raw = normalizeOwnerName(owner);
-  return [...new Set(raw.split(/[、/,，;；&]+/).map(normalizeOwnerName).filter(Boolean))];
+  return uniqueStrings(raw.split(/[、/,，;；&]+/).flatMap((name) => {
+    const normalized = normalizeOwnerName(name);
+    if (normalized !== "对应算子责任人") return [normalized];
+    const owners = operatorOwnerNamesForTask(task, referenceDate);
+    return owners.length ? owners : [normalized];
+  }).filter(Boolean));
 }
 
-function taskPeople(task) {
+function taskOwnerNames(task, referenceDate = "") {
+  return splitOwnerNames(task?.owner, task, referenceDate);
+}
+
+function taskPeople(task, referenceDate = "") {
   const byName = new Map((state.data.people || []).map((person) => [person.name, person]));
-  return splitOwnerNames(task.owner).map((name) => byName.get(name) || { id: "P??", name, position: 9999, placeholder: isPlaceholderOwner(name) });
+  return taskOwnerNames(task, referenceDate).map((name) => byName.get(name) || { id: "P??", name, position: 9999, placeholder: isPlaceholderOwner(name) });
 }
 
 function peopleForTasks(tasks) {
@@ -667,6 +720,10 @@ function uniqueBy(items, field) {
     seen.add(key);
     return true;
   });
+}
+
+function uniqueStrings(items) {
+  return [...new Set(items.filter(Boolean))];
 }
 
 function dateList(start, end) {
