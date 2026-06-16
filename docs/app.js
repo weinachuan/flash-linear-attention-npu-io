@@ -62,7 +62,7 @@ function filteredTasks() {
     return (!q || [task.title, task.owner, task.scope].some((value) => String(value || "").toLowerCase().includes(q)))
       && (!state.filters.risk || task.risk === state.filters.risk)
       && (!state.filters.priority || task.priority === state.filters.priority)
-      && (!state.filters.owner || task.owner === state.filters.owner)
+      && (!state.filters.owner || splitOwnerNames(task.owner).includes(state.filters.owner))
       && (!state.filters.group_id || task.group_id === state.filters.group_id)
       && (!state.filters.special_id || (state.filters.special_id === "__none__" ? !task.special_id : task.special_id === state.filters.special_id))
       && (!state.filters.status || task.status === state.filters.status);
@@ -121,7 +121,7 @@ function renderTableFilters() {
     tableFilterSelect("risk", [["", "全部"], ["高", "高"], ["中", "中"], ["低", "低"]]),
     tableFilterSelect("priority", [["", "全部"], ["P0", "P0"], ["P1", "P1"], ["P2", "P2"]]),
     `<th><input data-table-filter="q" type="search" placeholder="筛事项" value="${escapeAttr(state.filters.q)}"></th>`,
-    tableFilterSelect("owner", [["", "全部"], ...uniqueTaskValues("owner").map((value) => [value, value])]),
+    tableFilterSelect("owner", [["", "全部"], ...ownerFilterOptions()]),
     tableFilterSelect("group_id", [["", "全部"], ...state.data.groups.map((group) => [group.id, group.title])]),
     tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...state.data.specials.map((special) => [special.id, special.title])]),
     `<th></th>`,
@@ -151,6 +151,11 @@ function tableFilterSelect(field, options) {
 
 function uniqueTaskValues(field) {
   return [...new Set((state.data.tasks || []).map((task) => task[field]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), "zh-CN"));
+}
+
+function ownerFilterOptions() {
+  ensurePeopleCatalog();
+  return (state.data.people || []).map((person) => [person.name, person.name]);
 }
 
 function updateTableFilter(event) {
@@ -622,9 +627,14 @@ function ensurePeopleCatalog() {
   state.data.people = people.sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
 }
 
+function normalizeOwnerName(name) {
+  const value = String(name || "").trim();
+  return !value || value === "待填写" || value === "待排人力" ? "待排人力" : value;
+}
+
 function splitOwnerNames(owner) {
-  const raw = String(owner || "待填写").trim() || "待填写";
-  return raw.split(/[、/,，;；&]+/).map((name) => name.trim()).filter(Boolean);
+  const raw = normalizeOwnerName(owner);
+  return [...new Set(raw.split(/[、/,，;；&]+/).map(normalizeOwnerName).filter(Boolean))];
 }
 
 function taskPeople(task) {
@@ -889,7 +899,7 @@ async function addTask() {
     title,
     scope: "",
     target: "",
-    owner: "待填写",
+    owner: "待排人力",
     status: "todo",
     risk: "中",
     priority: "P1",
