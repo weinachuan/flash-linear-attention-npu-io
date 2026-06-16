@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-16T14:23:45+08:00",
+  "generatedAt": "2026-06-16T14:32:07+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -1302,35 +1302,6 @@
       "segments": [
         {
           "id": "seg-31d82f9f10",
-          "start_date": "2026-06-19",
-          "end_date": "2026-06-25",
-          "reason": "",
-          "position": 0
-        }
-      ]
-    },
-    {
-      "id": "t37",
-      "title": "dv_local <<<>>> 调用示例",
-      "scope": "",
-      "target": "",
-      "owner": "陈琳鑫",
-      "status": "todo",
-      "risk": "低",
-      "priority": "P2",
-      "group_id": "M-2026-06-25",
-      "special_id": "launch",
-      "start_date": "2026-06-19",
-      "end_date": "2026-06-25",
-      "evidence": [],
-      "dependencies": [],
-      "notes": "",
-      "position": 36,
-      "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T09:22:27+08:00",
-      "segments": [
-        {
-          "id": "seg-79d0d02d1e",
           "start_date": "2026-06-19",
           "end_date": "2026-06-25",
           "reason": "",

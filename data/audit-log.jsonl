@@ -3,3 +3,4 @@
 {"ts":"2026-06-16T03:34:27+08:00","action":"task.update","entity":"task","id":"t09","summary":"更新任务：chunk_dv_local 深融合优化","detail":{"title":"chunk_dv_local 深融合优化"},"source":"github-pages"}
 {"ts":"2026-06-16T03:43:30+08:00","action":"task.split","entity":"task","id":"t15","summary":"切分任务：prepare_wy_bwd_full GVA && Vdim 256","detail":{"break_start":"2026-06-19","break_end":"2026-06-19","reason":"临时插入其它任务"},"source":"github-pages"}
 {"ts":"2026-06-16T14:23:45+08:00","action":"owner_rule.update","entity":"project","id":"operator-owner-rules","summary":"更新对应算子责任人规则，并将相关任务命名为一键编包","detail":{"rule":"按算子与日期阈值自动解析对应算子责任人"},"source":"codex"}
+{"ts":"2026-06-16T14:32:07+08:00","action":"task.delete","entity":"task","id":"t37","summary":"删除重复任务：dv_local <<<>>> 调用示例","detail":{"kept":"dv_local <<<>>> 方式调用"},"source":"codex"}
