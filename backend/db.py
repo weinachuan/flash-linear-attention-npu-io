@@ -11,6 +11,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = ROOT / "data" / "project.sqlite3"
+STATE_PATH = ROOT / "data" / "project-state.json"
+AUDIT_LOG_PATH = ROOT / "data" / "audit-log.jsonl"
 PROJECT_DATA_CANDIDATES = [
     ROOT / "data" / "seed-project-data.json",
     ROOT.parent / "flash-linear-attention-npu-project" / "project-data.json",
@@ -125,6 +127,10 @@ def seed_if_empty(conn: sqlite3.Connection) -> None:
     count = conn.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
     if count:
         return
+    if STATE_PATH.exists():
+        import_state_snapshot(conn, STATE_PATH)
+        conn.commit()
+        return
     import_project_data(conn, first_existing(PROJECT_DATA_CANDIDATES))
     gantt_html = first_existing(GANTT_HTML_CANDIDATES)
     if gantt_html:
@@ -132,8 +138,107 @@ def seed_if_empty(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+def load_repo_state_or_seed(conn: sqlite3.Connection) -> None:
+    if STATE_PATH.exists():
+        import_state_snapshot(conn, STATE_PATH)
+        conn.commit()
+        return
+    seed_if_empty(conn)
+
+
 def first_existing(paths: list[Path]) -> Path | None:
     return next((path for path in paths if path.exists()), None)
+
+
+def import_state_snapshot(conn: sqlite3.Connection, path: Path) -> None:
+    data = json.loads(path.read_text(encoding="utf-8-sig"))
+    conn.execute("DELETE FROM task_segments")
+    conn.execute("DELETE FROM tasks")
+    conn.execute("DELETE FROM specials")
+    conn.execute("DELETE FROM groups")
+    conn.execute("DELETE FROM project_meta")
+
+    conn.execute(
+        "INSERT OR REPLACE INTO project_meta(key, value) VALUES (?, ?)",
+        ("project", as_json(data.get("project", DEFAULT_PROJECT))),
+    )
+    conn.execute(
+        "INSERT OR REPLACE INTO project_meta(key, value) VALUES (?, ?)",
+        ("repoScan", as_json(data.get("repoScan", {}))),
+    )
+
+    for pos, group in enumerate(data.get("groups", [])):
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO groups(id, title, due_date, start_date, end_date, position)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                group.get("id") or make_id("group"),
+                group.get("title") or "未命名分组",
+                group.get("due_date") or group.get("end_date") or "2026-06-25",
+                group.get("start_date") or group.get("due_date") or "2026-06-25",
+                group.get("end_date") or group.get("due_date") or "2026-06-25",
+                int(group.get("position", pos)),
+            ),
+        )
+
+    for pos, special in enumerate(data.get("specials", [])):
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO specials(id, title, group_id, position, collapsed)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                special.get("id") or make_id("special"),
+                special.get("title") or "专项：未命名",
+                special.get("group_id"),
+                int(special.get("position", pos)),
+                int(bool(special.get("collapsed", 0))),
+            ),
+        )
+
+    for pos, task in enumerate(data.get("tasks", [])):
+        payload = {
+            "id": task.get("id") or make_id("task"),
+            "title": task.get("title") or "未命名任务",
+            "scope": task.get("scope", ""),
+            "target": task.get("target", ""),
+            "owner": task.get("owner") or "待填写",
+            "status": task.get("status") or "todo",
+            "risk": task.get("risk") or "中",
+            "priority": task.get("priority") or RISK_TO_PRIORITY.get(task.get("risk"), "P1"),
+            "group_id": task.get("group_id"),
+            "special_id": task.get("special_id"),
+            "start_date": task.get("start_date"),
+            "end_date": task.get("end_date"),
+            "evidence": task.get("evidence", []),
+            "dependencies": task.get("dependencies", []),
+            "notes": task.get("notes", ""),
+            "position": int(task.get("position", pos)),
+        }
+        upsert_task(conn, payload)
+        if task.get("created_at") or task.get("updated_at"):
+            conn.execute(
+                "UPDATE tasks SET created_at = COALESCE(?, created_at), updated_at = COALESCE(?, updated_at) WHERE id = ?",
+                (task.get("created_at"), task.get("updated_at"), payload["id"]),
+            )
+        conn.execute("DELETE FROM task_segments WHERE task_id = ?", (payload["id"],))
+        for seg_pos, segment in enumerate(task.get("segments") or []):
+            conn.execute(
+                """
+                INSERT INTO task_segments(id, task_id, start_date, end_date, reason, position)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    segment.get("id") or make_id("seg"),
+                    payload["id"],
+                    segment.get("start_date") or payload["start_date"],
+                    segment.get("end_date") or payload["end_date"],
+                    segment.get("reason", ""),
+                    int(segment.get("position", seg_pos)),
+                ),
+            )
 
 
 def import_project_data(conn: sqlite3.Connection, path: Path | None) -> None:
@@ -387,6 +492,8 @@ def task_to_dict(conn: sqlite3.Connection, row: sqlite3.Row) -> dict[str, Any]:
 
 def export_all(conn: sqlite3.Connection) -> dict[str, Any]:
     return {
+        "storageVersion": 1,
+        "generatedAt": now_iso(),
         "project": parse_json(conn.execute("SELECT value FROM project_meta WHERE key = 'project'").fetchone()["value"], {}),
         "repoScan": parse_json(conn.execute("SELECT value FROM project_meta WHERE key = 'repoScan'").fetchone()["value"], {}),
         "groups": [dict(row) for row in conn.execute("SELECT * FROM groups ORDER BY position, due_date").fetchall()],
@@ -396,3 +503,10 @@ def export_all(conn: sqlite3.Connection) -> dict[str, Any]:
             for row in conn.execute("SELECT * FROM tasks ORDER BY position, start_date, title").fetchall()
         ],
     }
+
+
+def write_state_snapshot(conn: sqlite3.Connection) -> dict[str, Any]:
+    STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    state = export_all(conn)
+    STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return state

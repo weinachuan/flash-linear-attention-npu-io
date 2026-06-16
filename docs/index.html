@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>flash-linear-attention-npu 项目看板</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Project Snapshot</p>
+        <h1>flash-linear-attention-npu 项目看板</h1>
+        <p class="meta" id="meta">读取仓库数据中</p>
+      </div>
+      <div class="summary" id="summary"></div>
+    </header>
+
+    <section class="toolbar">
+      <label>搜索 <input id="q" type="search" placeholder="事项 / 负责人"></label>
+      <label>风险 <select id="risk"><option value="">全部</option><option>高</option><option>中</option><option>低</option></select></label>
+      <label>优先级 <select id="priority"><option value="">全部</option><option>P0</option><option>P1</option><option>P2</option></select></label>
+      <label>状态 <select id="status"><option value="">全部</option><option value="todo">todo</option><option value="doing">doing</option><option value="blocked">blocked</option><option value="done">done</option></select></label>
+      <button id="refresh" type="button">刷新仓库数据</button>
+    </section>
+
+    <section class="panel">
+      <h2>时间计划</h2>
+      <div id="gantt" class="gantt"></div>
+    </section>
+
+    <section class="panel">
+      <h2>任务明细</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>风险</th>
+              <th>优先级</th>
+              <th>事项</th>
+              <th>责任人</th>
+              <th>分组</th>
+              <th>专项</th>
+              <th>计划日期</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>最近变更</h2>
+      <div id="audit" class="audit"></div>
+    </section>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>

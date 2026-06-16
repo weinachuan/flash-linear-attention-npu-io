@@ -1,0 +1,1516 @@
+{
+  "storageVersion": 1,
+  "generatedAt": "2026-06-16T09:54:27+08:00",
+  "project": {
+    "name": "flash-linear-attention-npu",
+    "repository": "https://github.com/flashserve/flash-linear-attention-npu",
+    "timezone": "Asia/Shanghai",
+    "baselineDate": "2026-06-15",
+    "projectOwner": {
+      "name": "待填写",
+      "email": "待填写"
+    },
+    "remoteVerified": true,
+    "notes": "Based on user-provided transfer-test plan. External tracker, calendar, PR, issue, and test data are not connected yet."
+  },
+  "repoScan": {
+    "scanDate": "2026-06-15",
+    "repositoryHead": "4198b83e7e609333bf9d957520427ad751f8ef52",
+    "rule": "已合入标低风险；未合入但有开放 PR 标中风险；未找到 PR 标高风险。",
+    "source": {
+      "openPulls": "https://github.com/flashserve/flash-linear-attention-npu/pulls?q=is%3Apr+is%3Aopen",
+      "closedPulls": "https://github.com/flashserve/flash-linear-attention-npu/pulls?q=is%3Apr+is%3Aclosed"
+    },
+    "items": [
+      {
+        "id": "0618-CAUSAL-CONV1D-FWD-TND-NTD",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "已合入 PR #48：conv1d support BNSD/NTD。"
+      },
+      {
+        "id": "0618-CHUNK-DV-LOCAL-FUSION",
+        "repoRisk": "中",
+        "repoStatus": "未合入但有开放 PR",
+        "evidence": "开放 PR #20：Optimize chunk_bwd_dv_local kernel。"
+      },
+      {
+        "id": "0618-DHU-GVA-VDIM-256",
+        "repoRisk": "高",
+        "repoStatus": "未找到明确合入或开放 PR",
+        "evidence": "默认分支可见 dhu V<=256/测试线索，但未找到 dhu GVA && Vdim 256 的明确合入或开放 PR。"
+      },
+      {
+        "id": "0618-DOCS-GVA-VDIM-256",
+        "repoRisk": "高",
+        "repoStatus": "未找到明确合入或开放 PR",
+        "evidence": "未在开放 PR 或合入 PR 标题中找到 GVA/Vdim 256 算子文档更新项。"
+      },
+      {
+        "id": "0618-DQKWG-GVA-VDIM-256",
+        "repoRisk": "中",
+        "repoStatus": "未合入但有开放 PR",
+        "evidence": "开放 PR #18：feat: adding gva to chunk_bwd_dqkwg。"
+      },
+      {
+        "id": "0618-DV-LOCAL-GVA-VDIM-256",
+        "repoRisk": "中",
+        "repoStatus": "未完全合入但有开放 PR",
+        "evidence": "已合入 PR #22 覆盖 dv Vdim 256；开放 PR #51：support dv GVA。"
+      },
+      {
+        "id": "0618-DV-LOCAL-LAUNCH",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "已合入 PR #22：fix dv <<<>>> vdim 256。"
+      },
+      {
+        "id": "0618-FWD-H-FWD-O-PERF",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "已合入 PR #34：GDN fwd_h/fwd_o ascendc performance optim；已合入 PR #45：chunk_fwd_o 适配 <<<>>>。"
+      },
+      {
+        "id": "0618-FWD-H-GVA",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "用户确认 fwd_h GVA 06-18 转测已合；仓库扫描未定位到独立 PR 标题，需后续补 PR 号。"
+      },
+      {
+        "id": "0618-FWD-O-GVA",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "用户确认 fwd_o GVA 06-18 转测已合；仓库扫描未定位到独立 PR 标题，需后续补 PR 号。"
+      },
+      {
+        "id": "0618-FWD-O-LAUNCH",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "已合入 PR #45：chunk_fwd_o 适配 <<<>>>。"
+      },
+      {
+        "id": "0618-OPS-REORG",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "默认分支包含提交 5dfe90e：仓库目录结构从扁平布局整改为分层布局。"
+      },
+      {
+        "id": "0618-PREPARE-WY-BWD-DA-GVA-VDIM-256",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "已合入 PR #49：prepare_wy_repr_bwd_da GVA；默认分支测试包含 GVA 且 V=256 场景。"
+      },
+      {
+        "id": "0618-PREPARE-WY-REPR-BWD-FULL-FUSION",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "默认分支包含提交 451c372：优化 prepare_wy_repr_bwd_full 算子性能。"
+      },
+      {
+        "id": "0618-PREPARE-WY-REPR-BWD-FULL-REGBASE-A5",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "已合入 PR #19：add da A5 && full rebase performace optimize；默认分支包含 prepare_wy_repr_bwd_full A5 优化提交。"
+      },
+      {
+        "id": "0618-RECOMPUTE-W-U-GVA-VDIM-256",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "已合入 PR #44：recompute_wu_fwd GVA/V=256；默认分支包含 recompute_wu_fwd GVA 和 V=256 支持提交。"
+      },
+      {
+        "id": "0625-CAUSAL-CONV1D-BWD",
+        "repoRisk": "中",
+        "repoStatus": "未合入但有开放 PR",
+        "evidence": "开放 PR #55：feat: add causal_conv1d_bwd custom op。"
+      },
+      {
+        "id": "0625-DHU-LAUNCH-EXAMPLE",
+        "repoRisk": "高",
+        "repoStatus": "未找到明确合入或开放 PR",
+        "evidence": "未找到 dhu <<<>>> 调用示例的合入或开放 PR。"
+      },
+      {
+        "id": "0625-DQKWG-FUSION",
+        "repoRisk": "中",
+        "repoStatus": "未合入但有开放 PR",
+        "evidence": "开放 PR #17：GitHub cherry zhang e old dqkwg；开放 PR #18：feat: adding gva to chunk_bwd_dqkwg。"
+      },
+      {
+        "id": "0625-DQKWG-LAUNCH-EXAMPLE",
+        "repoRisk": "高",
+        "repoStatus": "未找到明确合入或开放 PR",
+        "evidence": "未找到 dqkwg <<<>>> 调用示例的合入或开放 PR。"
+      },
+      {
+        "id": "0625-DV-LOCAL-LAUNCH-EXAMPLE",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "已合入 PR #22：fix dv <<<>>> vdim 256。"
+      },
+      {
+        "id": "0625-FWD-H-GK-DECAY",
+        "repoRisk": "高",
+        "repoStatus": "未找到明确合入或开放 PR",
+        "evidence": "仓内 fwd_h 当前仍有 gk must be nullptr 的限制线索，未找到支持 gk 衰减的 PR。"
+      },
+      {
+        "id": "0625-FWD-H-LAUNCH-EXAMPLE",
+        "repoRisk": "中",
+        "repoStatus": "未合入但有开放 PR",
+        "evidence": "开放 PR #58：chunk_gated_delta_rule_fwd_h 支持 <<<>>> 调用。"
+      },
+      {
+        "id": "0625-FWD-H-VDIM-256",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "默认分支 fwd_h README/代码可见 V=256 支持线索。"
+      },
+      {
+        "id": "0625-FWD-O-LAUNCH-EXAMPLE",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "已合入 PR #45：chunk_fwd_o 适配 <<<>>>。"
+      },
+      {
+        "id": "0625-FWD-O-VDIM-256",
+        "repoRisk": "低",
+        "repoStatus": "已合入",
+        "evidence": "默认分支 fwd_o README/代码可见 V=256 支持线索。"
+      },
+      {
+        "id": "0625-PREPARE-WY-BWD-DA-LAUNCH-EXAMPLE",
+        "repoRisk": "高",
+        "repoStatus": "未找到明确合入或开放 PR",
+        "evidence": "未找到 prepare_wy_bwd_da <<<>>> 调用示例的合入或开放 PR。"
+      },
+      {
+        "id": "0625-PREPARE-WY-BWD-FULL-GVA-VDIM-256",
+        "repoRisk": "高",
+        "repoStatus": "未找到明确合入或开放 PR",
+        "evidence": "默认分支可见 prepare_wy_repr_bwd_full V=128/A5 优化线索，未找到 prepare_wy_bwd_full GVA && Vdim 256 的明确合入或开放 PR。"
+      },
+      {
+        "id": "0625-PREPARE-WY-BWD-FULL-LAUNCH-EXAMPLE",
+        "repoRisk": "高",
+        "repoStatus": "未找到明确合入或开放 PR",
+        "evidence": "未找到 prepare_wy_bwd_full <<<>>> 调用示例的合入或开放 PR。"
+      },
+      {
+        "id": "0625-RECOMPUTE-W-U-LAUNCH-EXAMPLE",
+        "repoRisk": "高",
+        "repoStatus": "未找到明确合入或开放 PR",
+        "evidence": "未找到 recompute_w_u <<<>>> 调用示例的合入或开放 PR。"
+      },
+      {
+        "id": "0625-SOLVE-TRI-ASCENDC",
+        "repoRisk": "中",
+        "repoStatus": "未合入但有开放 PR",
+        "evidence": "开放 PR #54：add ops solve_tril (basic)。"
+      },
+      {
+        "id": "0715-A5-REGBASE-BATCH",
+        "repoRisk": "高",
+        "repoStatus": "未找到覆盖全部范围的 PR",
+        "evidence": "仅找到 prepare_wy_repr_bwd_full A5 相关合入，未找到覆盖 fwd_o、fwd_h、dhu、recompute、dv_local、dqkwg 全量 A5 regbase 改写的 PR。"
+      },
+      {
+        "id": "0715-KDA-TRITON",
+        "repoRisk": "中",
+        "repoStatus": "未合入但有开放 PR",
+        "evidence": "开放 PR #53：Add kimi delta attention triton kernels。"
+      }
+    ]
+  },
+  "groups": [
+    {
+      "id": "M-2026-06-18",
+      "title": "06-18 转测",
+      "due_date": "2026-06-18",
+      "start_date": "2026-06-18",
+      "end_date": "2026-06-18",
+      "position": 0
+    },
+    {
+      "id": "M-2026-06-25",
+      "title": "06-25 转测",
+      "due_date": "2026-06-25",
+      "start_date": "2026-06-25",
+      "end_date": "2026-06-25",
+      "position": 1
+    },
+    {
+      "id": "M-2026-07-15",
+      "title": "07-15 转测",
+      "due_date": "2026-07-15",
+      "start_date": "2026-07-15",
+      "end_date": "2026-07-15",
+      "position": 2
+    }
+  ],
+  "specials": [
+    {
+      "id": "docs",
+      "title": "专项：对应场景文档更新",
+      "group_id": "M-2026-06-25",
+      "position": 90,
+      "collapsed": 0
+    },
+    {
+      "id": "launch",
+      "title": "专项：<<<>>> 调用示例",
+      "group_id": "M-2026-06-25",
+      "position": 91,
+      "collapsed": 0
+    }
+  ],
+  "tasks": [
+    {
+      "id": "t01",
+      "title": "fwd_h GVA",
+      "scope": "",
+      "target": "",
+      "owner": "方梓阳",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 0,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-ad6ef8526b",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t02",
+      "title": "fwd_o GVA",
+      "scope": "",
+      "target": "",
+      "owner": "吴雨舒",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 1,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-9f801d9dcb",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t03",
+      "title": "recompute_w_u GVA && Vdim 256",
+      "scope": "",
+      "target": "",
+      "owner": "方梓阳",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 2,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-0801e04687",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t04",
+      "title": "dv_local GVA && Vdim 256",
+      "scope": "",
+      "target": "",
+      "owner": "陈琳鑫",
+      "status": "todo",
+      "risk": "中",
+      "priority": "P0",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 3,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-4d160c57ee",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t05",
+      "title": "dqkwg GVA && Vdim 256",
+      "scope": "",
+      "target": "",
+      "owner": "黄浚哲",
+      "status": "todo",
+      "risk": "中",
+      "priority": "P0",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 4,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-71650b131f",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t06",
+      "title": "prepare_wy_bwd_da GVA && Vdim 256",
+      "scope": "",
+      "target": "",
+      "owner": "杨子奇",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 5,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-5ebbafe401",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t07",
+      "title": "prepare_wy_repr_bwd_full 深融合优化",
+      "scope": "",
+      "target": "",
+      "owner": "陈市",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 6,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-9b4561eff2",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t08",
+      "title": "prepare_wy_repr_bwd_full regbase 改写 A5",
+      "scope": "",
+      "target": "",
+      "owner": "龚翔宇",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 7,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-5063433fe7",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t09",
+      "title": "chunk_dv_local 深融合优化",
+      "scope": "",
+      "target": "",
+      "owner": "陈琳鑫",
+      "status": "todo",
+      "risk": "中",
+      "priority": "P0",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 8,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-f6b0d1664a",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t10",
+      "title": "fwd_h 与 fwd_o 性能优化",
+      "scope": "",
+      "target": "",
+      "owner": "姜东明",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 9,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-dcd9523a43",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t11",
+      "title": "causal_conv1d_fwd TND 转 NTD 消除 transpose",
+      "scope": "",
+      "target": "",
+      "owner": "江波",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 10,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-ba848d33d5",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t12",
+      "title": "ops 目录整改",
+      "scope": "",
+      "target": "",
+      "owner": "方梓阳",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-18",
+      "special_id": null,
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 11,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-3f969da999",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t13",
+      "title": "fwd_o <<<>>> 方式调用",
+      "scope": "",
+      "target": "",
+      "owner": "吴雨舒",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-18",
+      "special_id": "launch",
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 12,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-15b69a8629",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t14",
+      "title": "dv_local <<<>>> 方式调用",
+      "scope": "",
+      "target": "",
+      "owner": "陈琳鑫",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-18",
+      "special_id": "launch",
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-18",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 13,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-c0b280b344",
+          "start_date": "2026-06-15",
+          "end_date": "2026-06-18",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t15",
+      "title": "prepare_wy_bwd_full GVA && Vdim 256",
+      "scope": "",
+      "target": "",
+      "owner": "龚翔宇",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": null,
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 14,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-2ba0b1f4ef",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t16",
+      "title": "dhu GVA && Vdim 256",
+      "scope": "",
+      "target": "",
+      "owner": "方梓阳",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": null,
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 15,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-7f49a81021",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t17",
+      "title": "fwd_h Vdim 256",
+      "scope": "",
+      "target": "",
+      "owner": "刘福疆",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-25",
+      "special_id": null,
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 16,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-21513d9491",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t18",
+      "title": "fwd_o Vdim 256",
+      "scope": "",
+      "target": "",
+      "owner": "刘福疆",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-25",
+      "special_id": null,
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 17,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-d973d56d97",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t19",
+      "title": "新增 solve_tri AscendC A2/A3 算子",
+      "scope": "",
+      "target": "",
+      "owner": "石俊杰",
+      "status": "todo",
+      "risk": "中",
+      "priority": "P1",
+      "group_id": "M-2026-06-25",
+      "special_id": null,
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 18,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-057cf6f872",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t20",
+      "title": "新增 solve_tri AscendC A5 算子",
+      "scope": "",
+      "target": "",
+      "owner": "鲍超俊",
+      "status": "todo",
+      "risk": "中",
+      "priority": "P1",
+      "group_id": "M-2026-06-25",
+      "special_id": null,
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 19,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-2015742518",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t21",
+      "title": "新增 causal_conv1d bwd 算子",
+      "scope": "",
+      "target": "",
+      "owner": "江奇",
+      "status": "todo",
+      "risk": "中",
+      "priority": "P1",
+      "group_id": "M-2026-06-25",
+      "special_id": null,
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 20,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-46f78664fa",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t22",
+      "title": "dqkwg 算子深融合优化",
+      "scope": "",
+      "target": "",
+      "owner": "张艺/刘福疆",
+      "status": "todo",
+      "risk": "中",
+      "priority": "P1",
+      "group_id": "M-2026-06-25",
+      "special_id": null,
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 21,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-d1bde83de6",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t23",
+      "title": "fwd_h 支持 gk 方式衰减",
+      "scope": "",
+      "target": "",
+      "owner": "待排人力",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": null,
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 22,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-c065d374c1",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t24",
+      "title": "性能看板",
+      "scope": "",
+      "target": "",
+      "owner": "待排人力",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": null,
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 23,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-dfff37876c",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t25",
+      "title": "一键编报",
+      "scope": "",
+      "target": "",
+      "owner": "待排人力",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": null,
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 24,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-3e03d6ffc0",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t26",
+      "title": "fwd_h 对应场景文档更新",
+      "scope": "",
+      "target": "",
+      "owner": "对应算子责任人",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "docs",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 25,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-a627326868",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t27",
+      "title": "fwd_o 对应场景文档更新",
+      "scope": "",
+      "target": "",
+      "owner": "对应算子责任人",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "docs",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 26,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-91bb5dea40",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t28",
+      "title": "recompute_w_u 对应场景文档更新",
+      "scope": "",
+      "target": "",
+      "owner": "对应算子责任人",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "docs",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 27,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-23fd52047e",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t29",
+      "title": "dv_local 对应场景文档更新",
+      "scope": "",
+      "target": "",
+      "owner": "对应算子责任人",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "docs",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 28,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-a767a20051",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t30",
+      "title": "dqkwg 对应场景文档更新",
+      "scope": "",
+      "target": "",
+      "owner": "对应算子责任人",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "docs",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 29,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-3ec22781b8",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t31",
+      "title": "dhu 对应场景文档更新",
+      "scope": "",
+      "target": "",
+      "owner": "对应算子责任人",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "docs",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 30,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-017bc195b5",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t32",
+      "title": "prepare_wy_bwd_da 对应场景文档更新",
+      "scope": "",
+      "target": "",
+      "owner": "对应算子责任人",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "docs",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 31,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-c40d713206",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t33",
+      "title": "prepare_wy_bwd_full 对应场景文档更新",
+      "scope": "",
+      "target": "",
+      "owner": "对应算子责任人",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "docs",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 32,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-10b0afbaaa",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t34",
+      "title": "fwd_h <<<>>> 调用示例",
+      "scope": "",
+      "target": "",
+      "owner": "法振尧",
+      "status": "todo",
+      "risk": "中",
+      "priority": "P1",
+      "group_id": "M-2026-06-25",
+      "special_id": "launch",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 33,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-ef7acb84aa",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t35",
+      "title": "fwd_o <<<>>> 调用示例",
+      "scope": "",
+      "target": "",
+      "owner": "吴雨舒",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-25",
+      "special_id": "launch",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 34,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-d53079706b",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t36",
+      "title": "recompute_w_u <<<>>> 调用示例",
+      "scope": "",
+      "target": "",
+      "owner": "方梓阳",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "launch",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 35,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-31d82f9f10",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t37",
+      "title": "dv_local <<<>>> 调用示例",
+      "scope": "",
+      "target": "",
+      "owner": "陈琳鑫",
+      "status": "todo",
+      "risk": "低",
+      "priority": "P2",
+      "group_id": "M-2026-06-25",
+      "special_id": "launch",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 36,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-79d0d02d1e",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t38",
+      "title": "dqkwg <<<>>> 调用示例",
+      "scope": "",
+      "target": "",
+      "owner": "黄浚哲",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "launch",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 37,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-23a092ebd3",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t39",
+      "title": "dhu <<<>>> 调用示例",
+      "scope": "",
+      "target": "",
+      "owner": "方梓阳",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "launch",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 38,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-797e0353b8",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t40",
+      "title": "prepare_wy_bwd_da <<<>>> 调用示例",
+      "scope": "",
+      "target": "",
+      "owner": "杨子奇",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "launch",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 39,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-709935c665",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t41",
+      "title": "prepare_wy_bwd_full <<<>>> 调用示例",
+      "scope": "",
+      "target": "",
+      "owner": "吴雨舒",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P0",
+      "group_id": "M-2026-06-25",
+      "special_id": "launch",
+      "start_date": "2026-06-19",
+      "end_date": "2026-06-25",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 40,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-9c104cb6fd",
+          "start_date": "2026-06-19",
+          "end_date": "2026-06-25",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t42",
+      "title": "多算子 A5 场景 regbase 改写",
+      "scope": "",
+      "target": "",
+      "owner": "待填写",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P1",
+      "group_id": "M-2026-07-15",
+      "special_id": null,
+      "start_date": "2026-06-26",
+      "end_date": "2026-07-15",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 41,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-4377c81a73",
+          "start_date": "2026-06-26",
+          "end_date": "2026-07-15",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "t43",
+      "title": "KDA triton 算子回合",
+      "scope": "",
+      "target": "",
+      "owner": "待填写",
+      "status": "todo",
+      "risk": "中",
+      "priority": "P2",
+      "group_id": "M-2026-07-15",
+      "special_id": null,
+      "start_date": "2026-06-26",
+      "end_date": "2026-07-15",
+      "evidence": [],
+      "dependencies": [],
+      "notes": "",
+      "position": 42,
+      "created_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T09:22:27+08:00",
+      "segments": [
+        {
+          "id": "seg-4e2c4c818c",
+          "start_date": "2026-06-26",
+          "end_date": "2026-07-15",
+          "reason": "",
+          "position": 0
+        }
+      ]
+    }
+  ]
+}

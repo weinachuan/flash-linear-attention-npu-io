@@ -14,12 +14,14 @@ try:
         connect,
         export_all,
         init_db,
+        load_repo_state_or_seed,
         make_id,
         seed_if_empty,
         task_to_dict,
         update_task,
         upsert_task,
     )
+    from .repo_store import persist_change
 except ImportError:
     from db import (  # type: ignore
         DB_PATH,
@@ -27,12 +29,14 @@ except ImportError:
         connect,
         export_all,
         init_db,
+        load_repo_state_or_seed,
         make_id,
         seed_if_empty,
         task_to_dict,
         update_task,
         upsert_task,
     )
+    from repo_store import persist_change  # type: ignore
 
 
 FRONTEND = ROOT / "frontend"
@@ -82,7 +86,7 @@ class Handler(BaseHTTPRequestHandler):
             init_db(conn)
             seed_if_empty(conn)
             if path == "/api/health":
-                self.send_json({"ok": True, "database": DB_PATH.name})
+                self.send_json({"ok": True, "storage": "repository", "state": "data/project-state.json", "auditLog": "data/audit-log.jsonl"})
             elif path == "/api/export":
                 self.send_json(export_all(conn))
             elif path == "/api/groups":
@@ -120,8 +124,10 @@ class Handler(BaseHTTPRequestHandler):
                     self.split_task(conn, task_id, payload)
                 elif path.startswith("/api/tasks/") and method == "DELETE":
                     task_id = path.removeprefix("/api/tasks/")
+                    row = conn.execute("SELECT title FROM tasks WHERE id = ?", (task_id,)).fetchone()
                     conn.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
                     conn.commit()
+                    self.finalize_change(conn, "task.delete", "task", task_id, "删除任务：" + (row["title"] if row else task_id))
                     self.send_json({"ok": True})
                 elif path == "/api/groups" and method == "POST":
                     self.create_group(conn, payload)
@@ -139,6 +145,8 @@ class Handler(BaseHTTPRequestHandler):
                     self.send_error_json(404, "api not found")
             except ValueError as exc:
                 self.send_error_json(400, str(exc))
+            except RuntimeError as exc:
+                self.send_error_json(500, "仓库同步失败：" + str(exc))
 
     def create_task(self, conn, payload: dict) -> None:
         task_id = payload.get("id") or make_id("task")
@@ -155,7 +163,10 @@ class Handler(BaseHTTPRequestHandler):
         upsert_task(conn, payload)
         conn.commit()
         row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
-        self.send_json(task_to_dict(conn, row), status=201)
+        sync = self.finalize_change(conn, "task.create", "task", task_id, "新增任务：" + payload["title"], {"title": payload["title"]})
+        body = task_to_dict(conn, row)
+        body["_sync"] = sync
+        self.send_json(body, status=201)
 
     def patch_task(self, conn, task_id: str, payload: dict) -> None:
         changes = {key: value for key, value in payload.items() if key in ALLOWED_TASK_FIELDS}
@@ -175,7 +186,10 @@ class Handler(BaseHTTPRequestHandler):
             )
         conn.commit()
         row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
-        self.send_json(task_to_dict(conn, row))
+        sync = self.finalize_change(conn, "task.update", "task", task_id, "更新任务：" + row["title"], {"fields": sorted(changes.keys())})
+        body = task_to_dict(conn, row)
+        body["_sync"] = sync
+        self.send_json(body)
 
     def split_task(self, conn, task_id: str, payload: dict) -> None:
         break_start = payload.get("break_start")
@@ -210,7 +224,10 @@ class Handler(BaseHTTPRequestHandler):
         conn.execute("UPDATE tasks SET notes = ?, updated_at = datetime('now') WHERE id = ?", (reason, task_id))
         conn.commit()
         row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
-        self.send_json(task_to_dict(conn, row))
+        sync = self.finalize_change(conn, "task.split", "task", task_id, "切分任务：" + row["title"], {"break_start": break_start, "break_end": break_end, "reason": reason})
+        body = task_to_dict(conn, row)
+        body["_sync"] = sync
+        self.send_json(body)
 
     def create_group(self, conn, payload: dict) -> None:
         group_id = payload.get("id") or make_id("group")
@@ -221,7 +238,8 @@ class Handler(BaseHTTPRequestHandler):
             (group_id, title, date, payload.get("start_date") or date, payload.get("end_date") or date, payload.get("position") or 999),
         )
         conn.commit()
-        self.send_json({"ok": True, "id": group_id}, status=201)
+        sync = self.finalize_change(conn, "group.create", "group", group_id, "新增分组：" + title)
+        self.send_json({"ok": True, "id": group_id, "_sync": sync}, status=201)
 
     def patch_group(self, conn, group_id: str, payload: dict) -> None:
         allowed = {"title", "due_date", "start_date", "end_date", "position"}
@@ -236,7 +254,9 @@ class Handler(BaseHTTPRequestHandler):
         values.append(group_id)
         conn.execute(f"UPDATE groups SET {', '.join(assignments)} WHERE id = ?", values)
         conn.commit()
-        self.send_json({"ok": True})
+        row = conn.execute("SELECT title FROM groups WHERE id = ?", (group_id,)).fetchone()
+        sync = self.finalize_change(conn, "group.update", "group", group_id, "更新分组：" + (row["title"] if row else group_id), {"fields": sorted(payload.keys())})
+        self.send_json({"ok": True, "_sync": sync})
 
     def delete_group(self, conn, group_id: str) -> None:
         fallback = conn.execute("SELECT id FROM groups WHERE id != ? ORDER BY position LIMIT 1", (group_id,)).fetchone()
@@ -246,6 +266,7 @@ class Handler(BaseHTTPRequestHandler):
         conn.execute("UPDATE specials SET group_id = ? WHERE group_id = ?", (fallback["id"], group_id))
         conn.execute("DELETE FROM groups WHERE id = ?", (group_id,))
         conn.commit()
+        self.finalize_change(conn, "group.delete", "group", group_id, "删除分组：" + group_id, {"fallback_group_id": fallback["id"]})
         self.send_json({"ok": True})
 
     def create_special(self, conn, payload: dict) -> None:
@@ -255,7 +276,9 @@ class Handler(BaseHTTPRequestHandler):
             (special_id, payload.get("title") or "专项：新专项", payload.get("group_id") or first_group_id(conn), payload.get("position") or 999),
         )
         conn.commit()
-        self.send_json({"ok": True, "id": special_id}, status=201)
+        title = payload.get("title") or "专项：新专项"
+        sync = self.finalize_change(conn, "special.create", "special", special_id, "新增专项：" + title)
+        self.send_json({"ok": True, "id": special_id, "_sync": sync}, status=201)
 
     def patch_special(self, conn, special_id: str, payload: dict) -> None:
         allowed = {"title", "group_id", "position", "collapsed"}
@@ -270,13 +293,19 @@ class Handler(BaseHTTPRequestHandler):
         values.append(special_id)
         conn.execute(f"UPDATE specials SET {', '.join(assignments)} WHERE id = ?", values)
         conn.commit()
-        self.send_json({"ok": True})
+        row = conn.execute("SELECT title FROM specials WHERE id = ?", (special_id,)).fetchone()
+        sync = self.finalize_change(conn, "special.update", "special", special_id, "更新专项：" + (row["title"] if row else special_id), {"fields": sorted(payload.keys())})
+        self.send_json({"ok": True, "_sync": sync})
 
     def delete_special(self, conn, special_id: str) -> None:
         conn.execute("UPDATE tasks SET special_id = NULL WHERE special_id = ?", (special_id,))
         conn.execute("DELETE FROM specials WHERE id = ?", (special_id,))
         conn.commit()
+        self.finalize_change(conn, "special.delete", "special", special_id, "删除专项：" + special_id)
         self.send_json({"ok": True})
+
+    def finalize_change(self, conn, action: str, entity: str, entity_id: str, summary: str, detail: dict | None = None) -> dict:
+        return persist_change(conn, action, entity, entity_id, summary, detail)
 
     def serve_static(self, path: str) -> None:
         if path in {"/", "/io"}:
@@ -362,7 +391,7 @@ def main() -> None:
 
     with connect() as conn:
         init_db(conn)
-        seed_if_empty(conn)
+        load_repo_state_or_seed(conn)
 
     if args.init_only:
         print(f"database ready: {DB_PATH}")

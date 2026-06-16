@@ -6,8 +6,11 @@
 
 - 前端：原生 HTML/CSS/JavaScript，入口 `/io`
 - 后端：Python 标准库 HTTP API
-- 数据库：SQLite，默认位置 `data/project.sqlite3`
+- 数据源：仓库文件 `data/project-state.json`
+- 审计日志：仓库文件 `data/audit-log.jsonl`
+- 运行缓存：SQLite，仅用于本地服务运行时加速，不作为最终数据源
 - 数据操作：任务增删改查、筛选、分组、专项、甘特图展示、双击甘特条切分、JSON 导出
+- 每次写操作都会更新数据快照、追加日志，并自动提交推送到 GitHub 私有仓库
 
 ## 本地运行
 
@@ -21,7 +24,30 @@ python .\backend\app.py
 http://127.0.0.1:8787/io
 ```
 
-首次启动会自动初始化数据库，并尝试从相邻目录的历史 `project-data.json` 和 `gantt-view.html` 导入当前转测任务。
+首次启动会优先从 `data/project-state.json` 恢复数据；如果该文件不存在，则从内置 seed 数据初始化。
+
+## GitHub Pages 查看
+
+本仓库使用 `docs/` 作为 GitHub Pages 静态站点目录。
+
+- 本地 `/io` 页面用于编辑数据。
+- 每次本地写操作会更新 `data/project-state.json` 和 `data/audit-log.jsonl`。
+- 同时会把最新数据镜像到 `docs/project-state.json` 和 `docs/audit-log.jsonl`。
+- GitHub Pages 页面只读展示仓库里的最新数据，不运行 Python 后端。
+
+预期访问地址：
+
+```text
+https://weinachuan.github.io/flash-linear-attention-npu-io/
+```
+
+## 仓库数据文件
+
+- `data/project-state.json`：最新项目数据快照。
+- `data/audit-log.jsonl`：追加式操作日志，每行是一条 JSON 记录。
+- `data/project.sqlite3`：运行时缓存，已被 `.gitignore` 忽略。
+
+如果 GitHub 访问需要代理，服务会优先读取环境变量 `HTTP_PROXY` / `HTTPS_PROXY`；未设置时会尝试读取 Windows 用户代理配置。
 
 ## API
 
@@ -41,19 +67,6 @@ http://127.0.0.1:8787/io
 - `DELETE /api/specials/{id}`
 - `GET /api/export`
 
-## 创建 GitHub 私有仓库
+## 同步说明
 
-当前机器没有检测到 GitHub CLI 或 GitHub token。安装并登录 GitHub CLI 后，在本目录执行：
-
-```powershell
-gh auth login
-gh repo create flash-linear-attention-npu-io --private --source . --remote origin --push
-```
-
-如果你已经在 GitHub 网页上手动创建了私有仓库，也可以执行：
-
-```powershell
-git remote add origin https://github.com/<your-account>/flash-linear-attention-npu-io.git
-git branch -M main
-git push -u origin main
-```
+本地服务写入数据后会自动执行 `git commit` 和 `git push`。如果网络需要代理，请先保证 Windows 用户代理或 `HTTP_PROXY` / `HTTPS_PROXY` 可用。
