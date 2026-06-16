@@ -26,6 +26,7 @@
       <label>优先级 <select id="priority"><option value="">全部</option><option>P0</option><option>P1</option><option>P2</option></select></label>
       <label>状态 <select id="status"><option value="">全部</option><option value="todo">todo</option><option value="doing">doing</option><option value="blocked">blocked</option><option value="done">done</option></select></label>
       <button id="refresh" type="button">刷新仓库数据</button>
+      <button id="clearFilters" type="button">清空筛选</button>
       <button id="addTask" type="button" class="edit-only">新增任务</button>
       <button id="saveAll" type="button" class="edit-only primary">保存全部</button>
       <button id="addGroup" type="button" class="edit-only">新增分组</button>
@@ -54,6 +55,7 @@
               <th>状态</th>
               <th class="edit-only">操作</th>
             </tr>
+            <tr class="filter-row" id="tableFilters"></tr>
           </thead>
           <tbody id="rows"></tbody>
         </table>

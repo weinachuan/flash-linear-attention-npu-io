@@ -12,7 +12,7 @@ const state = {
   audit: [],
   token: sessionStorage.getItem("flashPagesToken") || "",
   dirtyTaskIds: new Set(),
-  filters: { q: "", risk: "", priority: "", status: "" },
+  filters: { q: "", risk: "", priority: "", owner: "", group_id: "", special_id: "", status: "" },
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -42,6 +42,9 @@ function filteredTasks() {
     return (!q || [task.title, task.owner, task.scope].some((value) => String(value || "").toLowerCase().includes(q)))
       && (!state.filters.risk || task.risk === state.filters.risk)
       && (!state.filters.priority || task.priority === state.filters.priority)
+      && (!state.filters.owner || task.owner === state.filters.owner)
+      && (!state.filters.group_id || task.group_id === state.filters.group_id)
+      && (!state.filters.special_id || (state.filters.special_id === "__none__" ? !task.special_id : task.special_id === state.filters.special_id))
       && (!state.filters.status || task.status === state.filters.status);
   });
 }
@@ -65,9 +68,64 @@ function render() {
   $("#editMode").classList.toggle("hidden", Boolean(state.token));
   updateEditStatus();
   renderGantt(tasks);
+  renderTableFilters();
   renderRows(tasks);
   renderAdmin();
   renderAudit();
+}
+
+function renderTableFilters() {
+  const columns = [
+    tableFilterSelect("risk", [["", "全部"], ["高", "高"], ["中", "中"], ["低", "低"]]),
+    tableFilterSelect("priority", [["", "全部"], ["P0", "P0"], ["P1", "P1"], ["P2", "P2"]]),
+    `<th><input data-table-filter="q" type="search" placeholder="筛事项" value="${escapeAttr(state.filters.q)}"></th>`,
+    tableFilterSelect("owner", [["", "全部"], ...uniqueTaskValues("owner").map((value) => [value, value])]),
+    tableFilterSelect("group_id", [["", "全部"], ...state.data.groups.map((group) => [group.id, group.title])]),
+    tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...state.data.specials.map((special) => [special.id, special.title])]),
+    `<th></th>`,
+    tableFilterSelect("status", [["", "全部"], ["todo", "todo"], ["doing", "doing"], ["blocked", "blocked"], ["done", "done"]]),
+    `<th class="edit-only"><button type="button" data-clear-filters>清空</button></th>`,
+  ];
+  $("#tableFilters").innerHTML = columns.join("");
+  document.querySelectorAll("[data-table-filter]").forEach((control) => {
+    control.addEventListener("input", updateTableFilter);
+    control.addEventListener("change", updateTableFilter);
+  });
+  document.querySelector("[data-clear-filters]")?.addEventListener("click", clearFilters);
+}
+
+function tableFilterSelect(field, options) {
+  const seen = new Set();
+  const normalized = options.filter(([id]) => {
+    const key = String(id);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return `<th><select data-table-filter="${field}">${normalized.map(([id, label]) => `<option value="${escapeAttr(id)}" ${state.filters[field] === id ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select></th>`;
+}
+
+function uniqueTaskValues(field) {
+  return [...new Set((state.data.tasks || []).map((task) => task[field]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), "zh-CN"));
+}
+
+function updateTableFilter(event) {
+  state.filters[event.target.dataset.tableFilter] = event.target.value.trim();
+  syncToolbarFilters();
+  render();
+}
+
+function clearFilters() {
+  Object.keys(state.filters).forEach((key) => { state.filters[key] = ""; });
+  syncToolbarFilters();
+  render();
+}
+
+function syncToolbarFilters() {
+  ["q", "risk", "priority", "status"].forEach((id) => {
+    const control = $(`#${id}`);
+    if (control) control.value = state.filters[id] || "";
+  });
 }
 
 function renderGantt(tasks) {
@@ -475,6 +533,7 @@ function escapeAttr(value) {
   });
 });
 $("#refresh").addEventListener("click", load);
+$("#clearFilters").addEventListener("click", clearFilters);
 $("#editMode").addEventListener("click", enableEditMode);
 $("#logout").addEventListener("click", logout);
 $("#addTask").addEventListener("click", () => addTask().catch(showError));
