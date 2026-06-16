@@ -166,15 +166,21 @@ function uniqueTaskValues(field) {
 }
 
 function ownerFilterOptions() {
-  ensurePeopleCatalog();
   return uniqueStrings([
-    ...(state.data.people || []).map((person) => person.name),
+    ...(state.data.tasks || []).flatMap((task) => taskOwnerNames(task)),
     ...operatorOwnerRuleNames(),
-  ]).map((name) => [name, name]);
+  ])
+    .filter(isSelectableOwnerName)
+    .sort((a, b) => a.localeCompare(b, "zh-CN"))
+    .map((name) => [name, name]);
 }
 
 function operatorOwnerRuleNames() {
   return uniqueStrings(Object.values(OPERATOR_OWNER_RULES).flat().map((rule) => rule.owner));
+}
+
+function isSelectableOwnerName(name) {
+  return Boolean(name && !/[、/,，;；&]/.test(name) && !isPlaceholderOwner(name));
 }
 
 function updateTableFilter(event) {
