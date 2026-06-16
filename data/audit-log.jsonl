@@ -1,3 +1,4 @@
 {"action":"state.init","detail":{},"entity":"project","id":"flash-linear-attention-npu","source":"web","summary":"initial repository snapshot","ts":"2026-06-16T09:54:27+08:00"}
 {"ts":"2026-06-16T03:30:31+08:00","action":"task.update","entity":"task","id":"t04","summary":"更新任务：dv_local GVA && Vdim 256","detail":{"title":"dv_local GVA && Vdim 256"},"source":"github-pages"}
 {"ts":"2026-06-16T03:34:27+08:00","action":"task.update","entity":"task","id":"t09","summary":"更新任务：chunk_dv_local 深融合优化","detail":{"title":"chunk_dv_local 深融合优化"},"source":"github-pages"}
+{"ts":"2026-06-16T03:43:30+08:00","action":"task.split","entity":"task","id":"t15","summary":"切分任务：prepare_wy_bwd_full GVA && Vdim 256","detail":{"break_start":"2026-06-19","break_end":"2026-06-19","reason":"临时插入其它任务"},"source":"github-pages"}
