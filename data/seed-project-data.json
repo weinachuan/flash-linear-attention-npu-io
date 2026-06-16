@@ -1,0 +1,652 @@
+﻿{
+    "project":  {
+                    "name":  "flash-linear-attention-npu",
+                    "repository":  "https://github.com/flashserve/flash-linear-attention-npu",
+                    "timezone":  "Asia/Shanghai",
+                    "baselineDate":  "2026-06-15",
+                    "projectOwner":  {
+                                         "name":  "待填写",
+                                         "email":  "待填写"
+                                     },
+                    "remoteVerified":  true,
+                    "notes":  "Based on user-provided transfer-test plan. External tracker, calendar, PR, issue, and test data are not connected yet."
+                },
+    "repoScan":  {
+                     "scanDate":  "2026-06-15",
+                     "repositoryHead":  "4198b83e7e609333bf9d957520427ad751f8ef52",
+                     "rule":  "已合入标低风险；未合入但有开放 PR 标中风险；未找到 PR 标高风险。",
+                     "source":  {
+                                    "openPulls":  "https://github.com/flashserve/flash-linear-attention-npu/pulls?q=is%3Apr+is%3Aopen",
+                                    "closedPulls":  "https://github.com/flashserve/flash-linear-attention-npu/pulls?q=is%3Apr+is%3Aclosed"
+                                },
+                     "items":  [
+                                   {
+                                       "id":  "0618-CAUSAL-CONV1D-FWD-TND-NTD",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "已合入 PR #48：conv1d support BNSD/NTD。"
+                                   },
+                                   {
+                                       "id":  "0618-CHUNK-DV-LOCAL-FUSION",
+                                       "repoRisk":  "中",
+                                       "repoStatus":  "未合入但有开放 PR",
+                                       "evidence":  "开放 PR #20：Optimize chunk_bwd_dv_local kernel。"
+                                   },
+                                   {
+                                       "id":  "0618-DHU-GVA-VDIM-256",
+                                       "repoRisk":  "高",
+                                       "repoStatus":  "未找到明确合入或开放 PR",
+                                       "evidence":  "默认分支可见 dhu V\u003c=256/测试线索，但未找到 dhu GVA \u0026\u0026 Vdim 256 的明确合入或开放 PR。"
+                                   },
+                                   {
+                                       "id":  "0618-DOCS-GVA-VDIM-256",
+                                       "repoRisk":  "高",
+                                       "repoStatus":  "未找到明确合入或开放 PR",
+                                       "evidence":  "未在开放 PR 或合入 PR 标题中找到 GVA/Vdim 256 算子文档更新项。"
+                                   },
+                                   {
+                                       "id":  "0618-DQKWG-GVA-VDIM-256",
+                                       "repoRisk":  "中",
+                                       "repoStatus":  "未合入但有开放 PR",
+                                       "evidence":  "开放 PR #18：feat: adding gva to chunk_bwd_dqkwg。"
+                                   },
+                                   {
+                                       "id":  "0618-DV-LOCAL-GVA-VDIM-256",
+                                       "repoRisk":  "中",
+                                       "repoStatus":  "未完全合入但有开放 PR",
+                                       "evidence":  "已合入 PR #22 覆盖 dv Vdim 256；开放 PR #51：support dv GVA。"
+                                   },
+                                   {
+                                       "id":  "0618-DV-LOCAL-LAUNCH",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "已合入 PR #22：fix dv \u003c\u003c\u003c\u003e\u003e\u003e vdim 256。"
+                                   },
+                                   {
+                                       "id":  "0618-FWD-H-FWD-O-PERF",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "已合入 PR #34：GDN fwd_h/fwd_o ascendc performance optim；已合入 PR #45：chunk_fwd_o 适配 \u003c\u003c\u003c\u003e\u003e\u003e。"
+                                   },
+                                   {
+                                       "id":  "0618-FWD-H-GVA",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "用户确认 fwd_h GVA 06-18 转测已合；仓库扫描未定位到独立 PR 标题，需后续补 PR 号。"
+                                   },
+                                   {
+                                       "id":  "0618-FWD-O-GVA",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "用户确认 fwd_o GVA 06-18 转测已合；仓库扫描未定位到独立 PR 标题，需后续补 PR 号。"
+                                   },
+                                   {
+                                       "id":  "0618-FWD-O-LAUNCH",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "已合入 PR #45：chunk_fwd_o 适配 \u003c\u003c\u003c\u003e\u003e\u003e。"
+                                   },
+                                   {
+                                       "id":  "0618-OPS-REORG",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "默认分支包含提交 5dfe90e：仓库目录结构从扁平布局整改为分层布局。"
+                                   },
+                                   {
+                                       "id":  "0618-PREPARE-WY-BWD-DA-GVA-VDIM-256",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "已合入 PR #49：prepare_wy_repr_bwd_da GVA；默认分支测试包含 GVA 且 V=256 场景。"
+                                   },
+                                   {
+                                       "id":  "0618-PREPARE-WY-REPR-BWD-FULL-FUSION",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "默认分支包含提交 451c372：优化 prepare_wy_repr_bwd_full 算子性能。"
+                                   },
+                                   {
+                                       "id":  "0618-PREPARE-WY-REPR-BWD-FULL-REGBASE-A5",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "已合入 PR #19：add da A5 \u0026\u0026 full rebase performace optimize；默认分支包含 prepare_wy_repr_bwd_full A5 优化提交。"
+                                   },
+                                   {
+                                       "id":  "0618-RECOMPUTE-W-U-GVA-VDIM-256",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "已合入 PR #44：recompute_wu_fwd GVA/V=256；默认分支包含 recompute_wu_fwd GVA 和 V=256 支持提交。"
+                                   },
+                                   {
+                                       "id":  "0625-CAUSAL-CONV1D-BWD",
+                                       "repoRisk":  "中",
+                                       "repoStatus":  "未合入但有开放 PR",
+                                       "evidence":  "开放 PR #55：feat: add causal_conv1d_bwd custom op。"
+                                   },
+                                   {
+                                       "id":  "0625-DHU-LAUNCH-EXAMPLE",
+                                       "repoRisk":  "高",
+                                       "repoStatus":  "未找到明确合入或开放 PR",
+                                       "evidence":  "未找到 dhu \u003c\u003c\u003c\u003e\u003e\u003e 调用示例的合入或开放 PR。"
+                                   },
+                                   {
+                                       "id":  "0625-DQKWG-FUSION",
+                                       "repoRisk":  "中",
+                                       "repoStatus":  "未合入但有开放 PR",
+                                       "evidence":  "开放 PR #17：GitHub cherry zhang e old dqkwg；开放 PR #18：feat: adding gva to chunk_bwd_dqkwg。"
+                                   },
+                                   {
+                                       "id":  "0625-DQKWG-LAUNCH-EXAMPLE",
+                                       "repoRisk":  "高",
+                                       "repoStatus":  "未找到明确合入或开放 PR",
+                                       "evidence":  "未找到 dqkwg \u003c\u003c\u003c\u003e\u003e\u003e 调用示例的合入或开放 PR。"
+                                   },
+                                   {
+                                       "id":  "0625-DV-LOCAL-LAUNCH-EXAMPLE",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "已合入 PR #22：fix dv \u003c\u003c\u003c\u003e\u003e\u003e vdim 256。"
+                                   },
+                                   {
+                                       "id":  "0625-FWD-H-GK-DECAY",
+                                       "repoRisk":  "高",
+                                       "repoStatus":  "未找到明确合入或开放 PR",
+                                       "evidence":  "仓内 fwd_h 当前仍有 gk must be nullptr 的限制线索，未找到支持 gk 衰减的 PR。"
+                                   },
+                                   {
+                                       "id":  "0625-FWD-H-LAUNCH-EXAMPLE",
+                                       "repoRisk":  "中",
+                                       "repoStatus":  "未合入但有开放 PR",
+                                       "evidence":  "开放 PR #58：chunk_gated_delta_rule_fwd_h 支持 \u003c\u003c\u003c\u003e\u003e\u003e 调用。"
+                                   },
+                                   {
+                                       "id":  "0625-FWD-H-VDIM-256",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "默认分支 fwd_h README/代码可见 V=256 支持线索。"
+                                   },
+                                   {
+                                       "id":  "0625-FWD-O-LAUNCH-EXAMPLE",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "已合入 PR #45：chunk_fwd_o 适配 \u003c\u003c\u003c\u003e\u003e\u003e。"
+                                   },
+                                   {
+                                       "id":  "0625-FWD-O-VDIM-256",
+                                       "repoRisk":  "低",
+                                       "repoStatus":  "已合入",
+                                       "evidence":  "默认分支 fwd_o README/代码可见 V=256 支持线索。"
+                                   },
+                                   {
+                                       "id":  "0625-PREPARE-WY-BWD-DA-LAUNCH-EXAMPLE",
+                                       "repoRisk":  "高",
+                                       "repoStatus":  "未找到明确合入或开放 PR",
+                                       "evidence":  "未找到 prepare_wy_bwd_da \u003c\u003c\u003c\u003e\u003e\u003e 调用示例的合入或开放 PR。"
+                                   },
+                                   {
+                                       "id":  "0625-PREPARE-WY-BWD-FULL-GVA-VDIM-256",
+                                       "repoRisk":  "高",
+                                       "repoStatus":  "未找到明确合入或开放 PR",
+                                       "evidence":  "默认分支可见 prepare_wy_repr_bwd_full V=128/A5 优化线索，未找到 prepare_wy_bwd_full GVA \u0026\u0026 Vdim 256 的明确合入或开放 PR。"
+                                   },
+                                   {
+                                       "id":  "0625-PREPARE-WY-BWD-FULL-LAUNCH-EXAMPLE",
+                                       "repoRisk":  "高",
+                                       "repoStatus":  "未找到明确合入或开放 PR",
+                                       "evidence":  "未找到 prepare_wy_bwd_full \u003c\u003c\u003c\u003e\u003e\u003e 调用示例的合入或开放 PR。"
+                                   },
+                                   {
+                                       "id":  "0625-RECOMPUTE-W-U-LAUNCH-EXAMPLE",
+                                       "repoRisk":  "高",
+                                       "repoStatus":  "未找到明确合入或开放 PR",
+                                       "evidence":  "未找到 recompute_w_u \u003c\u003c\u003c\u003e\u003e\u003e 调用示例的合入或开放 PR。"
+                                   },
+                                   {
+                                       "id":  "0625-SOLVE-TRI-ASCENDC",
+                                       "repoRisk":  "中",
+                                       "repoStatus":  "未合入但有开放 PR",
+                                       "evidence":  "开放 PR #54：add ops solve_tril (basic)。"
+                                   },
+                                   {
+                                       "id":  "0715-A5-REGBASE-BATCH",
+                                       "repoRisk":  "高",
+                                       "repoStatus":  "未找到覆盖全部范围的 PR",
+                                       "evidence":  "仅找到 prepare_wy_repr_bwd_full A5 相关合入，未找到覆盖 fwd_o、fwd_h、dhu、recompute、dv_local、dqkwg 全量 A5 regbase 改写的 PR。"
+                                   },
+                                   {
+                                       "id":  "0715-KDA-TRITON",
+                                       "repoRisk":  "中",
+                                       "repoStatus":  "未合入但有开放 PR",
+                                       "evidence":  "开放 PR #53：Add kimi delta attention triton kernels。"
+                                   }
+                               ]
+                 },
+    "milestones":  [
+                       {
+                           "id":  "M-2026-06-18",
+                           "title":  "06-18 转测",
+                           "dueDate":  "2026-06-18",
+                           "items":  [
+                                         {
+                                             "id":  "0618-FWD-H-GVA",
+                                             "title":  "fwd_h GVA",
+                                             "scope":  "fwd_h 支持 GVA，06-18 转测",
+                                             "target":  "功能转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  [
+                                                              "待补充 fwd_h GVA 功能验证、精度结果和转测结论",
+                                                              "New-ItemObj"
+                                                          ],
+                                             "dependencies":  [
+                                                                  "0618-FWD-O-GVA"
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-FWD-O-GVA",
+                                             "title":  "fwd_o GVA",
+                                             "scope":  "fwd_o 支持 GVA，06-18 转测",
+                                             "target":  "功能转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 fwd_o GVA 功能验证、精度结果和转测结论",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-RECOMPUTE-W-U-GVA-VDIM-256",
+                                             "title":  "recompute_w_u GVA \u0026\u0026 Vdim 256",
+                                             "scope":  "recompute_w_u 支持 GVA 且 Vdim=256",
+                                             "target":  "功能转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 recompute_w_u 功能验证、精度结果和转测结论",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-DV-LOCAL-GVA-VDIM-256",
+                                             "title":  "dv_local GVA \u0026\u0026 Vdim 256",
+                                             "scope":  "dv_local 支持 GVA 且 Vdim=256",
+                                             "target":  "功能转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 dv_local 功能验证、精度结果和转测结论",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-DQKWG-GVA-VDIM-256",
+                                             "title":  "dqkwg GVA \u0026\u0026 Vdim 256",
+                                             "scope":  "dqkwg 支持 GVA 且 Vdim=256",
+                                             "target":  "功能转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 dqkwg 功能验证、精度结果和转测结论",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-DHU-GVA-VDIM-256",
+                                             "title":  "dhu GVA \u0026\u0026 Vdim 256",
+                                             "scope":  "dhu 支持 GVA 且 Vdim=256",
+                                             "target":  "功能转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 dhu 功能验证、精度结果和转测结论",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-PREPARE-WY-BWD-DA-GVA-VDIM-256",
+                                             "title":  "prepare_wy_bwd_da GVA \u0026\u0026 Vdim 256",
+                                             "scope":  "prepare_wy_bwd_da 支持 GVA 且 Vdim=256；prepare_wy_bwd_full 转入 06-25",
+                                             "target":  "功能转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 prepare_wy_bwd_da 功能验证、精度结果和转测结论",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-DOCS-GVA-VDIM-256",
+                                             "title":  "对应场景算子文档更新",
+                                             "scope":  "GVA 与 Vdim 256 支持场景的算子文档",
+                                             "target":  "文档随功能转测同步更新",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充文档链接或提交记录",
+                                             "dependencies":  [
+                                                                  "0618-FWD-H-GVA",
+                                                                  "0618-FWD-O-GVA",
+                                                                  "0618-RECOMPUTE-W-U-GVA-VDIM-256",
+                                                                  "0618-DV-LOCAL-GVA-VDIM-256",
+                                                                  "0618-DQKWG-GVA-VDIM-256",
+                                                                  "0618-DHU-GVA-VDIM-256",
+                                                                  "0618-PREPARE-WY-BWD-DA-GVA-VDIM-256"
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-PREPARE-WY-REPR-BWD-FULL-FUSION",
+                                             "title":  "prepare_wy_repr_bwd_full 深融合优化",
+                                             "scope":  "单算子性能优化",
+                                             "target":  "预期单算子优化 15%",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充基线、优化后性能数据和测试条件",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-PREPARE-WY-REPR-BWD-FULL-REGBASE-A5",
+                                             "title":  "prepare_wy_repr_bwd_full regbase 改写 A5",
+                                             "scope":  "A5 场景 regbase 改写",
+                                             "target":  "预计优化 10%",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 A5 基线与优化后数据",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-CHUNK-DV-LOCAL-FUSION",
+                                             "title":  "chunk_dv_local 深融合优化",
+                                             "scope":  "chunk_dv_local 单算子优化",
+                                             "target":  "预期收益 10%",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充性能对比数据",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-FWD-H-FWD-O-PERF",
+                                             "title":  "fwd_h 与 fwd_o 性能优化",
+                                             "scope":  "fwd_h A2/A3/A5；fwd_o A2/A3/A5",
+                                             "target":  "fwd_h A2/A3 15%、A5 20%；fwd_o A2/A3 8%、A5 10%",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充各平台性能基线和优化后数据",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-CAUSAL-CONV1D-FWD-TND-NTD",
+                                             "title":  "causal_conv1d_fwd TND 转 NTD 消除 transpose",
+                                             "scope":  "causal_conv1d_fwd 数据布局优化",
+                                             "target":  "预计 GDN 整网提升 3%",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充整网基线、优化后数据和正确性验证",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-OPS-REORG",
+                                             "title":  "ops 目录整改",
+                                             "scope":  "ops 目录结构与归档整改",
+                                             "target":  "目录结构满足转测要求",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充变更说明和检查结论",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-FWD-O-LAUNCH",
+                                             "title":  "fwd_o \u003c\u003c\u003c\u003e\u003e\u003e 方式调用",
+                                             "scope":  "fwd_o 改为 \u003c\u003c\u003c\u003e\u003e\u003e 方式调用",
+                                             "target":  "完成 \u003c\u003c\u003c\u003e\u003e\u003e 调用并可转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 fwd_o 调用示例、编译和运行验证",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0618-DV-LOCAL-LAUNCH",
+                                             "title":  "dv_local \u003c\u003c\u003c\u003e\u003e\u003e 方式调用",
+                                             "scope":  "dv_local 改为 \u003c\u003c\u003c\u003e\u003e\u003e 方式调用",
+                                             "target":  "完成 \u003c\u003c\u003c\u003e\u003e\u003e 调用并可转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 dv_local 调用示例、编译和运行验证",
+                                             "dependencies":  [
+
+                                                              ]
+                                         }
+                                     ]
+                       },
+                       {
+                           "id":  "M-2026-06-25",
+                           "title":  "06-25 转测",
+                           "dueDate":  "2026-06-25",
+                           "items":  [
+                                         {
+                                             "id":  "0625-PREPARE-WY-BWD-FULL-GVA-VDIM-256",
+                                             "title":  "prepare_wy_bwd_full GVA \u0026\u0026 Vdim 256",
+                                             "scope":  "prepare_wy_bwd_full 支持 GVA 且 Vdim=256",
+                                             "target":  "功能转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 prepare_wy_bwd_full 功能验证、精度结果和转测结论",
+                                             "dependencies":  [
+                                                                  "0618-FWD-H-GVA"
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-FWD-H-VDIM-256",
+                                             "title":  "fwd_h Vdim 256",
+                                             "scope":  "fwd_h 支持 Vdim=256，06-25 转测",
+                                             "target":  "功能转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 fwd_h Vdim=256 功能验证、精度结果和转测结论",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-FWD-O-VDIM-256",
+                                             "title":  "fwd_o Vdim 256",
+                                             "scope":  "fwd_o 支持 Vdim=256，06-25 转测",
+                                             "target":  "功能转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 fwd_o Vdim=256 功能验证、精度结果和转测结论",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-FWD-H-LAUNCH-EXAMPLE",
+                                             "title":  "fwd_h \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "scope":  "fwd_h 的 \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "target":  "示例完整且可运行",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 fwd_h 调用示例路径和运行结果",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-FWD-O-LAUNCH-EXAMPLE",
+                                             "title":  "fwd_o \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "scope":  "fwd_o 的 \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "target":  "示例完整且可运行",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 fwd_o 调用示例路径和运行结果",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-RECOMPUTE-W-U-LAUNCH-EXAMPLE",
+                                             "title":  "recompute_w_u \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "scope":  "recompute_w_u 的 \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "target":  "示例完整且可运行",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 recompute_w_u 调用示例路径和运行结果",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-DV-LOCAL-LAUNCH-EXAMPLE",
+                                             "title":  "dv_local \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "scope":  "dv_local 的 \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "target":  "示例完整且可运行",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 dv_local 调用示例路径和运行结果",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-DQKWG-LAUNCH-EXAMPLE",
+                                             "title":  "dqkwg \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "scope":  "dqkwg 的 \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "target":  "示例完整且可运行",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 dqkwg 调用示例路径和运行结果",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-DHU-LAUNCH-EXAMPLE",
+                                             "title":  "dhu \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "scope":  "dhu 的 \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "target":  "示例完整且可运行",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 dhu 调用示例路径和运行结果",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-PREPARE-WY-BWD-DA-LAUNCH-EXAMPLE",
+                                             "title":  "prepare_wy_bwd_da \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "scope":  "prepare_wy_bwd_da 的 \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "target":  "示例完整且可运行",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 prepare_wy_bwd_da 调用示例路径和运行结果",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-PREPARE-WY-BWD-FULL-LAUNCH-EXAMPLE",
+                                             "title":  "prepare_wy_bwd_full \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "scope":  "prepare_wy_bwd_full 的 \u003c\u003c\u003c\u003e\u003e\u003e 调用示例",
+                                             "target":  "示例完整且可运行",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充 prepare_wy_bwd_full 调用示例路径和运行结果",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-SOLVE-TRI-ASCENDC",
+                                             "title":  "新增 solve_tri AscendC 算子",
+                                             "scope":  "A2、A3/A5 算子",
+                                             "target":  "新增算子转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充功能、精度和性能验证",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-CAUSAL-CONV1D-BWD",
+                                             "title":  "新增 causal_conv1d bwd 算子",
+                                             "scope":  "causal_conv1d 反向算子",
+                                             "target":  "新增算子转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充功能、精度和性能验证",
+                                             "dependencies":  [
+                                                                  "0618-CAUSAL-CONV1D-FWD-TND-NTD"
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-DQKWG-FUSION",
+                                             "title":  "dqkwg 算子深融合优化",
+                                             "scope":  "dqkwg 单算子优化",
+                                             "target":  "预计收益 25%",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充基线、优化后数据和正确性验证",
+                                             "dependencies":  [
+
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0625-FWD-H-GK-DECAY",
+                                             "title":  "fwd_h 支持 gk 方式衰减",
+                                             "scope":  "fwd_h 新衰减方式",
+                                             "target":  "功能转测",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充场景说明、精度结果和转测结论",
+                                             "dependencies":  [
+
+                                                              ]
+                                         }
+                                     ]
+                       },
+                       {
+                           "id":  "M-2026-07-15",
+                           "title":  "07-15 转测",
+                           "dueDate":  "2026-07-15",
+                           "items":  [
+                                         {
+                                             "id":  "0715-A5-REGBASE-BATCH",
+                                             "title":  "多算子 A5 场景 regbase 改写",
+                                             "scope":  "fwd_o, fwd_h, dhu, recompute, dv_local, dqkwg",
+                                             "target":  "预计提升 10%",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充各算子 A5 基线和优化后数据",
+                                             "dependencies":  [
+                                                                  "0618-FWD-H-FWD-O-PERF",
+                                                                  "0618-PREPARE-WY-REPR-BWD-FULL-REGBASE-A5"
+                                                              ]
+                                         },
+                                         {
+                                             "id":  "0715-KDA-TRITON",
+                                             "title":  "KDA triton 算子回合",
+                                             "scope":  "KDA triton 算子",
+                                             "target":  "待确认",
+                                             "owner":  "待确认",
+                                             "status":  "todo",
+                                             "evidence":  "待补充准确范围、目标和验收口径",
+                                             "dependencies":  [
+
+                                                              ]
+                                         }
+                                     ]
+                       }
+                   ]
+}

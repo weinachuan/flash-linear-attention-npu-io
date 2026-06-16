@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>flash-linear-attention-npu IO 控制台</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Private Project Console</p>
+        <h1>flash-linear-attention-npu IO 控制台</h1>
+        <p class="sub">前端 + Python 后端 + SQLite 数据库，用于维护转测任务、风险、负责人、专项和计划日期。</p>
+      </div>
+      <div class="status-card">
+        <span id="health">连接中</span>
+        <strong id="taskCount">0 项</strong>
+        <small>本地数据库持久化</small>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <button id="reloadBtn" type="button">刷新</button>
+      <button id="addBtn" type="button">新增任务</button>
+      <button id="exportBtn" type="button">导出 JSON</button>
+      <label class="search">搜索 <input id="searchInput" type="search" placeholder="事项、范围、负责人"></label>
+      <label>风险 <select id="riskFilter"><option value="">全部</option><option>高</option><option>中</option><option>低</option></select></label>
+      <label>优先级 <select id="priorityFilter"><option value="">全部</option><option>P0</option><option>P1</option><option>P2</option></select></label>
+      <label>状态 <select id="statusFilter"><option value="">全部</option><option value="todo">todo</option><option value="doing">doing</option><option value="blocked">blocked</option><option value="done">done</option></select></label>
+    </section>
+
+    <section class="grid">
+      <aside class="side">
+        <h2>分组</h2>
+        <div id="groupList" class="stack"></div>
+        <button id="addGroupBtn" class="ghost" type="button">新增分组</button>
+        <h2>专项</h2>
+        <div id="specialList" class="stack"></div>
+        <button id="addSpecialBtn" class="ghost" type="button">新增专项</button>
+      </aside>
+
+      <section class="board">
+        <div class="gantt" id="gantt"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>风险</th>
+                <th>优先级</th>
+                <th>事项</th>
+                <th>责任人</th>
+                <th>分组</th>
+                <th>专项</th>
+                <th>日期</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="taskRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="taskDialog">
+    <form method="dialog" id="taskForm">
+      <h2 id="dialogTitle">新增任务</h2>
+      <input type="hidden" name="id">
+      <label class="span-2">事项 <input name="title" required></label>
+      <label>风险 <select name="risk"><option>高</option><option>中</option><option>低</option></select></label>
+      <label>优先级 <select name="priority"><option>P0</option><option>P1</option><option>P2</option></select></label>
+      <label>负责人 <input name="owner" required></label>
+      <label>状态 <select name="status"><option value="todo">todo</option><option value="doing">doing</option><option value="blocked">blocked</option><option value="done">done</option></select></label>
+      <label>分组 <select name="group_id"></select></label>
+      <label>专项 <select name="special_id"><option value="">普通事项</option></select></label>
+      <label>开始日期 <input type="date" name="start_date" required></label>
+      <label>结束日期 <input type="date" name="end_date" required></label>
+      <label class="span-2">范围 <textarea name="scope"></textarea></label>
+      <label class="span-2">备注 <textarea name="notes"></textarea></label>
+      <menu>
+        <button id="cancelTask" type="button">取消</button>
+        <button class="primary" type="submit">保存</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="splitDialog">
+    <form method="dialog" id="splitForm">
+      <h2>切分任务</h2>
+      <input type="hidden" name="task_id">
+      <label>中断开始 <input type="date" name="break_start" required></label>
+      <label>中断结束 <input type="date" name="break_end" required></label>
+      <label class="span-2">原因 <textarea name="reason" required placeholder="例如：临时插入其它任务"></textarea></label>
+      <menu>
+        <button id="cancelSplit" type="button">取消</button>
+        <button class="primary" type="submit">确认切分</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script src="/app.js"></script>
+</body>
+</html>

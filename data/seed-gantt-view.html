@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>flash-linear-attention-npu 转测甘特图</title>
+  <style>
+    :root { --bg:#f4f2ed; --panel:#fffdf8; --ink:#252525; --muted:#706b62; --line:#ddd6ca; --grid:rgba(104,92,72,.16); --high:#c84032; --medium:#b77a16; --low:#25715f; --p0:#7e1f1a; --p1:#9c640f; --p2:#3f6d5b; --text-on-bar:#fffdf8; --row:34px; --chart:680px; --tasks:1140px; --risk-col:76px; --priority-col:86px; --title-col:260px; --owner-col:128px; --reason-col:172px; --op-col:150px; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:linear-gradient(180deg,#f9f6ef 0%,var(--bg) 55%,#ece7dd 100%); font-family:"Microsoft YaHei","Segoe UI",sans-serif; overflow-x:auto; }
+    main { width:max-content; min-width:calc(100vw - 32px); margin:18px 16px 28px; }
+    header { display:grid; grid-template-columns:1fr auto; gap:18px; align-items:end; margin-bottom:10px; border-bottom:1px solid var(--line); padding-bottom:10px; }
+    h1 { margin:0 0 4px; font-size:24px; font-weight:750; }
+    .meta { color:var(--muted); font-size:12px; line-height:1.5; }
+    .legend { display:flex; gap:10px; align-items:center; justify-content:flex-end; color:var(--muted); font-size:13px; flex-wrap:wrap; }
+    .legend span { display:inline-flex; gap:6px; align-items:center; white-space:nowrap; }
+    .dot { width:10px; height:10px; border-radius:2px; display:inline-block; }
+    .toolbar { display:flex; align-items:center; gap:10px; margin:0 0 10px; padding:10px 12px; border:1px solid var(--line); background:#fffaf1; }
+    .toolbar button { height:28px; border:1px solid var(--line); border-radius:4px; background:#f2eadc; color:#51473a; font-size:12px; font-weight:750; cursor:pointer; }
+    .toolbar .hint { margin-left:auto; color:var(--muted); font-size:12px; font-weight:700; }
+    .wrap { overflow:visible; border:1px solid var(--line); background:var(--panel); box-shadow:0 16px 40px rgba(57,47,33,.10); }
+    .board { --days:31; width:100%; min-width:calc(var(--chart) + var(--tasks)); display:grid; grid-template-columns:minmax(var(--chart), calc(var(--days) * 28px)) minmax(var(--tasks), 1fr); }
+    .timeline-head,.task-head { position:sticky; top:0; z-index:4; min-height:42px; border-bottom:1px solid var(--line); background:#fffaf1; }
+    .timeline-head { position:sticky; display:grid; grid-template-columns:repeat(var(--days),minmax(22px,1fr)); border-right:1px solid var(--line); }
+    .tick { display:flex; align-items:center; justify-content:center; border-left:1px solid var(--grid); color:var(--muted); font-size:11px; }
+    .tick.major { color:var(--ink); font-weight:700; background:rgba(196,64,50,.06); }
+    .task-head { display:grid; grid-template-columns:var(--risk-col) var(--priority-col) minmax(var(--title-col),1fr) var(--owner-col) var(--reason-col) var(--op-col); gap:10px; align-items:stretch; padding:0 12px; font-size:13px; font-weight:750; }
+    .head-cell { position:relative; display:flex; align-items:center; gap:6px; min-width:0; }
+    .col-resizer,.timeline-resizer { position:absolute; top:0; bottom:0; width:10px; cursor:col-resize; z-index:8; background:transparent; }
+    .col-resizer { right:-10px; }
+    .timeline-resizer { right:-5px; }
+    .col-resizer::after,.timeline-resizer::after { content:""; position:absolute; top:8px; bottom:8px; left:4px; width:2px; border-radius:2px; background:transparent; }
+    .col-resizer:hover::after,.timeline-resizer:hover::after { background:rgba(47,58,52,.35); }
+    .filter-btn { width:18px; height:18px; border:1px solid var(--line); border-radius:3px; background:#fffdf8; color:#51473a; font-size:10px; line-height:1; cursor:pointer; }
+    .filter-btn.active { background:#2f3a34; color:#fffdf8; border-color:#2f3a34; }
+    .filter-menu { position:absolute; top:34px; left:0; z-index:20; width:240px; max-height:320px; overflow:auto; display:none; padding:10px; border:1px solid var(--line); background:#fffdf8; box-shadow:0 12px 28px rgba(57,47,33,.16); }
+    .filter-menu.open { display:block; }
+    .filter-menu input[type="search"] { width:100%; height:28px; margin-bottom:8px; border:1px solid var(--line); border-radius:4px; padding:0 8px; font-size:12px; }
+    .filter-menu label { display:flex; gap:8px; align-items:center; padding:4px 0; color:var(--ink); font-size:12px; font-weight:500; }
+    .filter-actions { display:flex; gap:6px; margin-top:8px; }
+    .filter-actions button { height:24px; border:1px solid var(--line); border-radius:3px; background:#f2eadc; font-size:11px; cursor:pointer; }
+    .chart,.tasks { display:grid; grid-auto-rows:var(--row); }
+    .chart { border-right:1px solid var(--line); background-image:linear-gradient(90deg,transparent calc((100% / var(--days)) - 1px),var(--grid) calc((100% / var(--days)) - 1px)),linear-gradient(180deg,transparent calc(var(--row) - 1px),rgba(104,92,72,.12) calc(var(--row) - 1px)); background-size:calc(100% / var(--days)) var(--row),100% var(--row); }
+    .row { position:relative; display:flex; align-items:center; padding:0 10px; }
+    .bar { position:absolute; left:calc(var(--start) * (100% / var(--days)) + 10px); width:calc(var(--span) * (100% / var(--days)) - 20px); min-width:24px; height:14px; border-radius:4px; background:var(--color); box-shadow:inset 0 -1px 0 rgba(0,0,0,.18),0 3px 8px rgba(57,47,33,.10); cursor:grab; touch-action:none; }
+    .bar.segmented { outline:1px solid rgba(37,37,37,.16); outline-offset:1px; }
+    .resize-handle { position:absolute; top:0; bottom:0; width:8px; background:transparent; border:0; cursor:ew-resize; }
+    .resize-handle.left { left:0; }
+    .resize-handle.right { right:0; }
+    .bar:active { cursor:grabbing; }
+    .bar::after { content:attr(data-date); position:absolute; right:6px; top:50%; transform:translateY(-50%); color:var(--text-on-bar); font-size:9px; font-weight:700; white-space:nowrap; pointer-events:none; }
+    .task { display:grid; grid-template-columns:var(--risk-col) var(--priority-col) minmax(var(--title-col),1fr) var(--owner-col) var(--reason-col) var(--op-col); gap:10px; align-items:center; padding:0 12px; border-bottom:1px solid rgba(104,92,72,.10); }
+    .cell-select,.cell-input { width:100%; min-width:0; height:24px; border:1px solid transparent; border-radius:3px; background:transparent; color:var(--ink); font:inherit; font-size:12px; }
+    .cell-select:hover,.cell-input:hover,.cell-select:focus,.cell-input:focus { border-color:var(--line); background:#fffaf1; outline:0; }
+    .risk-select { color:#fffdf8; font-weight:750; text-align:center; background:var(--risk-color); }
+    .priority-select { color:#fffdf8; font-weight:750; text-align:center; background:var(--priority-color); }
+    .cell-select option { background:#fffdf8; color:var(--ink); font-weight:700; }
+    .cell-select option:checked { background:#d8e7ff; color:#17345c; }
+    .risk-select option[value="高"],.risk-select option[value="高"]:checked { background:var(--high); color:#fffdf8; }
+    .risk-select option[value="中"],.risk-select option[value="中"]:checked { background:var(--medium); color:#fffdf8; }
+    .risk-select option[value="低"],.risk-select option[value="低"]:checked { background:var(--low); color:#fffdf8; }
+    .priority-select option[value="P0"],.priority-select option[value="P0"]:checked { background:var(--p0); color:#fffdf8; }
+    .priority-select option[value="P1"],.priority-select option[value="P1"]:checked { background:var(--p1); color:#fffdf8; }
+    .priority-select option[value="P2"],.priority-select option[value="P2"]:checked { background:var(--p2); color:#fffdf8; }
+    .reason { color:var(--muted); }
+    .op-group { display:flex; gap:4px; justify-content:flex-end; }
+    .op-btn { height:22px; border:1px solid var(--line); border-radius:3px; background:#fffaf1; color:#51473a; font-size:11px; cursor:pointer; }
+    .op-btn.danger { color:#c84032; }
+    .task.milestone-gap,.row.milestone-gap { height:24px; min-height:24px; padding:0; border:0; background:#ebe3d5; }
+    .task.milestone-gap.group-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 12px; color:#51473a; font-size:12px; font-weight:800; cursor:context-menu; }
+    .group-range { flex:0 0 auto; color:var(--muted); font-size:11px; font-weight:700; }
+    .row.milestone-gap::before { content:attr(data-label); position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#51473a; font-size:12px; font-weight:800; }
+    .row.special-row,.task.special-row { background:#f5eddf; border-top:1px solid var(--line); border-bottom:1px solid var(--line); cursor:pointer; }
+    .row.special-row::before { content:attr(data-label); position:absolute; left:18px; top:50%; transform:translateY(-50%); color:#51473a; font-size:12px; font-weight:850; }
+    .task.special-row { grid-template-columns:1fr auto; padding:0 12px; }
+    .special-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px; border:0; padding:0; background:transparent; color:var(--ink); font:inherit; font-size:12px; font-weight:850; text-align:left; cursor:pointer; }
+    .special-count { flex:0 0 auto; color:var(--muted); font-size:11px; font-weight:700; }
+    .special-state { flex:0 0 auto; min-width:32px; color:#8b5b14; font-size:11px; text-align:right; }
+    .task[data-special] { background:linear-gradient(90deg,rgba(183,122,22,.08),rgba(255,253,248,0) 62%); }
+    .task[data-special] .cell-input[name="title"] { padding-left:10px; border-left:3px solid rgba(183,122,22,.45); }
+    .row[data-special] { background:rgba(183,122,22,.035); }
+    .task[data-task-id] { cursor:grab; }
+    .task[data-task-id] input,.task[data-task-id] select,.task[data-task-id] button { cursor:auto; }
+    .task.dragging { opacity:.42; }
+    .task.special-row.drop-target,.task.milestone-gap.group-row.drop-target,.row.special-row.drop-target,.row.milestone-gap.drop-target { outline:2px solid rgba(47,58,52,.52); outline-offset:-3px; background:#efe2ca; }
+    .filter-hidden,.special-collapsed { display:none !important; }
+    .dialog-backdrop { position:fixed; inset:0; z-index:50; display:none; place-items:center; background:rgba(37,37,37,.32); }
+    .dialog-backdrop.open { display:grid; }
+    .dialog { width:min(520px,calc(100vw - 32px)); padding:18px; border:1px solid var(--line); background:var(--panel); box-shadow:0 24px 60px rgba(37,37,37,.24); }
+    .dialog h2 { margin:0 0 14px; font-size:18px; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .form-grid label { display:grid; gap:4px; color:var(--muted); font-size:12px; font-weight:700; }
+    .form-grid input,.form-grid select,.form-grid textarea { width:100%; border:1px solid var(--line); border-radius:4px; padding:7px 8px; background:#fffdf8; color:var(--ink); font:inherit; font-size:12px; }
+    .form-grid textarea { min-height:64px; resize:vertical; }
+    .span-2 { grid-column:1 / -1; }
+    .dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+    .dialog-actions button { height:30px; border:1px solid var(--line); border-radius:4px; background:#f2eadc; color:#51473a; font-weight:750; cursor:pointer; }
+    .dialog-actions .primary { background:#2f3a34; color:#fffdf8; border-color:#2f3a34; }
+    .context-menu { position:fixed; z-index:80; min-width:150px; display:none; padding:6px; border:1px solid var(--line); background:#fffdf8; box-shadow:0 18px 42px rgba(37,37,37,.20); }
+    .context-menu.open { display:block; }
+    .context-menu button { width:100%; height:28px; border:0; background:transparent; color:#51473a; text-align:left; font:inherit; font-size:12px; cursor:pointer; }
+    .context-menu button:hover { background:#f2eadc; }
+    @media (max-width:900px) { main { width:calc(100vw - 20px); margin-top:18px; } header { grid-template-columns:1fr; align-items:start; } .legend { justify-content:flex-start; } .toolbar { flex-wrap:wrap; } .toolbar .hint { width:100%; margin-left:0; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>flash-linear-attention-npu 转测甘特图</h1>
+        <div class="meta">项目责任人：待填写　邮箱：待填写　基准日期：2026-06-15</div>
+      </div>
+      <div class="legend" aria-label="风险图例"><span><i class="dot" style="background:var(--high)"></i>高风险</span><span><i class="dot" style="background:var(--medium)"></i>中风险</span><span><i class="dot" style="background:var(--low)"></i>低风险</span><span><i class="dot" style="background:var(--p0)"></i>P0</span><span><i class="dot" style="background:var(--p1)"></i>P1</span><span><i class="dot" style="background:var(--p2)"></i>P2</span></div>
+    </header>
+    <section class="toolbar" aria-label="操作栏"><button id="addTask" type="button">新增任务</button><button id="addSpecial" type="button">新增专项</button><button id="setViewRange" type="button">设置窗口日期</button><button id="resetLocal" type="button">清空本页变更</button><span class="hint" id="summary">加载中</span></section>
+    <section class="wrap" aria-label="甘特图"><div class="board"><div class="timeline-head" id="timelineHead"></div><div class="task-head" id="taskHead"></div><div class="chart" id="chart"></div><div class="tasks" id="tasks"></div></div></section>
+  </main>
+  <div class="context-menu" id="groupMenu" role="menu"><button type="button" data-group-action="create">新增分组</button><button type="button" data-group-action="edit">编辑分组</button><button type="button" data-group-action="delete">删除分组</button></div>
+  <div class="dialog-backdrop" id="dialogBackdrop" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><form class="dialog" id="taskForm"><h2 id="dialogTitle">新增任务</h2><div class="form-grid"><label class="span-2">事项<input name="title" required></label><label>分组<select name="group"><option>06-18 转测</option><option>06-25 转测</option><option>07-15 转测</option></select></label><label>风险<select name="risk"><option>高</option><option>中</option><option>低</option></select></label><label>优先级<select name="priority"><option>P0</option><option>P1</option><option>P2</option></select></label><label>责任人<input name="owner" required value="待填写"></label><label>开始日期<input type="date" name="startDate" required value="2026-06-18"></label><label>结束日期<input type="date" name="endDate" required value="2026-06-25"></label><label class="span-2">原因/备注<textarea name="reason" placeholder="新增、切分或计划变动原因"></textarea></label></div><div class="dialog-actions"><button type="button" id="cancelDialog">取消</button><button class="primary" type="submit">保存</button></div></form></div>
+  <script type="application/json" id="initialTasks">[{"id":"t01","group":"06-18 转测","start":0,"span":4,"risk":"低","priority":"P2","title":"fwd_h GVA","owner":"方梓阳"},{"id":"t02","group":"06-18 转测","start":0,"span":4,"risk":"低","priority":"P2","title":"fwd_o GVA","owner":"吴雨舒"},{"id":"t03","group":"06-18 转测","start":0,"span":4,"risk":"低","priority":"P2","title":"recompute_w_u GVA && Vdim 256","owner":"方梓阳"},{"id":"t04","group":"06-18 转测","start":0,"span":4,"risk":"中","priority":"P0","title":"dv_local GVA && Vdim 256","owner":"陈琳鑫"},{"id":"t05","group":"06-18 转测","start":0,"span":4,"risk":"中","priority":"P0","title":"dqkwg GVA && Vdim 256","owner":"黄浚哲"},{"id":"t06","group":"06-18 转测","start":0,"span":4,"risk":"低","priority":"P2","title":"prepare_wy_bwd_da GVA && Vdim 256","owner":"杨子奇"},{"id":"t07","group":"06-18 转测","start":0,"span":4,"risk":"低","priority":"P2","title":"prepare_wy_repr_bwd_full 深融合优化","owner":"陈市"},{"id":"t08","group":"06-18 转测","start":0,"span":4,"risk":"低","priority":"P2","title":"prepare_wy_repr_bwd_full regbase 改写 A5","owner":"龚翔宇"},{"id":"t09","group":"06-18 转测","start":0,"span":4,"risk":"中","priority":"P0","title":"chunk_dv_local 深融合优化","owner":"陈琳鑫"},{"id":"t10","group":"06-18 转测","start":0,"span":4,"risk":"低","priority":"P2","title":"fwd_h 与 fwd_o 性能优化","owner":"姜东明"},{"id":"t11","group":"06-18 转测","start":0,"span":4,"risk":"低","priority":"P2","title":"causal_conv1d_fwd TND 转 NTD 消除 transpose","owner":"江波"},{"id":"t12","group":"06-18 转测","start":0,"span":4,"risk":"低","priority":"P2","title":"ops 目录整改","owner":"方梓阳"},{"id":"t13","group":"06-18 转测","start":0,"span":4,"risk":"低","priority":"P2","special":"launch","title":"fwd_o <<<>>> 方式调用","owner":"吴雨舒"},{"id":"t14","group":"06-18 转测","start":0,"span":4,"risk":"低","priority":"P2","special":"launch","title":"dv_local <<<>>> 方式调用","owner":"陈琳鑫"},{"id":"t15","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","title":"prepare_wy_bwd_full GVA && Vdim 256","owner":"龚翔宇"},{"id":"t16","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","title":"dhu GVA && Vdim 256","owner":"方梓阳"},{"id":"t17","group":"06-25 转测","start":4,"span":7,"risk":"低","priority":"P2","title":"fwd_h Vdim 256","owner":"刘福疆"},{"id":"t18","group":"06-25 转测","start":4,"span":7,"risk":"低","priority":"P2","title":"fwd_o Vdim 256","owner":"刘福疆"},{"id":"t19","group":"06-25 转测","start":4,"span":7,"risk":"中","priority":"P1","title":"新增 solve_tri AscendC A2/A3 算子","owner":"石俊杰"},{"id":"t20","group":"06-25 转测","start":4,"span":7,"risk":"中","priority":"P1","title":"新增 solve_tri AscendC A5 算子","owner":"鲍超俊"},{"id":"t21","group":"06-25 转测","start":4,"span":7,"risk":"中","priority":"P1","title":"新增 causal_conv1d bwd 算子","owner":"江奇"},{"id":"t22","group":"06-25 转测","start":4,"span":7,"risk":"中","priority":"P1","title":"dqkwg 算子深融合优化","owner":"张艺/刘福疆"},{"id":"t23","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","title":"fwd_h 支持 gk 方式衰减","owner":"待排人力"},{"id":"t24","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","title":"性能看板","owner":"待排人力"},{"id":"t25","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","title":"一键编报","owner":"待排人力"},{"id":"t26","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"docs","title":"fwd_h 对应场景文档更新","owner":"对应算子责任人"},{"id":"t27","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"docs","title":"fwd_o 对应场景文档更新","owner":"对应算子责任人"},{"id":"t28","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"docs","title":"recompute_w_u 对应场景文档更新","owner":"对应算子责任人"},{"id":"t29","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"docs","title":"dv_local 对应场景文档更新","owner":"对应算子责任人"},{"id":"t30","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"docs","title":"dqkwg 对应场景文档更新","owner":"对应算子责任人"},{"id":"t31","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"docs","title":"dhu 对应场景文档更新","owner":"对应算子责任人"},{"id":"t32","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"docs","title":"prepare_wy_bwd_da 对应场景文档更新","owner":"对应算子责任人"},{"id":"t33","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"docs","title":"prepare_wy_bwd_full 对应场景文档更新","owner":"对应算子责任人"},{"id":"t34","group":"06-25 转测","start":4,"span":7,"risk":"中","priority":"P1","special":"launch","title":"fwd_h <<<>>> 调用示例","owner":"法振尧"},{"id":"t35","group":"06-25 转测","start":4,"span":7,"risk":"低","priority":"P2","special":"launch","title":"fwd_o <<<>>> 调用示例","owner":"吴雨舒"},{"id":"t36","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"launch","title":"recompute_w_u <<<>>> 调用示例","owner":"方梓阳"},{"id":"t37","group":"06-25 转测","start":4,"span":7,"risk":"低","priority":"P2","special":"launch","title":"dv_local <<<>>> 调用示例","owner":"陈琳鑫"},{"id":"t38","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"launch","title":"dqkwg <<<>>> 调用示例","owner":"黄浚哲"},{"id":"t39","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"launch","title":"dhu <<<>>> 调用示例","owner":"方梓阳"},{"id":"t40","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"launch","title":"prepare_wy_bwd_da <<<>>> 调用示例","owner":"杨子奇"},{"id":"t41","group":"06-25 转测","start":4,"span":7,"risk":"高","priority":"P0","special":"launch","title":"prepare_wy_bwd_full <<<>>> 调用示例","owner":"吴雨舒"},{"id":"t42","group":"07-15 转测","start":11,"span":20,"risk":"高","priority":"P1","title":"多算子 A5 场景 regbase 改写","owner":"待填写"},{"id":"t43","group":"07-15 转测","start":11,"span":20,"risk":"中","priority":"P2","title":"KDA triton 算子回合","owner":"待填写"}]</script>
+  <script>
+    const STORAGE_KEY = "flash-gantt-full-crud-v1";
+    const INCLUDE_LOW = true;
+    const RISK_OPTIONS = ["高","中","低"];
+    const DEFAULT_GROUPS = [{ title:"06-18 转测", startDate:"2026-06-15", endDate:"2026-06-18" },{ title:"06-25 转测", startDate:"2026-06-19", endDate:"2026-06-25" },{ title:"07-15 转测", startDate:"2026-06-26", endDate:"2026-07-15" }];
+    const BASE_DATE = new Date(2026, 5, 15);
+    const INITIAL_TASKS = JSON.parse(document.getElementById('initialTasks').textContent);
+    const COLOR_BY_RISK = { '高': 'var(--high)', '中': 'var(--medium)', '低': 'var(--low)' };
+    const PRIORITY_COLOR = { P0: 'var(--p0)', P1: 'var(--p1)', P2: 'var(--p2)' };
+    const DEFAULT_LAYOUT = { chart:680, risk:76, priority:86, title:260, owner:128, reason:172, op:150 };
+    const MIN_LAYOUT = { chart:360, risk:72, priority:82, title:220, owner:118, reason:110, op:120 };
+    const DEFAULT_SPECIALS = { docs: { title: '专项：对应场景文档更新', group: '06-25 转测' }, launch: { title: '专项：<<<>>> 调用示例', group: '06-25 转测' } };
+    let groups = loadGroups();
+    let specials = loadSpecials();
+    let tasks = loadTasks();
+    let viewRange = loadViewRange();
+    let layout = loadLayout();
+    let filters = { risk: new Set(), priority: new Set(), owner: new Set(), title: '' };
+    let collapsedSpecials = { docs: false, launch: false };
+    let activeMenu = null;
+    let activeGroup = null;
+    let currentTimeline = { startIndex:0, endIndex:30, days:31 };
+    let pendingMode = 'add';
+    let pendingSplitId = null;
+
+    function loadTasks() { try { const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); if (Array.isArray(saved)) return saved; } catch (error) {} return structuredClone(INITIAL_TASKS); }
+    function loadGroups() { try { const saved = JSON.parse(localStorage.getItem(STORAGE_KEY + ':groups') || 'null'); if (Array.isArray(saved) && saved.length) { const valid = saved.filter((group) => group?.title && group?.startDate && group?.endDate); if (valid.length) return valid; } } catch (error) {} return structuredClone(DEFAULT_GROUPS); }
+    function loadSpecials() { try { const saved = JSON.parse(localStorage.getItem(STORAGE_KEY + ':specials') || 'null'); if (saved && typeof saved === 'object') return saved; } catch (error) {} return structuredClone(DEFAULT_SPECIALS); }
+    function loadViewRange() { try { const saved = JSON.parse(localStorage.getItem(STORAGE_KEY + ':viewRange') || 'null'); if (saved?.startDate && saved?.endDate) return saved; } catch (error) {} return null; }
+    function normalizeLayout(value = {}) { const next = { ...DEFAULT_LAYOUT, ...value }; Object.keys(DEFAULT_LAYOUT).forEach((key) => { next[key] = Math.max(MIN_LAYOUT[key], Number(next[key]) || DEFAULT_LAYOUT[key]); }); return next; }
+    function loadLayout() { try { const saved = JSON.parse(localStorage.getItem(STORAGE_KEY + ':layout') || 'null'); if (saved && typeof saved === 'object') return normalizeLayout(saved); } catch (error) {} return normalizeLayout(); }
+    function saveTasks() { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
+    function saveGroups() { localStorage.setItem(STORAGE_KEY + ':groups', JSON.stringify(groups)); }
+    function saveSpecials() { localStorage.setItem(STORAGE_KEY + ':specials', JSON.stringify(specials)); }
+    function saveViewRange() { if (viewRange) localStorage.setItem(STORAGE_KEY + ':viewRange', JSON.stringify(viewRange)); else localStorage.removeItem(STORAGE_KEY + ':viewRange'); }
+    function saveLayout() { localStorage.setItem(STORAGE_KEY + ':layout', JSON.stringify(layout)); }
+    function applyLayout() { layout = normalizeLayout(layout); const root = document.documentElement; root.style.setProperty('--chart', layout.chart + 'px'); root.style.setProperty('--risk-col', layout.risk + 'px'); root.style.setProperty('--priority-col', layout.priority + 'px'); root.style.setProperty('--title-col', layout.title + 'px'); root.style.setProperty('--owner-col', layout.owner + 'px'); root.style.setProperty('--reason-col', layout.reason + 'px'); root.style.setProperty('--op-col', layout.op + 'px'); const tasksMin = layout.risk + layout.priority + layout.title + layout.owner + layout.reason + layout.op + 74; root.style.setProperty('--tasks', tasksMin + 'px'); }
+    function esc(value) { return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'); }
+    function pad(value) { return String(value).padStart(2, '0'); }
+    function parseDate(dateText) { const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateText || '').trim()); if (!match) return null; const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])); return date.getFullYear() === Number(match[1]) && date.getMonth() === Number(match[2]) - 1 && date.getDate() === Number(match[3]) ? date : null; }
+    function dateFromIndex(index) { const d = new Date(BASE_DATE); d.setDate(d.getDate() + index); return d; }
+    function indexFromDate(dateText) { const date = parseDate(dateText); return date ? Math.round((date - BASE_DATE) / 86400000) : 0; }
+    function ymd(index) { const d = dateFromIndex(index); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+    function mmdd(index) { const d = dateFromIndex(index); return String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+    function iso(index) { return ymd(index); }
+    function endIndex(task) { return task.start + task.span - 1; }
+    function taskSegments(task) { return Array.isArray(task.segments) && task.segments.length ? task.segments : [{ start: task.start, span: task.span }]; }
+    function segmentEnd(segment) { return segment.start + segment.span - 1; }
+    function syncTaskRange(task) { const segments = taskSegments(task).sort((a, b) => a.start - b.start); task.segments = segments; task.start = segments[0].start; task.span = Math.max(1, segmentEnd(segments[segments.length - 1]) - task.start + 1); }
+    function groupTitles() { return groups.map((group) => group.title); }
+    function defaultGroupTitle() { return groups[0]?.title || '未分组'; }
+    function groupByTitle(title) { return groups.find((group) => group.title === title); }
+    function groupRangeText(title) { const group = groupByTitle(title); return group ? group.startDate + ' ~ ' + group.endDate : '未设置日期范围'; }
+    function hasActiveFilters() { return filters.risk.size || filters.priority.size || filters.owner.size || filters.title; }
+    function computeAutoTimeline() { const starts = [0], ends = [30]; groups.forEach((group) => { starts.push(indexFromDate(group.startDate)); ends.push(indexFromDate(group.endDate)); }); tasks.forEach((task) => taskSegments(task).forEach((segment) => { starts.push(segment.start); ends.push(segmentEnd(segment)); })); const startIndex = Math.min(...starts); const endIndex = Math.max(...ends, startIndex); return { startIndex, endIndex, days: endIndex - startIndex + 1 }; }
+    function computeTimeline() { if (viewRange) { const startIndex = indexFromDate(viewRange.startDate); const endIndexValue = Math.max(startIndex, indexFromDate(viewRange.endDate)); return { startIndex, endIndex: endIndexValue, days: endIndexValue - startIndex + 1 }; } return computeAutoTimeline(); }
+    function renderTimeline() { currentTimeline = computeTimeline(); document.querySelector('.board').style.setProperty('--days', currentTimeline.days); const groupEnds = new Set(groups.map((group) => indexFromDate(group.endDate))); document.getElementById('timelineHead').innerHTML = Array.from({ length: currentTimeline.days }, (_, offset) => { const index = currentTimeline.startIndex + offset; const d = dateFromIndex(index); const major = offset === 0 || d.getDate() === 1 || groupEnds.has(index); const label = offset === 0 || d.getDate() === 1 ? mmdd(index) : pad(d.getDate()); return '<div class="tick' + (major ? ' major' : '') + '" title="' + ymd(index) + '">' + label + '</div>'; }).join('') + '<span class="timeline-resizer" data-resize-col="chart" title="拖动调整甘特图宽度；双击恢复默认"></span>'; }
+    function activeTasks() { return INCLUDE_LOW ? tasks : tasks.filter((task) => task.risk !== '低'); }
+    function taskMatches(task) { return (!filters.risk.size || filters.risk.has(task.risk)) && (!filters.priority.size || filters.priority.has(task.priority)) && (!filters.owner.size || filters.owner.has(task.owner)) && (!filters.title || task.title.toLowerCase().includes(filters.title.toLowerCase())); }
+    function specialTitle(key) { return specials[key]?.title || ('专项：' + key); }
+    function specialKeysForGroup(group) { const keys = new Set(); Object.entries(specials).forEach(([key, special]) => { if (special.group === group) keys.add(key); }); activeTasks().forEach((task) => { if (task.group === group && task.special) keys.add(task.special); }); return [...keys]; }
+    function orderedTasksForGroup(group) { return activeTasks().filter((task) => task.group === group); }
+
+    function renderHeader() {
+      const columns = [{ label:'风险', field:'risk', type:'list' }, { label:'优先级', field:'priority', type:'list' }, { label:'事项', field:'title', type:'search' }, { label:'责任人', field:'owner', type:'list' }, { label:'备注', field:'reason', type:'none' }, { label:'操作', field:'op', type:'none' }];
+      document.getElementById('taskHead').innerHTML = columns.map((column) => { const active = column.field === 'title' ? Boolean(filters.title) : filters[column.field]?.size > 0; const button = column.type === 'none' ? '' : '<button class="filter-btn' + (active ? ' active' : '') + '" type="button" data-filter-button="' + column.field + '">▾</button>'; return '<div class="head-cell" data-col="' + column.field + '"><span>' + column.label + '</span>' + button + '<div class="filter-menu" data-filter-menu="' + column.field + '"></div><span class="col-resizer" data-resize-col="' + column.field + '" title="拖动调整列宽；双击恢复默认"></span></div>'; }).join('');
+      document.querySelectorAll('[data-filter-button]').forEach((button) => button.addEventListener('click', (event) => openFilter(event.currentTarget.dataset.filterButton)));
+    }
+    function openFilter(field) {
+      const menu = document.querySelector('[data-filter-menu="' + field + '"]'); if (activeMenu && activeMenu !== menu) activeMenu.classList.remove('open'); activeMenu = menu; if (menu.classList.contains('open')) { menu.classList.remove('open'); return; }
+      if (field === 'title') { menu.innerHTML = '<input type="search" value="' + esc(filters.title) + '" placeholder="搜索事项"><div class="filter-actions"><button type="button" data-apply>应用</button><button type="button" data-clear>清空</button></div>'; menu.querySelector('[data-apply]').addEventListener('click', () => { filters.title = menu.querySelector('input').value.trim(); render(); }); menu.querySelector('[data-clear]').addEventListener('click', () => { filters.title = ''; render(); }); }
+      else { const values = [...new Set(activeTasks().map((task) => task[field]))].filter(Boolean).sort((a,b) => String(a).localeCompare(String(b), 'zh-CN')); menu.innerHTML = values.map((value) => '<label><input type="checkbox" value="' + esc(value) + '" ' + (filters[field].has(value) ? 'checked' : '') + '> ' + esc(value) + '</label>').join('') + '<div class="filter-actions"><button type="button" data-apply>应用</button><button type="button" data-all>全选</button><button type="button" data-clear>清空</button></div>'; menu.querySelector('[data-apply]').addEventListener('click', () => { filters[field] = new Set([...menu.querySelectorAll('input:checked')].map((input) => input.value)); render(); }); menu.querySelector('[data-all]').addEventListener('click', () => menu.querySelectorAll('input').forEach((input) => input.checked = true)); menu.querySelector('[data-clear]').addEventListener('click', () => { filters[field].clear(); render(); }); }
+      menu.classList.add('open');
+    }
+    function renderSpecial(key, group, groupTasks, chartRows, taskRows) {
+      const specialTasks = groupTasks.filter((task) => task.special === key && taskMatches(task));
+      const isEmptySpecial = !specialTasks.length && specials[key]?.group === group && !filters.risk.size && !filters.priority.size && !filters.owner.size && !filters.title;
+      if (!specialTasks.length && !isEmptySpecial) return;
+      if (!(key in collapsedSpecials)) collapsedSpecials[key] = false;
+      const collapsed = collapsedSpecials[key];
+      const riskText = specialTasks.length ? '任务' : '空专项';
+      chartRows.push('<div class="row special-row" data-special-control data-special-target="' + key + '" data-drop-special="' + key + '" data-label="' + esc(specialTitle(key)) + '（' + specialTasks.length + '项）"></div>');
+      taskRows.push('<div class="task special-row" data-special-control data-special-target="' + key + '" data-drop-special="' + key + '" title="点击折叠/展开；拖任务到这里归入专项"><button class="special-toggle" type="button" aria-expanded="' + (!collapsed) + '"><span>' + esc(specialTitle(key)) + '</span><span class="special-count">' + specialTasks.length + '项 ' + riskText + '</span><span class="special-state">' + (collapsed ? '展开' : '收起') + '</span></button><span class="op-group"><button class="op-btn" type="button" data-special-edit="' + key + '">编辑</button><button class="op-btn danger" type="button" data-special-delete="' + key + '">删除</button></span></div>');
+      if (collapsed) return;
+      specialTasks.forEach((task) => renderTask(task, chartRows, taskRows));
+    }
+    function optionHtml(options, selected) { return options.map((value) => '<option value="' + value + '" ' + (value === selected ? 'selected' : '') + '>' + value + '</option>').join(''); }
+    function renderTask(task, chartRows, taskRows) {
+      const color = COLOR_BY_RISK[task.risk];
+      const pColor = PRIORITY_COLOR[task.priority] || 'var(--p2)';
+      const specialAttr = task.special ? ' data-special="' + task.special + '"' : '';
+      const segments = taskSegments(task);
+      const bars = segments.map((segment, index) => {
+        const clippedStart = Math.max(segment.start, currentTimeline.startIndex);
+        const clippedEnd = Math.min(segmentEnd(segment), currentTimeline.endIndex);
+        if (clippedEnd < clippedStart) return '';
+        const segmentedClass = segments.length > 1 ? ' segmented' : '';
+        const visualStart = clippedStart - currentTimeline.startIndex;
+        const visualSpan = clippedEnd - clippedStart + 1;
+        const clippedClass = clippedStart !== segment.start || clippedEnd !== segmentEnd(segment) ? ' clipped' : '';
+        return '<div class="bar' + segmentedClass + clippedClass + '" draggable="false" data-task-id="' + task.id + '" data-segment-index="' + index + '" style="--start:' + visualStart + '; --span:' + visualSpan + '; --color:' + color + '" data-date="' + ymd(clippedEnd) + '" title="完整计划：' + ymd(segment.start) + ' 至 ' + ymd(segmentEnd(segment)) + '；拖动中间调整位置；拖左右边缘缩短或延长；双击切分任务"><span class="resize-handle left" data-resize="start"></span><span class="resize-handle right" data-resize="end"></span></div>';
+      }).join('');
+      chartRows.push('<div class="row" data-task-id="' + task.id + '"' + specialAttr + '>' + bars + '</div>');
+      taskRows.push('<div class="task" draggable="true" data-task-id="' + task.id + '"' + specialAttr + ' title="拖到专项标题行归入专项；拖到分组标题行移出专项"><select class="cell-select risk-select" style="--risk-color:' + color + '" name="risk" data-edit="risk" data-id="' + task.id + '">' + optionHtml(RISK_OPTIONS, task.risk) + '</select><select class="cell-select priority-select" style="--priority-color:' + pColor + '" name="priority" data-edit="priority" data-id="' + task.id + '">' + optionHtml(['P0','P1','P2'], task.priority) + '</select><input class="cell-input" name="title" data-edit="title" data-id="' + task.id + '" value="' + esc(task.title) + '" title="' + esc(task.title) + '"><input class="cell-input" name="owner" data-edit="owner" data-id="' + task.id + '" value="' + esc(task.owner) + '"><input class="cell-input reason" name="reason" data-edit="reason" data-id="' + task.id + '" value="' + esc(task.reason || '') + '" placeholder="计划变更原因"><span class="op-group"><button class="op-btn danger" type="button" data-delete="' + task.id + '">删除</button></span></div>');
+    }
+    function render() { renderTimeline(); renderHeader(); const chartRows = []; const taskRows = []; for (const group of groupTitles()) { const groupAll = orderedTasksForGroup(group); const normalVisible = groupAll.filter((task) => !task.special && taskMatches(task)); const specialKeys = specialKeysForGroup(group); const hasAny = groupAll.some(taskMatches) || specialKeys.some((key) => specials[key]?.group === group) || !hasActiveFilters(); if (!hasAny) continue; const range = groupRangeText(group); chartRows.push('<div class="row milestone-gap" data-group-row data-drop-group="' + esc(group) + '" data-group="' + esc(group) + '" data-label="' + esc(group + '　' + range) + '"></div>'); taskRows.push('<div class="task milestone-gap group-row" data-group-row data-drop-group="' + esc(group) + '" data-group="' + esc(group) + '" title="右键管理分组；拖任务到这里移出专项并归入本分组"><span>' + esc(group) + '</span><span class="group-range">' + esc(range) + '　右键管理</span></div>'); normalVisible.forEach((task) => renderTask(task, chartRows, taskRows)); specialKeys.forEach((key) => renderSpecial(key, group, groupAll, chartRows, taskRows)); } document.getElementById('chart').innerHTML = chartRows.join(''); document.getElementById('tasks').innerHTML = taskRows.join(''); bindRows(); const shown = activeTasks().filter(taskMatches).filter((task) => !task.special || !collapsedSpecials[task.special]).length; const viewText = viewRange ? '窗口 ' + viewRange.startDate + ' ~ ' + viewRange.endDate : '窗口自动'; document.getElementById('summary').textContent = '显示 ' + shown + '/' + activeTasks().length + ' 项；' + viewText + '；双击甘特条切分；拖任务到专项或分组调整归属。'; }
+    function bindRows() {
+      document.querySelectorAll('[data-group-row]').forEach((row) => row.addEventListener('contextmenu', (event) => openGroupMenu(event, row.dataset.group)));
+      document.querySelectorAll('[data-special-control]').forEach((row) => row.addEventListener('click', (event) => {
+        if (event.target.closest('[data-special-edit],[data-special-delete]')) return;
+        collapsedSpecials[row.dataset.specialTarget] = !collapsedSpecials[row.dataset.specialTarget];
+        render();
+      }));
+      document.querySelectorAll('[data-special-edit]').forEach((button) => button.addEventListener('click', (event) => { event.stopPropagation(); editSpecial(button.dataset.specialEdit); }));
+      document.querySelectorAll('[data-special-delete]').forEach((button) => button.addEventListener('click', (event) => { event.stopPropagation(); deleteSpecial(button.dataset.specialDelete); }));
+      document.querySelectorAll('[data-edit]').forEach((input) => input.addEventListener('change', () => editTask(input.dataset.id, input.dataset.edit, input.value)));
+      document.querySelectorAll('[data-delete]').forEach((button) => button.addEventListener('click', () => deleteTask(button.dataset.delete)));
+      document.querySelectorAll('.bar').forEach((bar) => attachDrag(bar));
+      bindTaskDragTargets();
+      attachColumnResizers();
+    }
+    function bindTaskDragTargets() {
+      document.querySelectorAll('.task[data-task-id]').forEach((row) => {
+        row.addEventListener('dragstart', (event) => {
+          if (event.target.closest('input,select,button,textarea')) { event.preventDefault(); return; }
+          if (!event.dataTransfer) return;
+          event.dataTransfer.setData('text/plain', row.dataset.taskId);
+          event.dataTransfer.effectAllowed = 'move';
+          row.classList.add('dragging');
+        });
+        row.addEventListener('dragend', () => row.classList.remove('dragging'));
+      });
+      document.querySelectorAll('[data-drop-special],[data-drop-group]').forEach((target) => {
+        target.addEventListener('dragover', (event) => {
+          event.preventDefault();
+          if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+          target.classList.add('drop-target');
+        });
+        target.addEventListener('dragleave', () => target.classList.remove('drop-target'));
+        target.addEventListener('drop', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          target.classList.remove('drop-target');
+          const id = event.dataTransfer?.getData('text/plain');
+          assignTaskDrop(id, target.dataset.dropSpecial, target.dataset.dropGroup);
+        });
+      });
+    }
+    function assignTaskDrop(id, specialKey, groupName) {
+      const task = tasks.find((item) => item.id === id);
+      if (!task) return;
+      if (specialKey) {
+        const special = specials[specialKey];
+        if (!special) return;
+        task.special = specialKey;
+        task.group = special.group || task.group;
+      } else if (groupName) {
+        task.group = groupName;
+        delete task.special;
+      } else return;
+      saveTasks();
+      render();
+    }
+    function attachColumnResizers() {
+      document.querySelectorAll('[data-resize-col]').forEach((handle) => {
+        handle.addEventListener('pointerdown', (event) => {
+          if (event.button !== 0) return;
+          event.preventDefault();
+          event.stopPropagation();
+          const column = handle.dataset.resizeCol;
+          const startX = event.clientX;
+          const startWidth = layout[column] || DEFAULT_LAYOUT[column];
+          document.body.style.cursor = 'col-resize';
+          document.body.style.userSelect = 'none';
+          const move = (moveEvent) => { layout[column] = Math.max(MIN_LAYOUT[column], Math.round(startWidth + moveEvent.clientX - startX)); applyLayout(); };
+          const finish = () => { document.removeEventListener('pointermove', move); document.body.style.cursor = ''; document.body.style.userSelect = ''; saveLayout(); };
+          document.addEventListener('pointermove', move);
+          document.addEventListener('pointerup', finish, { once:true });
+        });
+        handle.addEventListener('dblclick', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const column = handle.dataset.resizeCol;
+          layout[column] = DEFAULT_LAYOUT[column];
+          applyLayout();
+          saveLayout();
+        });
+      });
+    }
+    function editTask(id, field, value) { const task = tasks.find((item) => item.id === id); if (!task) return; task[field] = value.trim ? value.trim() : value; saveTasks(); render(); }
+    function deleteTask(id) { const task = tasks.find((item) => item.id === id); if (!task) return; if (!confirm('确认删除：' + task.title + '？')) return; tasks = tasks.filter((item) => item.id !== id); saveTasks(); render(); }
+    function openGroupMenu(event, group) { event.preventDefault(); activeGroup = group; if (activeMenu) activeMenu.classList.remove('open'); const menu = document.getElementById('groupMenu'); menu.style.left = Math.min(event.clientX, window.innerWidth - 170) + 'px'; menu.style.top = Math.min(event.clientY, window.innerHeight - 110) + 'px'; menu.classList.add('open'); }
+    function closeGroupMenu() { document.getElementById('groupMenu').classList.remove('open'); }
+    function normalizeDateRange(startText, endText) { const start = parseDate(startText); const end = parseDate(endText); if (!start || !end) { alert('日期格式必须是 YYYY-MM-DD。'); return null; } let startIndex = indexFromDate(startText); let endIndexValue = indexFromDate(endText); if (endIndexValue < startIndex) [startIndex, endIndexValue] = [endIndexValue, startIndex]; return { startDate: ymd(startIndex), endDate: ymd(endIndexValue) }; }
+    function setViewRange() { const auto = computeAutoTimeline(); const startText = prompt('请输入窗口开始日期（YYYY-MM-DD）；留空恢复自动范围：', viewRange?.startDate || ymd(auto.startIndex)); if (startText === null) return; if (!startText.trim()) { viewRange = null; saveViewRange(); render(); return; } const endText = prompt('请输入窗口结束日期（YYYY-MM-DD）：', viewRange?.endDate || ymd(auto.endIndex)); if (endText === null) return; const range = normalizeDateRange(startText, endText); if (!range) return; viewRange = range; saveViewRange(); render(); }
+    function createGroup() { const currentIndex = Math.max(0, groups.findIndex((group) => group.title === activeGroup)); const seed = groups[currentIndex] || groups[groups.length - 1]; const defaultStart = ymd(indexFromDate(seed?.endDate || '2026-07-15') + 1); const title = prompt('请输入新增分组名称：', '新转测分组'); if (!title || !title.trim()) return; const name = title.trim(); if (groupByTitle(name)) { alert('分组名称已存在。'); return; } const startText = prompt('请输入分组开始日期（YYYY-MM-DD）：', defaultStart); if (!startText) return; const endText = prompt('请输入分组结束日期（YYYY-MM-DD）：', startText); if (!endText) return; const range = normalizeDateRange(startText, endText); if (!range) return; groups.splice(currentIndex + 1, 0, { title: name, ...range }); saveGroups(); render(); }
+    function editGroup() { const group = groupByTitle(activeGroup); if (!group) return; const title = prompt('修改分组名称：', group.title); if (!title || !title.trim()) return; const name = title.trim(); if (name !== group.title && groupByTitle(name)) { alert('分组名称已存在。'); return; } const startText = prompt('修改分组开始日期（YYYY-MM-DD）：', group.startDate); if (!startText) return; const endText = prompt('修改分组结束日期（YYYY-MM-DD）：', group.endDate); if (!endText) return; const range = normalizeDateRange(startText, endText); if (!range) return; const oldName = group.title; group.title = name; group.startDate = range.startDate; group.endDate = range.endDate; if (oldName !== name) { tasks.forEach((task) => { if (task.group === oldName) task.group = name; }); Object.values(specials).forEach((special) => { if (special.group === oldName) special.group = name; }); } saveGroups(); saveTasks(); saveSpecials(); render(); }
+    function deleteGroup() { if (groups.length <= 1) { alert('至少保留一个分组。'); return; } const group = groupByTitle(activeGroup); if (!group) return; const target = groups.find((item) => item.title !== group.title); const taskCount = tasks.filter((task) => task.group === group.title).length; const specialCount = Object.values(specials).filter((special) => special.group === group.title).length; if (!confirm('确认删除分组“' + group.title + '”？该分组下 ' + taskCount + ' 个任务和 ' + specialCount + ' 个专项会转入“' + target.title + '”，不会删除任务。')) return; tasks.forEach((task) => { if (task.group === group.title) task.group = target.title; }); Object.values(specials).forEach((special) => { if (special.group === group.title) special.group = target.title; }); groups = groups.filter((item) => item.title !== group.title); saveGroups(); saveTasks(); saveSpecials(); render(); }
+    function handleGroupAction(action) { closeGroupMenu(); if (action === 'create') createGroup(); else if (action === 'edit') editGroup(); else if (action === 'delete') deleteGroup(); }
+    function populateGroupSelect(selected) { const select = document.querySelector('select[name="group"]'); const titles = groupTitles(); if (selected && !titles.includes(selected)) titles.unshift(selected); select.innerHTML = titles.map((title) => '<option value="' + esc(title) + '">' + esc(title) + '</option>').join(''); select.value = titles.includes(selected) ? selected : defaultGroupTitle(); }
+    function createSpecial() {
+      const name = prompt('请输入新增专项名称：', '专项：新专项');
+      if (!name || !name.trim()) return;
+      const group = prompt('请输入专项所在分组：' + groupTitles().join(' / '), defaultGroupTitle());
+      if (!groupTitles().includes(group)) { alert('分组无效。'); return; }
+      const key = 'sp_' + Date.now().toString(36);
+      specials[key] = { title: name.trim(), group };
+      collapsedSpecials[key] = false;
+      saveSpecials();
+      render();
+    }
+    function editSpecial(key) {
+      const special = specials[key] || { title: specialTitle(key), group: defaultGroupTitle() };
+      const name = prompt('修改专项名称：', special.title);
+      if (!name || !name.trim()) return;
+      const group = prompt('修改专项所在分组：' + groupTitles().join(' / '), special.group || defaultGroupTitle());
+      if (!groupTitles().includes(group)) { alert('分组无效。'); return; }
+      specials[key] = { title: name.trim(), group };
+      saveSpecials();
+      render();
+    }
+    function deleteSpecial(key) {
+      const count = tasks.filter((task) => task.special === key).length;
+      if (!confirm('确认删除专项“' + specialTitle(key) + '”？该专项下 ' + count + ' 个任务会转为普通事项，不会删除任务。')) return;
+      tasks.forEach((task) => { if (task.special === key) delete task.special; });
+      delete specials[key];
+      delete collapsedSpecials[key];
+      saveTasks();
+      saveSpecials();
+      render();
+    }
+    function setTaskSpecial(id) {
+      const task = tasks.find((item) => item.id === id);
+      if (!task) return;
+      const entries = Object.entries(specials);
+      const options = entries.map(([key, special], index) => (index + 1) + '.' + special.title + '（' + key + '）').join('；');
+      const current = task.special ? specialTitle(task.special) : '';
+      const value = prompt('输入序号、专项名称或 key 以加入/转移；留空表示移出专项。可选：' + (options || '暂无专项'), current);
+      if (value === null) return;
+      const raw = value.trim();
+      const numericIndex = Number(raw);
+      const key = entries[numericIndex - 1]?.[0] || (specials[raw] ? raw : '') || entries.find(([, special]) => special.title === raw)?.[0];
+      if (!raw) delete task.special;
+      else if (key) task.special = key;
+      else { alert('专项不存在，请先新增专项。'); return; }
+      saveTasks();
+      render();
+    }
+    function describeSegments(segments) { return segments.map((segment) => ymd(segment.start) + ' 至 ' + ymd(segmentEnd(segment))).join('，'); }
+    function commitTimeChange(task, beforeSegments, actionText) {
+      syncTaskRange(task);
+      const afterSegments = taskSegments(task).map((segment) => ({ ...segment }));
+      const beforeText = describeSegments(beforeSegments);
+      const afterText = describeSegments(afterSegments);
+      if (beforeText === afterText) return true;
+      const reason = prompt(actionText + '：计划时间从 ' + beforeText + ' 调整为 ' + afterText + '，请输入变更原因（取消则撤销）：');
+      if (!reason || !reason.trim()) {
+        task.segments = beforeSegments.map((segment) => ({ ...segment }));
+        syncTaskRange(task);
+        return false;
+      }
+      task.reason = reason.trim();
+      saveTasks();
+      return true;
+    }
+    function attachDrag(bar) {
+      bar.addEventListener('dblclick', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const chart = document.getElementById('chart');
+        const rect = chart.getBoundingClientRect();
+        const unit = rect.width / currentTimeline.days;
+        const clickedIndex = currentTimeline.startIndex + Math.round((event.clientX - rect.left - 10) / unit);
+        openSplitDialog(bar.dataset.taskId, clickedIndex);
+      });
+      bar.addEventListener('pointerdown', (event) => {
+        event.preventDefault();
+        const task = tasks.find((item) => item.id === bar.dataset.taskId);
+        if (!task) return;
+        task.segments = taskSegments(task).map((segment) => ({ ...segment }));
+        const segmentIndex = Number(bar.dataset.segmentIndex || 0);
+        const segment = task.segments[segmentIndex];
+        if (!segment) return;
+        const beforeSegments = task.segments.map((item) => ({ ...item }));
+        const chart = document.getElementById('chart');
+        const rect = chart.getBoundingClientRect();
+        const unit = rect.width / currentTimeline.days;
+        const timelineStart = currentTimeline.startIndex;
+        const timelineEnd = currentTimeline.endIndex;
+        const resizeMode = event.target.dataset.resize || 'move';
+        const original = { ...segment };
+        const visualStart = Number(bar.style.getPropertyValue('--start')) || segment.start - timelineStart;
+        const pointerOffset = event.clientX - (rect.left + visualStart * unit + 10);
+        bar.setPointerCapture(event.pointerId);
+        const move = (moveEvent) => {
+          const raw = timelineStart + Math.round((moveEvent.clientX - rect.left - 10) / unit);
+          if (resizeMode === 'start') {
+            const oldEnd = segmentEnd(original);
+            segment.start = Math.max(timelineStart, Math.min(raw, oldEnd));
+            segment.span = Math.max(1, oldEnd - segment.start + 1);
+          } else if (resizeMode === 'end') {
+            const newEnd = Math.max(segment.start, Math.min(timelineEnd, raw));
+            segment.span = Math.max(1, newEnd - segment.start + 1);
+          } else {
+            const movedStart = timelineStart + Math.round((moveEvent.clientX - rect.left - pointerOffset - 10) / unit);
+            segment.start = Math.max(timelineStart, Math.min(timelineEnd - segment.span + 1, movedStart));
+          }
+          bar.style.setProperty('--start', segment.start - timelineStart);
+          bar.style.setProperty('--span', segment.span);
+          bar.dataset.date = ymd(segmentEnd(segment));
+        };
+        const finish = () => {
+          bar.removeEventListener('pointermove', move);
+          bar.removeEventListener('pointerup', finish);
+          bar.removeEventListener('pointercancel', cancel);
+          commitTimeChange(task, beforeSegments, resizeMode === 'move' ? '调整计划段位置' : '调整计划段长度');
+          render();
+        };
+        const cancel = () => {
+          task.segments = beforeSegments.map((item) => ({ ...item }));
+          syncTaskRange(task);
+          render();
+        };
+        bar.addEventListener('pointermove', move);
+        bar.addEventListener('pointerup', finish);
+        bar.addEventListener('pointercancel', cancel);
+      });
+    }
+    function openDialog(mode, seed = {}) { pendingMode = mode; pendingSplitId = seed.splitId || null; const form = document.getElementById('taskForm'); const group = seed.group || defaultGroupTitle(); const range = groupByTitle(group) || groups[0] || { startDate: ymd(0), endDate: ymd(30) }; populateGroupSelect(group); document.getElementById('dialogTitle').textContent = mode === 'split' ? '切分任务' : '新增任务'; form.title.value = seed.title || ''; form.group.value = group; form.risk.value = seed.risk || (INCLUDE_LOW ? '低' : '中'); form.priority.value = seed.priority || 'P1'; form.owner.value = seed.owner || '待填写'; form.startDate.value = seed.startDate || range.startDate; form.endDate.value = seed.endDate || range.endDate; form.reason.value = seed.reason || ''; document.getElementById('dialogBackdrop').classList.add('open'); form.title.focus(); }
+    function closeDialog() { document.getElementById('dialogBackdrop').classList.remove('open'); }
+    function openSplitDialog(id, seedIndex = null) {
+      const task = tasks.find((item) => item.id === id);
+      if (!task) return;
+      task.segments = taskSegments(task).map((segment) => ({ ...segment }));
+      const beforeSegments = task.segments.map((segment) => ({ ...segment }));
+      const defaultBreakIndex = Number.isFinite(seedIndex) ? Math.max(task.start, Math.min(endIndex(task), seedIndex)) : task.start + Math.max(1, Math.floor(task.span / 2));
+      const startText = prompt('请输入任务中断开始日期（YYYY-MM-DD）：', iso(defaultBreakIndex));
+      if (!startText) return;
+      const endText = prompt('请输入任务中断结束日期（YYYY-MM-DD）：', startText);
+      if (!endText) return;
+      const breakRange = normalizeDateRange(startText, endText);
+      if (!breakRange) return;
+      let breakStart = indexFromDate(breakRange.startDate);
+      let breakEnd = indexFromDate(breakRange.endDate);
+      const nextSegments = [];
+      for (const segment of beforeSegments) {
+        const segStart = segment.start;
+        const segEnd = segmentEnd(segment);
+        if (breakEnd < segStart || breakStart > segEnd) {
+          nextSegments.push({ ...segment });
+          continue;
+        }
+        if (breakStart > segStart) nextSegments.push({ start: segStart, span: breakStart - segStart });
+        if (breakEnd < segEnd) nextSegments.push({ start: breakEnd + 1, span: segEnd - breakEnd });
+      }
+      if (!nextSegments.length) {
+        alert('中断时间覆盖了整个任务，无法切分。');
+        return;
+      }
+      if (describeSegments(nextSegments) === describeSegments(beforeSegments)) {
+        alert('中断时间未落在当前计划段内，不需要切分。');
+        return;
+      }
+      task.segments = nextSegments;
+      syncTaskRange(task);
+      const reason = prompt('任务将从 ' + describeSegments(beforeSegments) + ' 切分为 ' + describeSegments(task.segments) + '，请输入中断原因（取消则撤销）：');
+      if (!reason || !reason.trim()) {
+        task.segments = beforeSegments;
+        syncTaskRange(task);
+        render();
+        return;
+      }
+      task.reason = '中断：' + reason.trim();
+      saveTasks();
+      render();
+    }
+    function submitDialog(event) { event.preventDefault(); const form = event.currentTarget; const range = normalizeDateRange(form.startDate.value, form.endDate.value); if (!range) return; const start = indexFromDate(range.startDate); const end = indexFromDate(range.endDate); const newTask = { id: 'u' + Date.now().toString(36), group: form.group.value, start, span: Math.max(1, end - start + 1), risk: form.risk.value, priority: form.priority.value, title: form.title.value.trim(), owner: form.owner.value.trim() || '待填写', reason: form.reason.value.trim() }; if (!newTask.title) return; if (pendingMode === 'split' && pendingSplitId) { const source = tasks.find((task) => task.id === pendingSplitId); if (source?.special) newTask.special = source.special; const index = tasks.findIndex((task) => task.id === pendingSplitId); tasks.splice(index + 1, 0, newTask); } else tasks.push(newTask); saveTasks(); closeDialog(); render(); }
+    document.addEventListener('click', (event) => { if (!event.target.closest('.head-cell') && activeMenu) activeMenu.classList.remove('open'); if (!event.target.closest('#groupMenu')) closeGroupMenu(); });
+document.getElementById('addTask').addEventListener('click', () => openDialog('add'));
+document.getElementById('addSpecial').addEventListener('click', createSpecial);
+document.getElementById('setViewRange').addEventListener('click', setViewRange);
+document.getElementById('cancelDialog').addEventListener('click', closeDialog);
+document.getElementById('taskForm').addEventListener('submit', submitDialog);
+document.getElementById('groupMenu').addEventListener('click', (event) => { const button = event.target.closest('[data-group-action]'); if (button) handleGroupAction(button.dataset.groupAction); });
+document.getElementById('resetLocal').addEventListener('click', () => { if (!confirm('确认清空本页拖动、新增、删除、切分、编辑、分组、专项、窗口日期和列宽变更？')) return; localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(STORAGE_KEY + ':groups'); localStorage.removeItem(STORAGE_KEY + ':specials'); localStorage.removeItem(STORAGE_KEY + ':viewRange'); localStorage.removeItem(STORAGE_KEY + ':layout'); groups = structuredClone(DEFAULT_GROUPS); tasks = structuredClone(INITIAL_TASKS); specials = structuredClone(DEFAULT_SPECIALS); viewRange = null; layout = normalizeLayout(); filters = { risk: new Set(), priority: new Set(), owner: new Set(), title: '' }; collapsedSpecials = { docs: false, launch: false }; applyLayout(); render(); });
+    applyLayout();
+    render();
+  </script>
+</body>
+</html>
