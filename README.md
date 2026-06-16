@@ -34,6 +34,7 @@ http://127.0.0.1:8787/io
 - 每次本地写操作会更新 `data/project-state.json` 和 `data/audit-log.jsonl`。
 - 同时会把最新数据镜像到 `docs/project-state.json` 和 `docs/audit-log.jsonl`。
 - GitHub Pages 页面只读展示仓库里的最新数据，不运行 Python 后端。
+- GitHub Pages 页面也支持编辑模式：输入你自己的 GitHub fine-grained token 后，可以直接在网页上增删改查并写回仓库。
 
 预期访问地址：
 
@@ -48,6 +49,23 @@ https://weinachuan.github.io/flash-linear-attention-npu-io/
 - `data/project.sqlite3`：运行时缓存，已被 `.gitignore` 忽略。
 
 如果 GitHub 访问需要代理，服务会优先读取环境变量 `HTTP_PROXY` / `HTTPS_PROXY`；未设置时会尝试读取 Windows 用户代理配置。
+
+## Pages 编辑模式
+
+公开页面默认只读。需要编辑时点击“启用编辑”，输入 GitHub fine-grained token。
+
+建议 token 设置：
+
+- Repository access：只选择 `weinachuan/flash-linear-attention-npu-io`
+- Permissions：`Contents: Read and write`
+- Expiration：尽量短，例如 7 天
+
+安全规则：
+
+- 不要把 token 写入仓库。
+- 页面只把 token 保存在当前浏览器会话的 `sessionStorage`。
+- 退出编辑或关闭浏览器会话后需要重新输入。
+- 每次保存会创建一次 GitHub commit，同时更新 `data/` 和 `docs/` 下的数据快照和审计日志。
 
 ## API
 

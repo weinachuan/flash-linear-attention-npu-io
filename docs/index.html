@@ -18,11 +18,18 @@
     </header>
 
     <section class="toolbar">
+      <label class="token-box">GitHub Token <input id="token" type="password" autocomplete="off" placeholder="仅当前会话使用"></label>
+      <button id="editMode" type="button">启用编辑</button>
+      <button id="logout" type="button" class="hidden">退出编辑</button>
       <label>搜索 <input id="q" type="search" placeholder="事项 / 负责人"></label>
       <label>风险 <select id="risk"><option value="">全部</option><option>高</option><option>中</option><option>低</option></select></label>
       <label>优先级 <select id="priority"><option value="">全部</option><option>P0</option><option>P1</option><option>P2</option></select></label>
       <label>状态 <select id="status"><option value="">全部</option><option value="todo">todo</option><option value="doing">doing</option><option value="blocked">blocked</option><option value="done">done</option></select></label>
       <button id="refresh" type="button">刷新仓库数据</button>
+      <button id="addTask" type="button" class="edit-only">新增任务</button>
+      <button id="addGroup" type="button" class="edit-only">新增分组</button>
+      <button id="addSpecial" type="button" class="edit-only">新增专项</button>
+      <span id="editStatus" class="edit-status">只读模式</span>
     </section>
 
     <section class="panel">
@@ -44,10 +51,25 @@
               <th>专项</th>
               <th>计划日期</th>
               <th>状态</th>
+              <th class="edit-only">操作</th>
             </tr>
           </thead>
           <tbody id="rows"></tbody>
         </table>
+      </div>
+    </section>
+
+    <section class="panel edit-only">
+      <h2>分组 / 专项管理</h2>
+      <div class="admin-grid">
+        <div>
+          <h3>分组</h3>
+          <div id="groupAdmin" class="admin-list"></div>
+        </div>
+        <div>
+          <h3>专项</h3>
+          <div id="specialAdmin" class="admin-list"></div>
+        </div>
       </div>
     </section>
 
