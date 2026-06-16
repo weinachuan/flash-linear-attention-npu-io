@@ -801,18 +801,38 @@ function prLinkEditorHtml(task) {
   return `
     <div class="pr-link-editor">
       <input class="link-input" data-field="pr_link" placeholder="PR URL，可填多个" value="${escapeAttr(task.pr_link || "")}">
-      ${prCatalogSelectHtml()}
+      ${prCatalogQuickPickerHtml()}
     </div>
   `;
 }
 
-function prCatalogSelectHtml() {
+function prCatalogQuickPickerHtml() {
   const items = state.prCatalog?.items || [];
   if (!items.length) {
-    return `<select class="pr-picker" data-pr-picker disabled><option value="">暂无 PR 候选</option></select>`;
+    return `
+      <div class="pr-quick-picker">
+        <input class="pr-search" data-pr-search disabled placeholder="暂无 PR 候选">
+        <button type="button" data-pr-append disabled>追加</button>
+      </div>
+    `;
   }
-  const options = items.map((pr) => `<option value="${escapeAttr(pr.url)}">${escapeHtml(prOptionLabel(pr))}</option>`).join("");
-  return `<select class="pr-picker" data-pr-picker title="从定时同步的 PR 候选池追加"><option value="">从 PR 候选池追加</option>${options}</select>`;
+  return `
+    <div class="pr-quick-picker">
+      <input class="pr-search" data-pr-search list="prCatalogOptions" placeholder="输入 PR 号 / 标题 / 链接，回车追加">
+      <button type="button" data-pr-append>追加</button>
+    </div>
+  `;
+}
+
+function renderPrCatalogDatalist() {
+  let datalist = document.querySelector("#prCatalogOptions");
+  if (!datalist) {
+    datalist = document.createElement("datalist");
+    datalist.id = "prCatalogOptions";
+    document.body.appendChild(datalist);
+  }
+  const items = state.prCatalog?.items || [];
+  datalist.innerHTML = items.map((pr) => `<option value="${escapeAttr(prOptionLabel(pr))}"></option>`).join("");
 }
 
 function prOptionLabel(pr) {
@@ -820,18 +840,41 @@ function prOptionLabel(pr) {
   return `#${pr.number} ${status} ${pr.title || ""}`.trim();
 }
 
-function appendPrFromPicker(select) {
-  const row = select.closest("tr");
+function findPrCandidate(query) {
+  const value = String(query || "").trim();
+  if (!value) return null;
+  const items = state.prCatalog?.items || [];
+  const normalized = value.toLowerCase();
+  const number = normalized.match(/^#?(\d+)$/)?.[1]
+    || normalized.match(/\/pull\/(\d+)/)?.[1]
+    || normalized.match(/^#?(\d+)\b/)?.[1];
+  if (number) {
+    const byNumber = items.find((pr) => String(pr.number) === number);
+    if (byNumber) return byNumber;
+  }
+  return items.find((pr) => [pr.url, prOptionLabel(pr), pr.title, pr.headRef].some((field) => String(field || "").toLowerCase().includes(normalized))) || null;
+}
+
+function appendPrFromSearch(control) {
+  const row = control.closest("tr");
+  const search = row?.querySelector("[data-pr-search]");
+  const candidate = findPrCandidate(search?.value);
+  if (!search?.value) return;
+  if (!candidate) {
+    alert(`未在候选池中匹配到 PR：${search.value}`);
+    return;
+  }
   const input = row?.querySelector('[data-field="pr_link"]');
-  if (!input || !select.value) return;
+  if (!input) return;
   const links = String(input.value || "").split(/[\s,，;；]+/).map((item) => item.trim()).filter(Boolean);
-  if (!links.includes(select.value)) links.push(select.value);
+  if (!links.includes(candidate.url)) links.push(candidate.url);
   input.value = links.join(" ");
-  select.value = "";
+  search.value = "";
   markTaskDirty(input);
 }
 
 function renderRows(tasks) {
+  renderPrCatalogDatalist();
   $("#rows").innerHTML = tasks.map((task) => {
     if (!state.token) {
       return `
@@ -868,7 +911,12 @@ function renderRows(tasks) {
   }).join("");
   document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => handleTaskAction(button).catch(showError)));
   document.querySelectorAll("#rows [data-field]").forEach((control) => control.addEventListener("change", () => markTaskDirty(control)));
-  document.querySelectorAll("#rows [data-pr-picker]").forEach((control) => control.addEventListener("change", () => appendPrFromPicker(control)));
+  document.querySelectorAll("#rows [data-pr-append]").forEach((control) => control.addEventListener("click", () => appendPrFromSearch(control)));
+  document.querySelectorAll("#rows [data-pr-search]").forEach((control) => control.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    appendPrFromSearch(control);
+  }));
 }
 
 function attachGanttDrag(bar) {
