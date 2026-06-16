@@ -33,7 +33,7 @@ OPERATOR_RULES = [
 FEATURE_PATTERNS = [
     ("gva", ["gva"]),
     ("vdim256", ["vdim", "v dim", "v=256", "256"]),
-    ("deep_fusion", ["深融合", "fusion", "fuse"]),
+    ("deep_fusion", ["深融合", "fusion", "fuse", "性能", "优化"]),
     ("regbase", ["regbase", "rebase"]),
     ("launch", ["<<<>>>", "launch", "调用"]),
     ("docs", ["文档", "doc", "docs", "readme"]),
@@ -138,8 +138,8 @@ def task_feature_keys(title):
     return [key for key, patterns in FEATURE_PATTERNS if any(normalize(pattern) in title_l for pattern in patterns)]
 
 
-def pr_text(pr):
-    return normalize(" ".join([pr.get("title") or "", pr.get("body") or "", pr.get("head", {}).get("ref") or ""]))
+def pr_signal_text(pr):
+    return normalize(" ".join([pr.get("title") or "", pr.get("head", {}).get("ref") or ""]))
 
 
 def operator_matches(op_id, text):
@@ -154,24 +154,24 @@ def feature_matches(feature_key, text):
 
 def score_pr(task, pr):
     title = task.get("title", "")
-    text = pr_text(pr)
+    signal = pr_signal_text(pr)
     op_ids = task_operator_ids(title)
     features = task_feature_keys(title)
     score = 0
 
     normalized_title = normalize(title)
-    if normalized_title and normalized_title in text:
+    if normalized_title and normalized_title in signal:
         score += 12
 
     op_hit = False
     for op_id in op_ids:
-        if operator_matches(op_id, text):
+        if operator_matches(op_id, signal):
             score += 6
             op_hit = True
 
     feature_hit_count = 0
     for feature in features:
-        if feature_matches(feature, text):
+        if feature_matches(feature, signal):
             score += 3
             feature_hit_count += 1
 
@@ -181,7 +181,7 @@ def score_pr(task, pr):
         return 0
 
     tokens = [token for token in re.split(r"[^a-z0-9_]+", normalize(title)) if len(token) >= 3]
-    score += min(4, sum(1 for token in set(tokens) if token in text))
+    score += min(4, sum(1 for token in set(tokens) if token in signal))
     return score
 
 
