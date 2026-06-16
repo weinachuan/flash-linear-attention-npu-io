@@ -674,7 +674,7 @@ function ensurePeopleCatalog() {
       placeholder: isPlaceholderOwner(name),
     });
   });
-  state.data.people = people.sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
+  state.data.people = people.sort(comparePeople);
 }
 
 function normalizeOwnerName(name) {
@@ -702,7 +702,13 @@ function taskPeople(task, referenceDate = "") {
 }
 
 function peopleForTasks(tasks) {
-  return uniqueBy(tasks.flatMap(taskPeople), "id").sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
+  return uniqueBy(tasks.flatMap(taskPeople), "id").sort(comparePeople);
+}
+
+function comparePeople(a, b) {
+  const waitingA = a.name === "待排人力" ? 0 : 1;
+  const waitingB = b.name === "待排人力" ? 0 : 1;
+  return waitingA - waitingB || a.position - b.position || a.id.localeCompare(b.id);
 }
 
 function personChipHtml(person) {
