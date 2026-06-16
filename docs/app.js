@@ -12,6 +12,8 @@ const state = {
   audit: [],
   token: sessionStorage.getItem("flashPagesToken") || "",
   dirtyTaskIds: new Set(),
+  baseTimeline: { start: "", end: "", total: 1 },
+  view: { start: "", end: "", total: 1 },
   timeline: { start: "", end: "", total: 1 },
   filters: { q: "", risk: "", priority: "", owner: "", group_id: "", special_id: "", status: "" },
 };
@@ -51,12 +53,15 @@ function filteredTasks() {
 }
 
 function render() {
-  const tasks = filteredTasks();
+  const filtered = filteredTasks();
   const all = state.data.tasks || [];
+  state.baseTimeline = computeTimelineRange();
+  ensureTimelineView();
+  const tasks = filtered.filter(taskIntersectsView);
   const high = all.filter((task) => task.risk === "高").length;
   const medium = all.filter((task) => task.risk === "中").length;
   const done = all.filter((task) => task.status === "done").length;
-  $("#meta").textContent = `仓库数据更新时间：${state.data.generatedAt || "未知"} · 当前显示 ${tasks.length}/${all.length} 项`;
+  $("#meta").textContent = `仓库数据更新时间：${state.data.generatedAt || "未知"} · 窗口 ${state.view.start} ~ ${state.view.end} · 当前显示 ${tasks.length}/${filtered.length}/${all.length} 项`;
   $("#summary").innerHTML = [
     ["总任务", all.length],
     ["高风险", high],
@@ -68,6 +73,7 @@ function render() {
   $("#logout").classList.toggle("hidden", !state.token);
   $("#editMode").classList.toggle("hidden", Boolean(state.token));
   updateEditStatus();
+  renderTimeAxis();
   renderGantt(tasks);
   renderTableFilters();
   renderRows(tasks);
@@ -129,23 +135,223 @@ function syncToolbarFilters() {
   });
 }
 
-function renderGantt(tasks) {
-  if (!tasks.length) {
-    $("#gantt").innerHTML = `<p class="empty">没有符合筛选条件的任务。</p>`;
+function computeTimelineRange() {
+  const dates = [];
+  (state.data?.tasks || []).forEach((task) => {
+    taskSegments(task).forEach((segment) => {
+      if (segment.start_date) dates.push(segment.start_date);
+      if (segment.end_date) dates.push(segment.end_date);
+    });
+  });
+  (state.data?.groups || []).forEach((group) => {
+    [group.start_date, group.end_date, group.due_date].forEach((date) => {
+      if (date) dates.push(date);
+    });
+  });
+  const parsed = dates.map(Date.parse).filter(Number.isFinite);
+  if (!parsed.length) {
+    const today = toDay(Date.now());
+    return { start: today, end: today, total: 1 };
+  }
+  const start = toDay(Math.min(...parsed));
+  const end = toDay(Math.max(...parsed));
+  return { start, end, total: Math.max(1, daysBetween(start, end) + 1) };
+}
+
+function ensureTimelineView() {
+  const full = state.baseTimeline;
+  if (!state.view.start || !state.view.end) {
+    setTimelineView(0, full.total - 1);
     return;
   }
-  const dates = tasks.flatMap((task) => task.segments?.length
-    ? task.segments.flatMap((segment) => [segment.start_date, segment.end_date])
-    : [task.start_date, task.end_date]);
-  const start = toDay(Math.min(...dates.map(Date.parse)));
-  const end = toDay(Math.max(...dates.map(Date.parse)));
-  const total = Math.max(1, daysBetween(start, end) + 1);
-  state.timeline = { start, end, total };
+  const rawStart = daysBetween(full.start, state.view.start);
+  const rawEnd = daysBetween(full.start, state.view.end);
+  const startOffset = Number.isFinite(rawStart) ? rawStart : 0;
+  const endOffset = Number.isFinite(rawEnd) ? rawEnd : full.total - 1;
+  setTimelineView(startOffset, endOffset);
+}
+
+function setTimelineView(startOffset, endOffset) {
+  const full = state.baseTimeline;
+  const safeStart = clamp(Math.round(startOffset), 0, Math.max(0, full.total - 1));
+  const safeEnd = clamp(Math.round(endOffset), safeStart, Math.max(safeStart, full.total - 1));
+  const start = addDays(full.start, safeStart);
+  const end = addDays(full.start, safeEnd);
+  state.view = { start, end, total: safeEnd - safeStart + 1 };
+  state.timeline = { ...state.view };
+}
+
+function taskSegments(task) {
+  return task.segments?.length ? task.segments : [{ start_date: task.start_date, end_date: task.end_date, reason: task.notes || "", position: 0 }];
+}
+
+function taskIntersectsView(task) {
+  return taskSegments(task).some((segment) => datesOverlap(segment.start_date, segment.end_date, state.view.start, state.view.end));
+}
+
+function datesOverlap(startA, endA, startB, endB) {
+  return Boolean(startA && endA && startB && endB && startA <= endB && endA >= startB);
+}
+
+function renderTimeAxis() {
+  const full = state.baseTimeline;
+  const milestones = timelineMilestones();
+  const ticks = timelineTicks(milestones);
+  $("#timeAxis").innerHTML = `
+    <div class="timeline-head">
+      <div>
+        <strong>DDL / 时间节点</strong>
+        <span>拖动深色窗口条切换显示范围，拖动两端可缩放窗口</span>
+      </div>
+      <div class="timeline-actions">
+        <span id="viewText"></span>
+        <button id="resetTimeline" type="button">显示全量</button>
+      </div>
+    </div>
+    <div id="timelineScale" class="timeline-scale">
+      <div class="axis-line"></div>
+      ${ticks.map((offset) => `
+        <span class="axis-tick" style="left:${slotCenterPct(offset, full.total)}%">
+          <i></i><em>${formatMonthDay(addDays(full.start, offset))}</em>
+        </span>
+      `).join("")}
+      ${milestones.map((item) => `
+        <span class="ddl-marker" style="left:${slotCenterPct(item.offset, full.total)}%" title="${escapeAttr(item.title)}：${escapeAttr(item.date)}">
+          <i></i>
+          <b>DDL</b>
+          <em>${escapeHtml(formatMonthDay(item.date))}</em>
+          <small>${escapeHtml(item.title)}</small>
+        </span>
+      `).join("")}
+      <div class="timeline-window" data-axis-mode="move">
+        <span class="timeline-window-edge" data-axis-mode="start"></span>
+        <span class="timeline-window-label" data-axis-mode="move"></span>
+        <span class="timeline-window-edge" data-axis-mode="end"></span>
+      </div>
+    </div>
+  `;
+  paintTimelineWindow();
+  attachTimelineDrag();
+  $("#resetTimeline").addEventListener("click", () => {
+    setTimelineView(0, state.baseTimeline.total - 1);
+    render();
+  });
+}
+
+function timelineMilestones() {
+  const full = state.baseTimeline;
+  return (state.data?.groups || []).map((group) => {
+    const date = group.due_date || group.end_date || group.start_date;
+    const offset = date ? daysBetween(full.start, date) : NaN;
+    return { title: group.title, date, offset };
+  }).filter((item) => item.date && Number.isFinite(item.offset) && item.offset >= 0 && item.offset < full.total)
+    .sort((a, b) => a.offset - b.offset || a.title.localeCompare(b.title, "zh-CN"));
+}
+
+function timelineTicks(milestones) {
+  const full = state.baseTimeline;
+  const step = full.total <= 18 ? 1 : Math.ceil(full.total / 16);
+  const offsets = new Set([0, Math.max(0, full.total - 1), ...milestones.map((item) => item.offset)]);
+  for (let offset = 0; offset < full.total; offset += step) offsets.add(offset);
+  return [...offsets].filter((offset) => offset >= 0 && offset < full.total).sort((a, b) => a - b);
+}
+
+function attachTimelineDrag() {
+  const scale = $("#timelineScale");
+  if (!scale) return;
+  scale.addEventListener("pointerdown", (event) => {
+    const target = event.target.closest("[data-axis-mode]");
+    const mode = target?.dataset.axisMode || "jump";
+    const full = state.baseTimeline;
+    const startOffset = daysBetween(full.start, state.view.start);
+    const endOffset = daysBetween(full.start, state.view.end);
+    const span = endOffset - startOffset + 1;
+    const firstOffset = pointerToTimelineOffset(event, scale);
+    const grabOffset = firstOffset - startOffset;
+    event.preventDefault();
+
+    if (mode === "jump") {
+      const nextStart = clamp(firstOffset - Math.floor(span / 2), 0, Math.max(0, full.total - span));
+      setTimelineView(nextStart, nextStart + span - 1);
+      render();
+      return;
+    }
+
+    scale.setPointerCapture(event.pointerId);
+    scale.classList.add("dragging");
+    const move = (moveEvent) => {
+      const offset = pointerToTimelineOffset(moveEvent, scale);
+      let nextStart = startOffset;
+      let nextEnd = endOffset;
+      if (mode === "move") {
+        nextStart = clamp(offset - grabOffset, 0, Math.max(0, full.total - span));
+        nextEnd = nextStart + span - 1;
+      } else if (mode === "start") {
+        nextStart = clamp(offset, 0, endOffset);
+      } else {
+        nextEnd = clamp(offset, startOffset, full.total - 1);
+      }
+      setTimelineView(nextStart, nextEnd);
+      paintTimelineWindow();
+    };
+    const finish = () => {
+      scale.removeEventListener("pointermove", move);
+      scale.removeEventListener("pointerup", finish);
+      scale.removeEventListener("pointercancel", finish);
+      scale.classList.remove("dragging");
+      render();
+    };
+    scale.addEventListener("pointermove", move);
+    scale.addEventListener("pointerup", finish);
+    scale.addEventListener("pointercancel", finish);
+  });
+}
+
+function pointerToTimelineOffset(event, scale) {
+  const rect = scale.getBoundingClientRect();
+  const ratio = clamp((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+  return clamp(Math.floor(ratio * state.baseTimeline.total), 0, state.baseTimeline.total - 1);
+}
+
+function paintTimelineWindow() {
+  const full = state.baseTimeline;
+  const startOffset = daysBetween(full.start, state.view.start);
+  const endOffset = daysBetween(full.start, state.view.end);
+  const left = slotStartPct(startOffset, full.total);
+  const width = Math.max(1.5, (endOffset - startOffset + 1) / Math.max(1, full.total) * 100);
+  const windowEl = document.querySelector(".timeline-window");
+  const label = document.querySelector(".timeline-window-label");
+  if (windowEl) {
+    windowEl.style.left = `${left}%`;
+    windowEl.style.width = `${width}%`;
+  }
+  if (label) label.textContent = `${formatMonthDay(state.view.start)} ~ ${formatMonthDay(state.view.end)}`;
+  const viewText = $("#viewText");
+  if (viewText) viewText.textContent = `窗口：${state.view.start} ~ ${state.view.end}（${state.view.total} 天）`;
+}
+
+function slotCenterPct(offset, total) {
+  return ((offset + 0.5) / Math.max(1, total)) * 100;
+}
+
+function slotStartPct(offset, total) {
+  return (offset / Math.max(1, total)) * 100;
+}
+
+function renderGantt(tasks) {
+  if (!tasks.length) {
+    $("#gantt").innerHTML = `<p class="empty">当前时间窗口内没有符合筛选条件的任务。</p>`;
+    return;
+  }
+  const { start, end, total } = state.timeline;
   $("#gantt").innerHTML = tasks.map((task) => {
-    const bars = (task.segments?.length ? task.segments : [{ start_date: task.start_date, end_date: task.end_date }]).map((segment, index) => {
-      const left = daysBetween(start, segment.start_date) / total * 100;
-      const width = Math.max(1.2, (daysBetween(segment.start_date, segment.end_date) + 1) / total * 100);
-      return `<span class="bar" data-risk="${task.risk}" data-task-id="${task.id}" data-segment-index="${index}" style="left:${left}%;width:${width}%" title="${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}；编辑模式下拖动移动，边缘拉伸"></span>`;
+    const bars = taskSegments(task).map((segment, index) => {
+      if (!datesOverlap(segment.start_date, segment.end_date, start, end)) return "";
+      const clippedStart = maxDate(segment.start_date, start);
+      const clippedEnd = minDate(segment.end_date, end);
+      const left = daysBetween(start, clippedStart) / total * 100;
+      const width = Math.max(1.2, (daysBetween(clippedStart, clippedEnd) + 1) / total * 100);
+      return `<span class="bar" data-risk="${task.risk}" data-task-id="${escapeAttr(task.id)}" data-segment-index="${index}" style="left:${left}%;width:${width}%" title="${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}；编辑模式下拖动移动，边缘拉伸"></span>`;
     }).join("");
     return `<div class="gantt-row"><div class="gantt-title">${escapeHtml(task.title)}</div><div class="track">${bars}</div></div>`;
   }).join("");
@@ -212,8 +418,8 @@ function attachGanttDrag(bar) {
     const startX = event.clientX;
     const edge = event.offsetX <= 8 ? "start" : (bar.offsetWidth - event.offsetX <= 8 ? "end" : "move");
     const original = { start: segment.start_date, end: segment.end_date };
-    const originalStartOffset = daysBetween(state.timeline.start, segment.start_date);
-    const originalEndOffset = daysBetween(state.timeline.start, segment.end_date);
+    const originalStartOffset = clamp(daysBetween(state.timeline.start, segment.start_date), 0, state.timeline.total - 1);
+    const originalEndOffset = clamp(daysBetween(state.timeline.start, segment.end_date), originalStartOffset, state.timeline.total - 1);
     const originalSpan = originalEndOffset - originalStartOffset + 1;
     bar.setPointerCapture(event.pointerId);
     bar.classList.add("dragging");
@@ -598,21 +804,35 @@ function daysBetween(a, b) {
 }
 
 function addDays(value, days) {
-  const date = new Date(`${value}T00:00:00`);
-  date.setDate(date.getDate() + days);
+  const date = dateFromYmd(value);
+  date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().slice(0, 10);
 }
 
 function prevDay(value) {
-  const date = new Date(`${value}T00:00:00`);
-  date.setDate(date.getDate() - 1);
-  return date.toISOString().slice(0, 10);
+  return addDays(value, -1);
 }
 
 function nextDay(value) {
-  const date = new Date(`${value}T00:00:00`);
-  date.setDate(date.getDate() + 1);
-  return date.toISOString().slice(0, 10);
+  return addDays(value, 1);
+}
+
+function dateFromYmd(value) {
+  const [year, month, day] = String(value).split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function maxDate(a, b) {
+  return a > b ? a : b;
+}
+
+function minDate(a, b) {
+  return a < b ? a : b;
+}
+
+function formatMonthDay(value) {
+  const [, month, day] = String(value || "").split("-");
+  return month && day ? `${month}-${day}` : String(value || "");
 }
 
 function clamp(value, min, max) {
