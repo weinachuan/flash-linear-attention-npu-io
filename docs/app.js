@@ -12,6 +12,7 @@ const state = {
   audit: [],
   token: sessionStorage.getItem("flashPagesToken") || "",
   dirtyTaskIds: new Set(),
+  timeline: { start: "", end: "", total: 1 },
   filters: { q: "", risk: "", priority: "", owner: "", group_id: "", special_id: "", status: "" },
 };
 
@@ -139,11 +140,12 @@ function renderGantt(tasks) {
   const start = toDay(Math.min(...dates.map(Date.parse)));
   const end = toDay(Math.max(...dates.map(Date.parse)));
   const total = Math.max(1, daysBetween(start, end) + 1);
+  state.timeline = { start, end, total };
   $("#gantt").innerHTML = tasks.map((task) => {
-    const bars = (task.segments?.length ? task.segments : [{ start_date: task.start_date, end_date: task.end_date }]).map((segment) => {
+    const bars = (task.segments?.length ? task.segments : [{ start_date: task.start_date, end_date: task.end_date }]).map((segment, index) => {
       const left = daysBetween(start, segment.start_date) / total * 100;
       const width = Math.max(1.2, (daysBetween(segment.start_date, segment.end_date) + 1) / total * 100);
-      return `<span class="bar" data-risk="${task.risk}" data-task-id="${task.id}" style="left:${left}%;width:${width}%" title="${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}"></span>`;
+      return `<span class="bar" data-risk="${task.risk}" data-task-id="${task.id}" data-segment-index="${index}" style="left:${left}%;width:${width}%" title="${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}；编辑模式下拖动移动，边缘拉伸"></span>`;
     }).join("");
     return `<div class="gantt-row"><div class="gantt-title">${escapeHtml(task.title)}</div><div class="track">${bars}</div></div>`;
   }).join("");
@@ -151,6 +153,7 @@ function renderGantt(tasks) {
     bar.addEventListener("dblclick", () => {
       if (state.token) splitTask(bar.dataset.taskId);
     });
+    attachGanttDrag(bar);
   });
 }
 
@@ -172,7 +175,7 @@ function renderRows(tasks) {
       `;
     }
     return `
-      <tr data-task-id="${escapeAttr(task.id)}">
+      <tr data-task-id="${escapeAttr(task.id)}" class="${state.dirtyTaskIds.has(task.id) ? "dirty" : ""}">
         <td>${selectHtml("risk", [["高","高"],["中","中"],["低","低"]], task.risk)}</td>
         <td>${selectHtml("priority", [["P0","P0"],["P1","P1"],["P2","P2"]], task.priority)}</td>
         <td><input class="title-input" data-field="title" value="${escapeAttr(task.title)}"></td>
@@ -187,6 +190,80 @@ function renderRows(tasks) {
   }).join("");
   document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => handleTaskAction(button).catch(showError)));
   document.querySelectorAll("#rows [data-field]").forEach((control) => control.addEventListener("change", () => markTaskDirty(control)));
+}
+
+function attachGanttDrag(bar) {
+  bar.addEventListener("mousemove", (event) => {
+    if (!state.token || bar.classList.contains("dragging")) return;
+    bar.style.cursor = event.offsetX <= 8 || bar.offsetWidth - event.offsetX <= 8 ? "ew-resize" : "grab";
+  });
+  bar.addEventListener("pointerdown", (event) => {
+    if (!state.token) return;
+    event.preventDefault();
+    const task = state.data.tasks.find((item) => item.id === bar.dataset.taskId);
+    if (!task) return;
+    const segments = task.segments?.length ? task.segments : [{ id: `seg-${crypto.randomUUID().slice(0, 10)}`, start_date: task.start_date, end_date: task.end_date, reason: "", position: 0 }];
+    task.segments = segments;
+    const segment = segments[Number(bar.dataset.segmentIndex || 0)];
+    if (!segment) return;
+    const track = bar.parentElement;
+    const rect = track.getBoundingClientRect();
+    const unit = rect.width / state.timeline.total;
+    const startX = event.clientX;
+    const edge = event.offsetX <= 8 ? "start" : (bar.offsetWidth - event.offsetX <= 8 ? "end" : "move");
+    const original = { start: segment.start_date, end: segment.end_date };
+    const originalStartOffset = daysBetween(state.timeline.start, segment.start_date);
+    const originalEndOffset = daysBetween(state.timeline.start, segment.end_date);
+    const originalSpan = originalEndOffset - originalStartOffset + 1;
+    bar.setPointerCapture(event.pointerId);
+    bar.classList.add("dragging");
+
+    const move = (moveEvent) => {
+      const deltaDays = Math.round((moveEvent.clientX - startX) / unit);
+      let nextStart = originalStartOffset;
+      let nextEnd = originalEndOffset;
+      if (edge === "move") {
+        nextStart = clamp(originalStartOffset + deltaDays, 0, Math.max(0, state.timeline.total - originalSpan));
+        nextEnd = nextStart + originalSpan - 1;
+      } else if (edge === "start") {
+        nextStart = clamp(originalStartOffset + deltaDays, 0, originalEndOffset);
+      } else {
+        nextEnd = clamp(originalEndOffset + deltaDays, originalStartOffset, state.timeline.total - 1);
+      }
+      segment.start_date = addDays(state.timeline.start, nextStart);
+      segment.end_date = addDays(state.timeline.start, nextEnd);
+      paintBar(bar, nextStart, nextEnd);
+    };
+
+    const finish = () => {
+      bar.removeEventListener("pointermove", move);
+      bar.removeEventListener("pointerup", finish);
+      bar.removeEventListener("pointercancel", cancel);
+      bar.classList.remove("dragging");
+      if (segment.start_date === original.start && segment.end_date === original.end) return;
+      syncTaskDatesFromSegments(task);
+      markTaskDirtyById(task.id);
+      render();
+    };
+
+    const cancel = () => {
+      segment.start_date = original.start;
+      segment.end_date = original.end;
+      bar.classList.remove("dragging");
+      render();
+    };
+
+    bar.addEventListener("pointermove", move);
+    bar.addEventListener("pointerup", finish);
+    bar.addEventListener("pointercancel", cancel);
+  });
+}
+
+function paintBar(bar, startOffset, endOffset) {
+  const width = Math.max(1.2, (endOffset - startOffset + 1) / state.timeline.total * 100);
+  const left = startOffset / state.timeline.total * 100;
+  bar.style.left = `${left}%`;
+  bar.style.width = `${width}%`;
 }
 
 function renderAdmin() {
@@ -242,6 +319,11 @@ function markTaskDirty(control) {
   updateEditStatus();
 }
 
+function markTaskDirtyById(taskId) {
+  state.dirtyTaskIds.add(taskId);
+  updateEditStatus();
+}
+
 function applyRowToTask(row, normalizeSegments = true) {
   const task = state.data.tasks.find((item) => item.id === row.dataset.taskId);
   if (!task) return null;
@@ -251,6 +333,15 @@ function applyRowToTask(row, normalizeSegments = true) {
   task.updated_at = nowIso();
   if (normalizeSegments) normalizeTaskSegments(task);
   return task;
+}
+
+function syncTaskDatesFromSegments(task) {
+  const segments = [...(task.segments || [])].sort((a, b) => a.start_date.localeCompare(b.start_date));
+  if (!segments.length) return;
+  task.segments = segments.map((segment, index) => ({ ...segment, position: index }));
+  task.start_date = segments[0].start_date;
+  task.end_date = segments[segments.length - 1].end_date;
+  task.updated_at = nowIso();
 }
 
 async function saveAllTasks() {
@@ -506,6 +597,12 @@ function daysBetween(a, b) {
   return Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
 }
 
+function addDays(value, days) {
+  const date = new Date(`${value}T00:00:00`);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
 function prevDay(value) {
   const date = new Date(`${value}T00:00:00`);
   date.setDate(date.getDate() - 1);
@@ -516,6 +613,10 @@ function nextDay(value) {
   const date = new Date(`${value}T00:00:00`);
   date.setDate(date.getDate() + 1);
   return date.toISOString().slice(0, 10);
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
 function escapeHtml(value) {

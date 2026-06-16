@@ -52,6 +52,9 @@ body.editing .edit-status { color:#277560; }
 .gantt-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#40382e; font-size:12px; font-weight:850; }
 .track { position:relative; height:20px; border-radius:999px; background:#eee3d2; overflow:hidden; }
 .bar { position:absolute; top:3px; height:14px; min-width:8px; border-radius:999px; background:var(--medium); }
+body.editing .bar { cursor:grab; touch-action:none; }
+body.editing .bar:hover { box-shadow:0 0 0 2px rgba(32,37,31,.18); }
+.bar.dragging { cursor:grabbing; opacity:.82; }
 .bar[data-risk="高"] { background:var(--high); }
 .bar[data-risk="中"] { background:var(--medium); }
 .bar[data-risk="低"] { background:var(--low); }
