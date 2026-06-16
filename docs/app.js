@@ -637,7 +637,7 @@ function peopleForTasks(tasks) {
 
 function personChipHtml(person) {
   const klass = person.placeholder ? " placeholder" : "";
-  return `<span class="person-chip${klass}"><b>${escapeHtml(person.id)}</b><em>${escapeHtml(person.name)}</em></span>`;
+  return `<span class="person-chip${klass}"><em>${escapeHtml(person.name)}</em></span>`;
 }
 
 function ownerChipsHtml(task) {
