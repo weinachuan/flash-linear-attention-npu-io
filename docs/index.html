@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>flash-linear-attention-npu 项目看板</title>
-  <link rel="stylesheet" href="./styles.css?v=20260616-ddl-timeline">
+  <link rel="stylesheet" href="./styles.css?v=20260616-planning-views">
 </head>
 <body>
   <main class="shell">
@@ -34,10 +34,25 @@
       <span id="editStatus" class="edit-status">只读模式</span>
     </section>
 
-    <section class="panel">
-      <h2>时间计划</h2>
+    <section class="panel plan-panel">
+      <div class="panel-title-row">
+        <h2>时间计划</h2>
+        <div class="view-switch" role="tablist" aria-label="计划视图切换">
+          <button type="button" class="active" data-plan-tab="timeline">甘特计划</button>
+          <button type="button" data-plan-tab="people">人力视图</button>
+          <button type="button" data-plan-tab="operator">算子视图</button>
+        </div>
+      </div>
       <div id="timeAxis" class="time-axis"></div>
-      <div id="gantt" class="gantt"></div>
+      <div id="timelinePanel" class="plan-view active" data-plan-view="timeline">
+        <div id="gantt" class="gantt"></div>
+      </div>
+      <div id="peoplePanel" class="plan-view" data-plan-view="people">
+        <div id="peopleView" class="people-view"></div>
+      </div>
+      <div id="operatorPanel" class="plan-view" data-plan-view="operator">
+        <div id="operatorView" class="operator-view"></div>
+      </div>
     </section>
 
     <section class="panel">
@@ -53,6 +68,8 @@
               <th>分组</th>
               <th>专项</th>
               <th>计划日期</th>
+              <th>PR 链接</th>
+              <th>转测报告</th>
               <th>状态</th>
               <th class="edit-only">操作</th>
             </tr>
@@ -82,6 +99,6 @@
       <div id="audit" class="audit"></div>
     </section>
   </main>
-  <script src="./app.js?v=20260616-ddl-timeline"></script>
+  <script src="./app.js?v=20260616-planning-views"></script>
 </body>
 </html>

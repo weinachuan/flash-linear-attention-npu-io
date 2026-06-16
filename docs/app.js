@@ -15,6 +15,7 @@ const state = {
   baseTimeline: { start: "", end: "", total: 1 },
   view: { start: "", end: "", total: 1 },
   timeline: { start: "", end: "", total: 1 },
+  activePlanView: "timeline",
   filters: { q: "", risk: "", priority: "", owner: "", group_id: "", special_id: "", status: "" },
 };
 
@@ -73,12 +74,30 @@ function render() {
   $("#logout").classList.toggle("hidden", !state.token);
   $("#editMode").classList.toggle("hidden", Boolean(state.token));
   updateEditStatus();
+  renderPlanTabs();
   renderTimeAxis();
   renderGantt(tasks);
+  renderPeopleView(tasks);
+  renderOperatorView(tasks);
   renderTableFilters();
   renderRows(tasks);
   renderAdmin();
   renderAudit();
+}
+
+function renderPlanTabs() {
+  document.querySelectorAll("[data-plan-tab]").forEach((button) => {
+    const active = button.dataset.planTab === state.activePlanView;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", active ? "true" : "false");
+    button.onclick = () => {
+      state.activePlanView = button.dataset.planTab;
+      renderPlanTabs();
+    };
+  });
+  document.querySelectorAll("[data-plan-view]").forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.planView === state.activePlanView);
+  });
 }
 
 function renderTableFilters() {
@@ -89,6 +108,8 @@ function renderTableFilters() {
     tableFilterSelect("owner", [["", "全部"], ...uniqueTaskValues("owner").map((value) => [value, value])]),
     tableFilterSelect("group_id", [["", "全部"], ...state.data.groups.map((group) => [group.id, group.title])]),
     tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...state.data.specials.map((special) => [special.id, special.title])]),
+    `<th></th>`,
+    `<th></th>`,
     `<th></th>`,
     tableFilterSelect("status", [["", "全部"], ["todo", "todo"], ["doing", "doing"], ["blocked", "blocked"], ["done", "done"]]),
     `<th class="edit-only"><button type="button" data-clear-filters>清空</button></th>`,
@@ -136,6 +157,32 @@ function syncToolbarFilters() {
 }
 
 function computeTimelineRange() {
+  const dates = [];
+  (state.data?.tasks || []).forEach((task) => {
+    taskSegments(task).forEach((segment) => {
+      if (segment.start_date) dates.push(segment.start_date);
+      if (segment.end_date) dates.push(segment.end_date);
+    });
+  });
+  (state.data?.groups || []).forEach((group) => {
+    [group.start_date, group.end_date, group.due_date].forEach((date) => {
+      if (date) dates.push(date);
+    });
+  });
+  [state.view.start, state.view.end].forEach((date) => {
+    if (date) dates.push(date);
+  });
+  const parsed = dates.map(Date.parse).filter(Number.isFinite);
+  if (!parsed.length) {
+    const today = toDay(Date.now());
+    return { start: today, end: today, total: 1 };
+  }
+  const start = toDay(Math.min(...parsed));
+  const end = toDay(Math.max(...parsed));
+  return { start, end, total: Math.max(1, daysBetween(start, end) + 1) };
+}
+
+function computeDataTimelineRange() {
   const dates = [];
   (state.data?.tasks || []).forEach((task) => {
     taskSegments(task).forEach((segment) => {
@@ -200,11 +247,14 @@ function renderTimeAxis() {
   $("#timeAxis").innerHTML = `
     <div class="timeline-head">
       <div>
-        <strong>DDL / 时间节点</strong>
-        <span>拖动深色窗口条切换显示范围，拖动两端可缩放窗口</span>
+        <strong>DDL 与时间窗口</strong>
+        <span>拖动绿色窗口条可平移，拖动两端可缩放；也可以直接输入更长日期范围</span>
       </div>
       <div class="timeline-actions">
-        <span id="viewText"></span>
+        <label>开始 <input id="viewStartDate" type="date" value="${escapeAttr(state.view.start)}"></label>
+        <label>结束 <input id="viewEndDate" type="date" value="${escapeAttr(state.view.end)}"></label>
+        <button id="expandStart" type="button">前扩 7 天</button>
+        <button id="expandEnd" type="button">后扩 7 天</button>
         <button id="resetTimeline" type="button">显示全量</button>
       </div>
     </div>
@@ -225,17 +275,43 @@ function renderTimeAxis() {
       `).join("")}
       <div class="timeline-window" data-axis-mode="move">
         <span class="timeline-window-edge" data-axis-mode="start"></span>
-        <span class="timeline-window-label" data-axis-mode="move"></span>
+        <span class="timeline-window-label" data-axis-mode="move" id="viewText"></span>
         <span class="timeline-window-edge" data-axis-mode="end"></span>
       </div>
     </div>
   `;
   paintTimelineWindow();
   attachTimelineDrag();
+  $("#viewStartDate").addEventListener("change", applyTimelineDateInputs);
+  $("#viewEndDate").addEventListener("change", applyTimelineDateInputs);
+  $("#expandStart").addEventListener("click", () => setAbsoluteTimelineView(addDays(state.view.start, -7), state.view.end));
+  $("#expandEnd").addEventListener("click", () => setAbsoluteTimelineView(state.view.start, addDays(state.view.end, 7)));
   $("#resetTimeline").addEventListener("click", () => {
-    setTimelineView(0, state.baseTimeline.total - 1);
+    const dataRange = computeDataTimelineRange();
+    state.baseTimeline = dataRange;
+    state.view = { start: "", end: "", total: 1 };
+    setTimelineView(0, dataRange.total - 1);
     render();
   });
+}
+
+function applyTimelineDateInputs() {
+  const start = $("#viewStartDate").value;
+  const end = $("#viewEndDate").value;
+  setAbsoluteTimelineView(start, end);
+}
+
+function setAbsoluteTimelineView(start, end) {
+  if (!isYmd(start) || !isYmd(end)) {
+    alert("请输入有效日期。");
+    return;
+  }
+  const nextStart = minDate(start, end);
+  const nextEnd = maxDate(start, end);
+  state.view = { start: nextStart, end: nextEnd, total: Math.max(1, daysBetween(nextStart, nextEnd) + 1) };
+  state.baseTimeline = computeTimelineRange();
+  ensureTimelineView();
+  render();
 }
 
 function timelineMilestones() {
@@ -363,6 +439,149 @@ function renderGantt(tasks) {
   });
 }
 
+function renderPeopleView(tasks) {
+  const days = dateList(state.view.start, state.view.end);
+  const owners = [...new Set(tasks.map((task) => task.owner || "待填写"))].sort((a, b) => a.localeCompare(b, "zh-CN"));
+  if (!tasks.length) {
+    $("#peopleView").innerHTML = `<p class="empty">当前时间窗口内没有符合筛选条件的人力安排。</p>`;
+    return;
+  }
+  $("#peopleView").innerHTML = `
+    <div class="view-note">按当前时间窗口展示每日人力占用；同一天多个事项会叠放显示。</div>
+    <div class="people-grid-wrap">
+      <table class="people-grid">
+        <thead>
+          <tr>
+            <th class="people-owner-head">负责人</th>
+            ${days.map((day) => `<th><strong>${formatMonthDay(day)}</strong><small>${weekdayName(day)}</small></th>`).join("")}
+          </tr>
+        </thead>
+        <tbody>
+          ${owners.map((owner) => `
+            <tr>
+              <th class="people-owner">${escapeHtml(owner)}</th>
+              ${days.map((day) => `<td>${tasksForOwnerOnDay(tasks, owner, day).map(taskChipHtml).join("")}</td>`).join("")}
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderOperatorView(tasks) {
+  if (!tasks.length) {
+    $("#operatorView").innerHTML = `<p class="empty">当前时间窗口内没有符合筛选条件的算子事项。</p>`;
+    return;
+  }
+  const groups = new Map();
+  tasks.forEach((task) => {
+    const operator = operatorName(task);
+    if (!groups.has(operator)) groups.set(operator, []);
+    groups.get(operator).push(task);
+  });
+  const cards = [...groups.entries()]
+    .sort(([a], [b]) => a.localeCompare(b, "zh-CN"))
+    .map(([operator, items]) => {
+      const sorted = [...items].sort((a, b) => a.end_date.localeCompare(b.end_date) || a.title.localeCompare(b.title, "zh-CN"));
+      return `
+        <article class="operator-card">
+          <header>
+            <div>
+              <strong>${escapeHtml(operator)}</strong>
+              <span>${sorted.length} 个特性 / 事项</span>
+            </div>
+            <small>${escapeHtml(operatorTimeRange(sorted))}</small>
+          </header>
+          <div class="operator-features">
+            ${sorted.map((task) => `
+              <div class="operator-feature">
+                <div class="feature-main">
+                  <span class="tag ${riskClass(task.risk)}">${escapeHtml(task.risk)}</span>
+                  <span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span>
+                  <strong>${escapeHtml(featureTitle(task))}</strong>
+                </div>
+                <div class="feature-meta">
+                  <span>${escapeHtml(groupTitle(task.group_id))}</span>
+                  <span>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</span>
+                  <span>${escapeHtml(task.owner || "待填写")}</span>
+                  ${linkListHtml(task.pr_link, "PR")}
+                  ${linkListHtml(task.test_report, "报告")}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </article>
+      `;
+    }).join("");
+  $("#operatorView").innerHTML = `<div class="operator-grid">${cards}</div>`;
+}
+
+function tasksForOwnerOnDay(tasks, owner, day) {
+  return tasks.filter((task) => (task.owner || "待填写") === owner && taskSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day));
+}
+
+function taskChipHtml(task) {
+  return `<span class="work-chip ${riskClass(task.risk)}" title="${escapeAttr(task.title)}">${escapeHtml(featureTitle(task))}</span>`;
+}
+
+function operatorTimeRange(tasks) {
+  const starts = tasks.map((task) => task.start_date).filter(Boolean).sort();
+  const ends = tasks.map((task) => task.end_date).filter(Boolean).sort();
+  return starts.length && ends.length ? `${starts[0]} ~ ${ends[ends.length - 1]}` : "";
+}
+
+function operatorName(task) {
+  const title = task.title || "";
+  const known = [
+    "prepare_wy_repr_bwd_full",
+    "prepare_wy_bwd_full",
+    "prepare_wy_bwd_da",
+    "recompute_w_u",
+    "causal_conv1d_fwd",
+    "causal_conv1d bwd",
+    "causal_conv1d",
+    "chunk_dv_local",
+    "dv_local",
+    "dqkwg",
+    "fwd_h",
+    "fwd_o",
+    "dhu",
+    "solve_tri",
+    "KDA",
+    "ops",
+  ];
+  const lower = title.toLowerCase();
+  const found = known.find((name) => lower.includes(name.toLowerCase()));
+  if (found) return found;
+  return title.split(/\s+/)[0] || "未归类";
+}
+
+function featureTitle(task) {
+  const operator = operatorName(task);
+  return task.title.startsWith(operator) ? task.title.slice(operator.length).trim() || task.title : task.title;
+}
+
+function dateList(start, end) {
+  const result = [];
+  for (let day = start; day <= end; day = addDays(day, 1)) result.push(day);
+  return result;
+}
+
+function weekdayName(value) {
+  return ["日", "一", "二", "三", "四", "五", "六"][dateFromYmd(value).getUTCDay()];
+}
+
+function linkListHtml(value, label) {
+  const links = parseLinks(value);
+  if (!links.length) return `<span class="muted-cell">-</span>`;
+  return links.map((link, index) => `<a class="link-pill" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}${links.length > 1 ? index + 1 : ""}</a>`).join("");
+}
+
+function parseLinks(value) {
+  return String(value || "").split(/[\s,，;；]+/).map((item) => item.trim()).filter((item) => /^https?:\/\//i.test(item));
+}
+
 function renderRows(tasks) {
   $("#rows").innerHTML = tasks.map((task) => {
     if (!state.token) {
@@ -375,6 +594,8 @@ function renderRows(tasks) {
           <td>${escapeHtml(groupTitle(task.group_id))}</td>
           <td>${escapeHtml(specialTitle(task.special_id))}</td>
           <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
+          <td>${linkListHtml(task.pr_link, "PR")}</td>
+          <td>${linkListHtml(task.test_report, "报告")}</td>
           <td>${escapeHtml(task.status)}</td>
           <td class="edit-only"></td>
         </tr>
@@ -389,6 +610,8 @@ function renderRows(tasks) {
         <td>${selectHtml("group_id", state.data.groups.map((g) => [g.id, g.title]), task.group_id)}</td>
         <td>${selectHtml("special_id", [["","普通事项"], ...state.data.specials.map((s) => [s.id, s.title])], task.special_id || "")}</td>
         <td><input type="date" data-field="start_date" value="${escapeAttr(task.start_date)}"> ~ <input type="date" data-field="end_date" value="${escapeAttr(task.end_date)}"></td>
+        <td><input class="link-input" data-field="pr_link" placeholder="PR URL" value="${escapeAttr(task.pr_link || "")}"></td>
+        <td><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
         <td>${selectHtml("status", [["todo","todo"],["doing","doing"],["blocked","blocked"],["done","done"]], task.status)}</td>
         <td class="edit-only"><span class="ops"><button data-action="save">保存</button><button data-action="split">切分</button><button class="danger" data-action="delete">删除</button></span></td>
       </tr>
@@ -537,7 +760,7 @@ function applyRowToTask(row, normalizeSegments = true) {
     task[input.dataset.field] = input.value.trim();
   });
   task.updated_at = nowIso();
-  if (normalizeSegments) normalizeTaskSegments(task);
+  if (normalizeSegments && (!task.segments?.length || task.segments.length <= 1)) normalizeTaskSegments(task);
   return task;
 }
 
@@ -579,6 +802,8 @@ async function addTask() {
     end_date: firstGroup?.due_date || "2026-06-25",
     evidence: [],
     dependencies: [],
+    pr_link: "",
+    test_report: "",
     notes: "",
     position: state.data.tasks.length,
     created_at: nowIso(),
@@ -833,6 +1058,10 @@ function minDate(a, b) {
 function formatMonthDay(value) {
   const [, month, day] = String(value || "").split("-");
   return month && day ? `${month}-${day}` : String(value || "");
+}
+
+function isYmd(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(value || "")) && !Number.isNaN(Date.parse(value));
 }
 
 function clamp(value, min, max) {
