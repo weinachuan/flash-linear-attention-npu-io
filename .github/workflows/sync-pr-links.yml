@@ -1,15 +1,13 @@
-name: Sync upstream PR links
+name: Scan upstream PR candidates
 
 on:
-  schedule:
-    - cron: "0 0,6 * * *"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  sync-pr-links:
+  scan-pr-candidates:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,17 +23,4 @@ jobs:
       - name: Scan upstream pull requests
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python scripts/sync_pr_links.py --dry-run
-
-      - name: Commit pending review table
-        run: |
-          if git diff --quiet -- data/pending-pr-sync.json docs/pending-pr-sync.json; then
-            echo "No pending PR sync changes."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/pending-pr-sync.json docs/pending-pr-sync.json
-          git commit -m "生成待确认 PR 同步表"
-          git pull --rebase origin main
-          git push
+        run: python scripts/sync_pr_links.py --format markdown

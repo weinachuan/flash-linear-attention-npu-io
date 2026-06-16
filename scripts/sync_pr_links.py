@@ -12,7 +12,6 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[1]
 STATE_PATHS = [ROOT / "data" / "project-state.json", ROOT / "docs" / "project-state.json"]
 AUDIT_PATHS = [ROOT / "data" / "audit-log.jsonl", ROOT / "docs" / "audit-log.jsonl"]
-PENDING_PATHS = [ROOT / "data" / "pending-pr-sync.json", ROOT / "docs" / "pending-pr-sync.json"]
 SOURCE_REPO = "flashserve/flash-linear-attention-npu"
 API_ROOT = "https://api.github.com"
 BJ_TZ = timezone(timedelta(hours=8))
@@ -109,17 +108,21 @@ def explicit_task_prs(task, pr_index):
         if not token:
             continue
         if token in pr_index:
-            if pr_is_trackable(pr_index[token]):
+            if pr_is_acceptable_for_task(task, pr_index[token]):
                 matches.append(pr_index[token])
             continue
         number_match = re.search(r"/pull/(\d+)$", token)
-        if number_match and number_match.group(1) in pr_index and pr_is_trackable(pr_index[number_match.group(1)]):
+        if number_match and number_match.group(1) in pr_index and pr_is_acceptable_for_task(task, pr_index[number_match.group(1)]):
             matches.append(pr_index[number_match.group(1)])
     return list({pr.get("html_url"): pr for pr in matches if pr.get("html_url")}.values())
 
 
 def pr_is_trackable(pr):
     return pr.get("state") != "closed" or bool(pr.get("merged_at"))
+
+
+def pr_is_acceptable_for_task(task, pr):
+    return pr_is_trackable(pr) and score_pr(task, pr) >= 8
 
 
 def task_operator_ids(title):
@@ -267,37 +270,6 @@ def update_state(path, pull_requests, timestamp):
     return changed
 
 
-def pending_payload(timestamp, pull_requests, changed):
-    return {
-        "generatedAt": timestamp,
-        "sourceRepo": SOURCE_REPO,
-        "pullRequests": len(pull_requests),
-        "rule": "待确认：已合入 PR 建议低风险；开放 PR 建议中风险；未匹配 PR 建议高风险。",
-        "changes": changed,
-    }
-
-
-def pending_changes_equal(path, changed):
-    if not path.exists():
-        return not changed
-    try:
-        old = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return False
-    return old.get("changes", []) == changed
-
-
-def write_pending_reports(timestamp, pull_requests):
-    data = json.loads(STATE_PATHS[0].read_text(encoding="utf-8"))
-    changed = collect_changes(data, pull_requests)
-    if all(pending_changes_equal(path, changed) for path in PENDING_PATHS):
-        return changed, False
-    payload = pending_payload(timestamp, pull_requests, changed)
-    for path in PENDING_PATHS:
-        path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return changed, True
-
-
 def append_audit(path, timestamp, changed):
     if not changed:
         return
@@ -314,15 +286,54 @@ def append_audit(path, timestamp, changed):
         handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
+def print_markdown(changed):
+    print("| 任务ID | 事项 | 风险变化 | PR链接变化 | 候选PR |")
+    print("| --- | --- | --- | --- | --- |")
+    if not changed:
+        print("| - | 暂无建议变更 | - | - | - |")
+        return
+    for item in changed:
+        risk = f"{item.get('old_risk') or '-'} -> {item.get('risk') or '-'}"
+        link = f"{short_links(item.get('old_pr_link'))} -> {short_links(item.get('pr_link'))}"
+        prs = "<br>".join(format_pr(pr) for pr in item.get("prs", [])) or "-"
+        print(f"| {item.get('id') or ''} | {safe_cell(item.get('title') or '')} | {safe_cell(risk)} | {safe_cell(link)} | {safe_cell(prs)} |")
+
+
+def short_links(value):
+    links = str(value or "").split()
+    if not links:
+        return "-"
+    return " ".join(short_link(link) for link in links)
+
+
+def short_link(link):
+    match = re.search(r"/pull/(\d+)", str(link))
+    return f"#{match.group(1)}" if match else str(link)
+
+
+def format_pr(pr):
+    state = "已合入" if pr.get("merged_at") else "开放" if pr.get("state") == "open" else "已关闭"
+    return f"#{pr.get('number')} {state} {pr.get('title') or ''}"
+
+
+def safe_cell(value):
+    return str(value).replace("|", "\\|").replace("\n", " ")
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dry-run", action="store_true", help="only write pending review table")
+    parser.add_argument("--apply", action="store_true", help="write confirmed PR links and risks to project data")
+    parser.add_argument("--format", choices=["json", "markdown"], default="json", help="output format when not applying")
     args = parser.parse_args()
     timestamp = now_bj()
     pull_requests = fetch_pull_requests()
-    if args.dry_run:
-        changed, wrote = write_pending_reports(timestamp, pull_requests)
-        print(json.dumps({"pull_requests": len(pull_requests), "pending": len(changed), "wrote": wrote}, ensure_ascii=False))
+    if not args.apply:
+        data = json.loads(STATE_PATHS[0].read_text(encoding="utf-8"))
+        changed = collect_changes(data, pull_requests)
+        if args.format == "markdown":
+            print_markdown(changed)
+        else:
+            print(json.dumps({"pull_requests": len(pull_requests), "candidates": len(changed), "changes": changed}, ensure_ascii=False, indent=2))
         return
     first_changed = None
     for path in STATE_PATHS:

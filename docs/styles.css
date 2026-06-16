@@ -103,22 +103,6 @@ td .link-input { min-width:220px; }
 .audit-item { display:grid; grid-template-columns:190px 1fr; gap:10px; padding:9px 10px; border:1px solid var(--line); background:#fffaf1; }
 .audit-item time { color:var(--muted); font-size:12px; }
 .empty { color:var(--muted); }
-.pending-panel { border-left:4px solid var(--ink); }
-.pending-meta { display:flex; flex-wrap:wrap; gap:10px 16px; margin-bottom:10px; color:var(--muted); font-size:12px; }
-.table-wrap.compact { max-height:320px; overflow:auto; border:1px solid var(--line); }
-.pending-table th,.pending-table td { padding:8px 10px; vertical-align:top; }
-.pending-table td strong,.pending-table td small { display:block; }
-.pending-table td small,.muted { color:var(--muted); }
-.risk-badge { display:inline-flex; justify-content:center; min-width:34px; padding:3px 8px; border-radius:999px; color:white; font-weight:900; font-size:12px; }
-.risk-badge.high { background:var(--high); }
-.risk-badge.medium { background:var(--medium); }
-.risk-badge.low { background:var(--low); }
-.arrow { color:var(--muted); padding:0 4px; }
-.link-diff { display:flex; gap:6px; align-items:center; margin:0 0 4px; }
-.link-diff em { min-width:20px; color:var(--muted); font-style:normal; font-size:12px; }
-.matched-pr { display:block; margin:0 0 6px; }
-.matched-pr em { margin-left:6px; padding:2px 6px; border-radius:999px; background:#eee2cf; color:#514638; font-style:normal; font-size:11px; }
-.matched-pr b { display:block; margin-top:2px; color:#3b342d; font-size:12px; }
 .admin-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
 .admin-grid h3 { margin:0 0 8px; font-size:14px; color:#514638; }
 .admin-list { display:grid; gap:8px; }

@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-16T23:29:43+08:00",
+  "generatedAt": "2026-06-16T23:50:51+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -293,7 +293,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60"
+      "pr_link": ""
     },
     {
       "id": "t02",
@@ -323,7 +323,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34"
+      "pr_link": ""
     },
     {
       "id": "t03",
@@ -353,7 +353,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/44 https://github.com/flashserve/flash-linear-attention-npu/pull/36"
+      "pr_link": ""
     },
     {
       "id": "t04",
@@ -383,7 +383,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/5"
+      "pr_link": ""
     },
     {
       "id": "t05",
@@ -413,7 +413,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/18"
+      "pr_link": ""
     },
     {
       "id": "t06",
@@ -443,7 +443,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/49"
+      "pr_link": ""
     },
     {
       "id": "t07",
@@ -473,7 +473,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/14"
+      "pr_link": ""
     },
     {
       "id": "t08",
@@ -563,7 +563,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/15 https://github.com/flashserve/flash-linear-attention-npu/pull/45"
+      "pr_link": ""
     },
     {
       "id": "t11",
@@ -593,7 +593,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/55 https://github.com/flashserve/flash-linear-attention-npu/pull/48 https://github.com/flashserve/flash-linear-attention-npu/pull/34"
+      "pr_link": ""
     },
     {
       "id": "t12",
@@ -654,7 +654,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/15"
+      "pr_link": ""
     },
     {
       "id": "t14",
@@ -684,7 +684,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/20"
+      "pr_link": ""
     },
     {
       "id": "t15",
@@ -714,7 +714,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/64"
+      "pr_link": ""
     },
     {
       "id": "t16",
@@ -744,7 +744,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/61"
+      "pr_link": ""
     },
     {
       "id": "t17",
@@ -774,7 +774,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60"
+      "pr_link": ""
     },
     {
       "id": "t18",
@@ -804,7 +804,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/15"
+      "pr_link": ""
     },
     {
       "id": "t19",
@@ -834,7 +834,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/54"
+      "pr_link": ""
     },
     {
       "id": "t20",
@@ -864,7 +864,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/54"
+      "pr_link": ""
     },
     {
       "id": "t21",
@@ -894,7 +894,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/55"
+      "pr_link": ""
     },
     {
       "id": "t22",
@@ -924,7 +924,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/17"
+      "pr_link": ""
     },
     {
       "id": "t23",
@@ -1041,7 +1041,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60"
+      "pr_link": ""
     },
     {
       "id": "t27",
@@ -1071,7 +1071,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/53"
+      "pr_link": ""
     },
     {
       "id": "t28",
@@ -1101,7 +1101,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/44 https://github.com/flashserve/flash-linear-attention-npu/pull/36"
+      "pr_link": ""
     },
     {
       "id": "t29",
@@ -1131,7 +1131,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/20"
+      "pr_link": ""
     },
     {
       "id": "t30",
@@ -1161,7 +1161,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/18 https://github.com/flashserve/flash-linear-attention-npu/pull/17"
+      "pr_link": ""
     },
     {
       "id": "t31",
@@ -1191,7 +1191,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/61"
+      "pr_link": ""
     },
     {
       "id": "t32",
@@ -1221,7 +1221,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/49"
+      "pr_link": ""
     },
     {
       "id": "t33",
@@ -1281,7 +1281,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60 https://github.com/flashserve/flash-linear-attention-npu/pull/58"
+      "pr_link": ""
     },
     {
       "id": "t36",
@@ -1311,7 +1311,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/44 https://github.com/flashserve/flash-linear-attention-npu/pull/36"
+      "pr_link": ""
     },
     {
       "id": "t38",
@@ -1341,7 +1341,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/18 https://github.com/flashserve/flash-linear-attention-npu/pull/17"
+      "pr_link": ""
     },
     {
       "id": "t39",
@@ -1371,7 +1371,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/61"
+      "pr_link": ""
     },
     {
       "id": "t40",
@@ -1401,7 +1401,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/49"
+      "pr_link": ""
     },
     {
       "id": "t41",
@@ -1431,7 +1431,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/64"
+      "pr_link": ""
     },
     {
       "id": "t42",
@@ -1490,7 +1490,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/53"
+      "pr_link": ""
     }
   ],
   "people": [

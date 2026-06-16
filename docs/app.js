@@ -3,10 +3,8 @@ const API_ROOT = `https://api.github.com/repos/${REPO.owner}/${REPO.name}`;
 const DATA_PATHS = {
   state: "data/project-state.json",
   audit: "data/audit-log.jsonl",
-  pending: "data/pending-pr-sync.json",
   pageState: "docs/project-state.json",
   pageAudit: "docs/audit-log.jsonl",
-  pagePending: "docs/pending-pr-sync.json",
 };
 
 const OPERATOR_RULES = [
@@ -38,7 +36,6 @@ const OPERATOR_OWNER_RULES = {
 const state = {
   data: null,
   audit: [],
-  pending: { changes: [] },
   token: sessionStorage.getItem("flashPagesToken") || "",
   dirtyTaskIds: new Set(),
   baseTimeline: { start: "", end: "", total: 1 },
@@ -52,15 +49,13 @@ const $ = (selector) => document.querySelector(selector);
 
 async function load() {
   const stamp = Date.now();
-  const [dataRes, auditRes, pendingRes] = await Promise.all([
+  const [dataRes, auditRes] = await Promise.all([
     fetch(`./project-state.json?v=${stamp}`),
     fetch(`./audit-log.jsonl?v=${stamp}`).catch(() => null),
-    fetch(`./pending-pr-sync.json?v=${stamp}`).catch(() => null),
   ]);
   if (!dataRes.ok) throw new Error("未读取到 project-state.json");
   state.data = await dataRes.json();
   state.audit = auditRes && auditRes.ok ? parseAudit(await auditRes.text()) : [];
-  state.pending = pendingRes && pendingRes.ok ? await pendingRes.json() : { changes: [] };
   ensurePeopleCatalog();
   render();
 }
@@ -113,7 +108,6 @@ function render() {
   renderPeopleView(tasks);
   renderOperatorView(tasks);
   renderTableFilters();
-  renderPendingPrSync();
   renderRows(tasks);
   renderAdmin();
   renderAudit();
@@ -948,70 +942,6 @@ function renderAdmin() {
   document.querySelectorAll("[data-admin]").forEach((button) => button.addEventListener("click", () => handleAdminAction(button).catch(showError)));
 }
 
-function renderPendingPrSync() {
-  const changes = state.pending?.changes || [];
-  $("#applyPendingPrSync").disabled = !changes.length;
-  if (!changes.length) {
-    $("#pendingPrSync").innerHTML = `<p class="empty">暂无待确认 PR 同步变更。定时扫描发现变化后，会先展示在这里，不会直接修改任务。</p>`;
-    return;
-  }
-  $("#pendingPrSync").innerHTML = `
-    <div class="pending-meta">
-      <span>扫描时间：${escapeHtml(state.pending.generatedAt || "未知")}</span>
-      <span>扫描 PR：${escapeHtml(state.pending.pullRequests ?? "-")} 个</span>
-      <span>${escapeHtml(state.pending.rule || "")}</span>
-    </div>
-    <div class="table-wrap compact">
-      <table class="pending-table">
-        <thead>
-          <tr>
-            <th>事项</th>
-            <th>风险变化</th>
-            <th>PR 链接变化</th>
-            <th>匹配 PR</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${changes.map((change) => `
-            <tr>
-              <td><strong>${escapeHtml(change.title || change.id)}</strong><small>${escapeHtml(change.id || "")}</small></td>
-              <td>${riskBadge(change.old_risk)} <span class="arrow">→</span> ${riskBadge(change.risk)}</td>
-              <td>
-                <div class="link-diff"><em>原</em>${prLinksHtml(change.old_pr_link)}</div>
-                <div class="link-diff"><em>新</em>${prLinksHtml(change.pr_link)}</div>
-              </td>
-              <td>${matchedPrsHtml(change.prs || [])}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-function riskBadge(value) {
-  return `<span class="risk-badge ${riskClass(value)}">${escapeHtml(value || "-")}</span>`;
-}
-
-function prLinksHtml(value) {
-  const links = String(value || "").split(/\s+/).filter(Boolean);
-  if (!links.length) return `<span class="muted">-</span>`;
-  return links.map((link) => `<a href="${escapeAttr(link)}" target="_blank" rel="noopener">${escapeHtml(prShortName(link))}</a>`).join(" ");
-}
-
-function matchedPrsHtml(prs) {
-  if (!prs.length) return `<span class="muted">未匹配</span>`;
-  return prs.map((pr) => {
-    const stateLabel = pr.merged_at ? "已合入" : pr.state === "open" ? "开放" : "已关闭";
-    return `<span class="matched-pr"><a href="${escapeAttr(pr.url)}" target="_blank" rel="noopener">#${escapeHtml(pr.number)}</a><em>${escapeHtml(stateLabel)}</em><b>${escapeHtml(pr.title || "")}</b></span>`;
-  }).join("");
-}
-
-function prShortName(link) {
-  const match = String(link).match(/\/pull\/(\d+)/);
-  return match ? `#${match[1]}` : link;
-}
-
 function renderAudit() {
   const recent = state.audit.slice(-10).reverse();
   $("#audit").innerHTML = recent.length
@@ -1246,59 +1176,6 @@ function renameOwnerInTasks(oldName, newName) {
   });
 }
 
-async function applyPendingPrSync() {
-  requireToken();
-  const changes = state.pending?.changes || [];
-  if (!changes.length) {
-    alert("没有待确认 PR 同步变更。");
-    return;
-  }
-  if (!confirm(`确认应用 ${changes.length} 项 PR 链接/风险变更？`)) return;
-  const timestamp = nowIso();
-  const byId = new Map((state.data.tasks || []).map((task) => [task.id, task]));
-  const applied = [];
-  changes.forEach((change) => {
-    const task = byId.get(change.id);
-    if (!task) return;
-    task.pr_link = change.pr_link || "";
-    task.risk = change.risk || task.risk;
-    task.updated_at = timestamp;
-    applied.push(change.id);
-  });
-  state.data.generatedAt = timestamp;
-  const entry = {
-    ts: timestamp,
-    action: "pr_scan.confirm",
-    entity: "project",
-    id: "pending-pr-sync",
-    summary: `确认应用 PR 同步：${applied.length} 项`,
-    detail: { ids: applied },
-    source: "github-pages",
-  };
-  state.audit.push(entry);
-  state.pending = {
-    generatedAt: timestamp,
-    sourceRepo: state.pending?.sourceRepo || "flashserve/flash-linear-attention-npu",
-    pullRequests: state.pending?.pullRequests || 0,
-    rule: state.pending?.rule || "待确认：已合入 PR 建议低风险；开放 PR 建议中风险；未匹配 PR 建议高风险。",
-    changes: [],
-  };
-  const stateText = JSON.stringify(state.data, null, 2) + "\n";
-  const auditText = state.audit.map((item) => JSON.stringify(item)).join("\n") + "\n";
-  const pendingText = JSON.stringify(state.pending, null, 2) + "\n";
-  $("#editStatus").textContent = "正在应用 PR 同步确认...";
-  await commitFiles({
-    [DATA_PATHS.state]: stateText,
-    [DATA_PATHS.pageState]: stateText,
-    [DATA_PATHS.audit]: auditText,
-    [DATA_PATHS.pageAudit]: auditText,
-    [DATA_PATHS.pending]: pendingText,
-    [DATA_PATHS.pagePending]: pendingText,
-  }, `确认应用 PR 同步：${applied.length}项`);
-  $("#editStatus").textContent = "已应用 PR 同步，Pages 稍后刷新";
-  render();
-}
-
 async function saveRepository(summary, action, entity, id, detail = {}) {
   requireToken();
   ensurePeopleCatalog();
@@ -1494,7 +1371,6 @@ $("#saveAll").addEventListener("click", () => saveAllTasks().catch(showError));
 $("#addGroup").addEventListener("click", () => addGroup().catch(showError));
 $("#addSpecial").addEventListener("click", () => addSpecial().catch(showError));
 $("#addPerson").addEventListener("click", () => addPerson().catch(showError));
-$("#applyPendingPrSync").addEventListener("click", () => applyPendingPrSync().catch(showError));
 
 function showError(error) {
   $("#editStatus").textContent = `写入失败：${error.message}`;
