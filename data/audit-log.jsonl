@@ -1,1 +1,2 @@
-{"action": "state.init", "detail": {}, "entity": "project", "id": "flash-linear-attention-npu", "source": "web", "summary": "initial repository snapshot", "ts": "2026-06-16T09:54:27+08:00"}
+{"action":"state.init","detail":{},"entity":"project","id":"flash-linear-attention-npu","source":"web","summary":"initial repository snapshot","ts":"2026-06-16T09:54:27+08:00"}
+{"ts":"2026-06-16T03:30:31+08:00","action":"task.update","entity":"task","id":"t04","summary":"更新任务：dv_local GVA && Vdim 256","detail":{"title":"dv_local GVA && Vdim 256"},"source":"github-pages"}
