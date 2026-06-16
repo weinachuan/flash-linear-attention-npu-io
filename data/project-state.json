@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-16T14:51:24+08:00",
+  "generatedAt": "2026-06-16T23:11:34+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -14,9 +14,9 @@
     "notes": "Based on user-provided transfer-test plan. External tracker, calendar, PR, issue, and test data are not connected yet."
   },
   "repoScan": {
-    "scanDate": "2026-06-15",
+    "scanDate": "2026-06-16",
     "repositoryHead": "4198b83e7e609333bf9d957520427ad751f8ef52",
-    "rule": "已合入标低风险；未合入但有开放 PR 标中风险；未找到 PR 标高风险。",
+    "rule": "已合入 PR 标低风险；未合入但匹配到 PR 标中风险；未匹配到 PR 标高风险。",
     "source": {
       "openPulls": "https://github.com/flashserve/flash-linear-attention-npu/pulls?q=is%3Apr+is%3Aopen",
       "closedPulls": "https://github.com/flashserve/flash-linear-attention-npu/pulls?q=is%3Apr+is%3Aclosed"
@@ -283,7 +283,7 @@
       "notes": "",
       "position": 0,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-ad6ef8526b",
@@ -292,7 +292,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60"
     },
     {
       "id": "t02",
@@ -312,7 +313,7 @@
       "notes": "",
       "position": 1,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-9f801d9dcb",
@@ -321,7 +322,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34"
     },
     {
       "id": "t03",
@@ -341,7 +343,7 @@
       "notes": "",
       "position": 2,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-0801e04687",
@@ -350,7 +352,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/44 https://github.com/flashserve/flash-linear-attention-npu/pull/36"
     },
     {
       "id": "t04",
@@ -359,7 +362,7 @@
       "target": "",
       "owner": "陈琳鑫/叶倩雯",
       "status": "todo",
-      "risk": "中",
+      "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
       "special_id": "",
@@ -370,7 +373,7 @@
       "notes": "",
       "position": 3,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T03:30:31+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-4d160c57ee",
@@ -379,7 +382,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/5"
     },
     {
       "id": "t05",
@@ -388,7 +392,7 @@
       "target": "",
       "owner": "黄浚哲",
       "status": "todo",
-      "risk": "中",
+      "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
       "special_id": null,
@@ -399,7 +403,7 @@
       "notes": "",
       "position": 4,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-71650b131f",
@@ -408,7 +412,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/18"
     },
     {
       "id": "t06",
@@ -428,7 +433,7 @@
       "notes": "",
       "position": 5,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-5ebbafe401",
@@ -437,7 +442,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/49"
     },
     {
       "id": "t07",
@@ -446,7 +452,7 @@
       "target": "",
       "owner": "陈市",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P0",
       "group_id": "M-2026-06-18",
       "special_id": null,
@@ -457,7 +463,7 @@
       "notes": "",
       "position": 6,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:51:24+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-9b4561eff2",
@@ -466,7 +472,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": ""
     },
     {
       "id": "t08",
@@ -475,7 +482,7 @@
       "target": "",
       "owner": "龚翔宇",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P2",
       "group_id": "M-2026-06-18",
       "special_id": null,
@@ -486,7 +493,7 @@
       "notes": "",
       "position": 7,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-5063433fe7",
@@ -495,7 +502,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": ""
     },
     {
       "id": "t09",
@@ -504,7 +512,7 @@
       "target": "",
       "owner": "陈琳鑫/叶倩雯",
       "status": "todo",
-      "risk": "中",
+      "risk": "高",
       "priority": "P0",
       "group_id": "M-2026-06-18",
       "special_id": "",
@@ -515,7 +523,7 @@
       "notes": "",
       "position": 8,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T03:34:27+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-f6b0d1664a",
@@ -524,7 +532,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": ""
     },
     {
       "id": "t10",
@@ -544,7 +553,7 @@
       "notes": "",
       "position": 9,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-dcd9523a43",
@@ -553,7 +562,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/15 https://github.com/flashserve/flash-linear-attention-npu/pull/45"
     },
     {
       "id": "t11",
@@ -573,7 +583,7 @@
       "notes": "",
       "position": 10,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-ba848d33d5",
@@ -582,7 +592,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/55 https://github.com/flashserve/flash-linear-attention-npu/pull/48 https://github.com/flashserve/flash-linear-attention-npu/pull/34"
     },
     {
       "id": "t12",
@@ -633,7 +644,7 @@
       "notes": "",
       "position": 12,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-15b69a8629",
@@ -642,7 +653,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/15"
     },
     {
       "id": "t14",
@@ -651,7 +663,7 @@
       "target": "",
       "owner": "陈琳鑫",
       "status": "todo",
-      "risk": "低",
+      "risk": "中",
       "priority": "P1",
       "group_id": "M-2026-06-18",
       "special_id": "launch",
@@ -662,7 +674,7 @@
       "notes": "",
       "position": 13,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-c0b280b344",
@@ -671,7 +683,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/20"
     },
     {
       "id": "t15",
@@ -680,7 +693,7 @@
       "target": "",
       "owner": "龚翔宇",
       "status": "todo",
-      "risk": "高",
+      "risk": "中",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": null,
@@ -691,7 +704,7 @@
       "notes": "临时插入其它任务",
       "position": 14,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T03:43:30+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-4783e662-d",
@@ -700,7 +713,8 @@
           "reason": "临时插入其它任务",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/64"
     },
     {
       "id": "t16",
@@ -709,7 +723,7 @@
       "target": "",
       "owner": "方梓阳",
       "status": "todo",
-      "risk": "高",
+      "risk": "中",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": null,
@@ -720,7 +734,7 @@
       "notes": "",
       "position": 15,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-7f49a81021",
@@ -729,7 +743,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/61"
     },
     {
       "id": "t17",
@@ -749,7 +764,7 @@
       "notes": "",
       "position": 16,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-21513d9491",
@@ -758,7 +773,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60"
     },
     {
       "id": "t18",
@@ -778,7 +794,7 @@
       "notes": "",
       "position": 17,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-d973d56d97",
@@ -787,7 +803,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/15"
     },
     {
       "id": "t19",
@@ -807,7 +824,7 @@
       "notes": "",
       "position": 18,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-057cf6f872",
@@ -816,7 +833,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/54"
     },
     {
       "id": "t20",
@@ -836,7 +854,7 @@
       "notes": "",
       "position": 19,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-2015742518",
@@ -845,7 +863,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/54"
     },
     {
       "id": "t21",
@@ -865,7 +884,7 @@
       "notes": "",
       "position": 20,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-46f78664fa",
@@ -874,7 +893,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/55"
     },
     {
       "id": "t22",
@@ -894,7 +914,7 @@
       "notes": "",
       "position": 21,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:51:24+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-d1bde83de6",
@@ -903,7 +923,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/17"
     },
     {
       "id": "t23",
@@ -999,7 +1020,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1010,7 +1031,7 @@
       "notes": "",
       "position": 25,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-a627326868",
@@ -1019,7 +1040,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60"
     },
     {
       "id": "t27",
@@ -1028,7 +1050,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1039,7 +1061,7 @@
       "notes": "",
       "position": 26,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-91bb5dea40",
@@ -1048,7 +1070,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/53"
     },
     {
       "id": "t28",
@@ -1057,7 +1080,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1068,7 +1091,7 @@
       "notes": "",
       "position": 27,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-23fd52047e",
@@ -1077,7 +1100,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/44 https://github.com/flashserve/flash-linear-attention-npu/pull/36"
     },
     {
       "id": "t29",
@@ -1086,7 +1110,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "高",
+      "risk": "中",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1097,7 +1121,7 @@
       "notes": "",
       "position": 28,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-a767a20051",
@@ -1106,7 +1130,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/20"
     },
     {
       "id": "t30",
@@ -1115,7 +1140,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1126,7 +1151,7 @@
       "notes": "",
       "position": 29,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-3ec22781b8",
@@ -1135,7 +1160,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/18 https://github.com/flashserve/flash-linear-attention-npu/pull/17"
     },
     {
       "id": "t31",
@@ -1144,7 +1170,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "高",
+      "risk": "中",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1155,7 +1181,7 @@
       "notes": "",
       "position": 30,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-017bc195b5",
@@ -1164,7 +1190,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/61"
     },
     {
       "id": "t32",
@@ -1173,7 +1200,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1184,7 +1211,7 @@
       "notes": "",
       "position": 31,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-c40d713206",
@@ -1193,7 +1220,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/49"
     },
     {
       "id": "t33",
@@ -1202,7 +1230,7 @@
       "target": "",
       "owner": "对应算子责任人",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1213,7 +1241,7 @@
       "notes": "",
       "position": 32,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-10b0afbaaa",
@@ -1222,7 +1250,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/14 https://github.com/flashserve/flash-linear-attention-npu/pull/64 https://github.com/flashserve/flash-linear-attention-npu/pull/13"
     },
     {
       "id": "t34",
@@ -1231,7 +1260,7 @@
       "target": "",
       "owner": "法振尧",
       "status": "todo",
-      "risk": "中",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1242,7 +1271,7 @@
       "notes": "",
       "position": 33,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-ef7acb84aa",
@@ -1251,7 +1280,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60"
     },
     {
       "id": "t36",
@@ -1260,7 +1290,7 @@
       "target": "",
       "owner": "方梓阳",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1271,7 +1301,7 @@
       "notes": "",
       "position": 35,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-31d82f9f10",
@@ -1280,7 +1310,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/44 https://github.com/flashserve/flash-linear-attention-npu/pull/36"
     },
     {
       "id": "t38",
@@ -1289,7 +1320,7 @@
       "target": "",
       "owner": "黄浚哲",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1300,7 +1331,7 @@
       "notes": "",
       "position": 37,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-23a092ebd3",
@@ -1309,7 +1340,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/18 https://github.com/flashserve/flash-linear-attention-npu/pull/17"
     },
     {
       "id": "t39",
@@ -1318,7 +1350,7 @@
       "target": "",
       "owner": "方梓阳",
       "status": "todo",
-      "risk": "高",
+      "risk": "中",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1329,7 +1361,7 @@
       "notes": "",
       "position": 38,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-797e0353b8",
@@ -1338,7 +1370,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/61"
     },
     {
       "id": "t40",
@@ -1347,7 +1380,7 @@
       "target": "",
       "owner": "杨子奇",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1358,7 +1391,7 @@
       "notes": "",
       "position": 39,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-709935c665",
@@ -1367,7 +1400,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/49"
     },
     {
       "id": "t41",
@@ -1376,7 +1410,7 @@
       "target": "",
       "owner": "吴雨舒",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1387,7 +1421,7 @@
       "notes": "",
       "position": 40,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-9c104cb6fd",
@@ -1396,7 +1430,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/14 https://github.com/flashserve/flash-linear-attention-npu/pull/64 https://github.com/flashserve/flash-linear-attention-npu/pull/13"
     },
     {
       "id": "t42",
@@ -1445,7 +1480,7 @@
       "notes": "",
       "position": 42,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T09:22:27+08:00",
+      "updated_at": "2026-06-16T23:11:34+08:00",
       "segments": [
         {
           "id": "seg-4e2c4c818c",
@@ -1454,7 +1489,8 @@
           "reason": "",
           "position": 0
         }
-      ]
+      ],
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/53"
     }
   ],
   "people": [
