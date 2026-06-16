@@ -7,6 +7,20 @@ const DATA_PATHS = {
   pageAudit: "docs/audit-log.jsonl",
 };
 
+const OPERATOR_RULES = [
+  { id: "chunk_gated_delta_rule_fwd_h", label: "chunk_gated_delta_rule_fwd_h", aliases: ["chunk_gated_delta_rule_fwd_h", "fwd_h"] },
+  { id: "chunk_fwd_o", label: "chunk_fwd_o", aliases: ["chunk_fwd_o", "fwd_o"] },
+  { id: "recompute_wu_fwd", label: "recompute_wu_fwd", aliases: ["recompute_wu_fwd", "recompute_w_u", "recompute_wu", "recompute"] },
+  { id: "chunk_bwd_dv_local", label: "chunk_bwd_dv_local", aliases: ["chunk_bwd_dv_local", "chunk_dv_local", "dv_local"] },
+  { id: "chunk_bwd_dqkwg", label: "chunk_bwd_dqkwg", aliases: ["chunk_bwd_dqkwg", "dqkwg"] },
+  { id: "chunk_gated_delta_rule_bwd_dhu", label: "chunk_gated_delta_rule_bwd_dhu", aliases: ["chunk_gated_delta_rule_bwd_dhu", "dhu"] },
+  { id: "prepare_wy_repr_bwd_da", label: "prepare_wy_repr_bwd_da", aliases: ["prepare_wy_repr_bwd_da", "prepare_wy_bwd_da"] },
+  { id: "prepare_wy_repr_bwd_full", label: "prepare_wy_repr_bwd_full", aliases: ["prepare_wy_repr_bwd_full", "prepare_wy_bwd_full"] },
+  { id: "causal_conv1d", label: "causal_conv1d", aliases: ["causal_conv1d_fwd", "causal_conv1d bwd", "causal_conv1d_bwd", "causal_conv1d"] },
+  { id: "solve_tril_npu", label: "solve_tril_npu", aliases: ["solve_tril_npu", "solve_tril", "solve_tri"] },
+  { id: "kimi_delta_attention_triton", label: "kimi_delta_attention_triton", aliases: ["kimi_delta_attention", "KDA triton", "KDA"] },
+];
+
 const state = {
   data: null,
   audit: [],
@@ -30,6 +44,7 @@ async function load() {
   if (!dataRes.ok) throw new Error("未读取到 project-state.json");
   state.data = await dataRes.json();
   state.audit = auditRes && auditRes.ok ? parseAudit(await auditRes.text()) : [];
+  ensurePeopleCatalog();
   render();
 }
 
@@ -427,9 +442,9 @@ function renderGantt(tasks) {
       const clippedEnd = minDate(segment.end_date, end);
       const left = daysBetween(start, clippedStart) / total * 100;
       const width = Math.max(1.2, (daysBetween(clippedStart, clippedEnd) + 1) / total * 100);
-      return `<span class="bar" data-risk="${task.risk}" data-task-id="${escapeAttr(task.id)}" data-segment-index="${index}" style="left:${left}%;width:${width}%" title="${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}；编辑模式下拖动移动，边缘拉伸"></span>`;
+      return `<span class="bar" data-risk="${task.risk}" data-task-id="${escapeAttr(task.id)}" data-segment-index="${index}" style="left:${left}%;width:${width}%" title="${escapeHtml(displayTaskTitle(task))}：${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}；编辑模式下拖动移动，边缘拉伸"></span>`;
     }).join("");
-    return `<div class="gantt-row"><div class="gantt-title">${escapeHtml(task.title)}</div><div class="track">${bars}</div></div>`;
+    return `<div class="gantt-row"><div class="gantt-title">${escapeHtml(displayTaskTitle(task))}</div><div class="track">${bars}</div></div>`;
   }).join("");
   document.querySelectorAll(".bar").forEach((bar) => {
     bar.addEventListener("dblclick", () => {
@@ -441,7 +456,7 @@ function renderGantt(tasks) {
 
 function renderPeopleView(tasks) {
   const days = dateList(state.view.start, state.view.end);
-  const owners = [...new Set(tasks.map((task) => task.owner || "待填写"))].sort((a, b) => a.localeCompare(b, "zh-CN"));
+  const people = peopleForTasks(tasks);
   if (!tasks.length) {
     $("#peopleView").innerHTML = `<p class="empty">当前时间窗口内没有符合筛选条件的人力安排。</p>`;
     return;
@@ -452,15 +467,15 @@ function renderPeopleView(tasks) {
       <table class="people-grid">
         <thead>
           <tr>
-            <th class="people-owner-head">负责人</th>
+            <th class="people-owner-head">人员</th>
             ${days.map((day) => `<th><strong>${formatMonthDay(day)}</strong><small>${weekdayName(day)}</small></th>`).join("")}
           </tr>
         </thead>
         <tbody>
-          ${owners.map((owner) => `
+          ${people.map((person) => `
             <tr>
-              <th class="people-owner">${escapeHtml(owner)}</th>
-              ${days.map((day) => `<td>${tasksForOwnerOnDay(tasks, owner, day).map(taskChipHtml).join("")}</td>`).join("")}
+              <th class="people-owner">${personChipHtml(person)}</th>
+              ${days.map((day) => `<td>${tasksForPersonOnDay(tasks, person, day).map(taskChipHtml).join("")}</td>`).join("")}
             </tr>
           `).join("")}
         </tbody>
@@ -470,96 +485,177 @@ function renderPeopleView(tasks) {
 }
 
 function renderOperatorView(tasks) {
-  if (!tasks.length) {
+  const rows = operatorRows(tasks);
+  if (!rows.length) {
     $("#operatorView").innerHTML = `<p class="empty">当前时间窗口内没有符合筛选条件的算子事项。</p>`;
     return;
   }
-  const groups = new Map();
-  tasks.forEach((task) => {
-    const operator = operatorName(task);
-    if (!groups.has(operator)) groups.set(operator, []);
-    groups.get(operator).push(task);
-  });
-  const cards = [...groups.entries()]
-    .sort(([a], [b]) => a.localeCompare(b, "zh-CN"))
-    .map(([operator, items]) => {
-      const sorted = [...items].sort((a, b) => a.end_date.localeCompare(b.end_date) || a.title.localeCompare(b.title, "zh-CN"));
-      return `
-        <article class="operator-card">
-          <header>
-            <div>
-              <strong>${escapeHtml(operator)}</strong>
-              <span>${sorted.length} 个特性 / 事项</span>
+  const { start, end, total } = state.timeline;
+  $("#operatorView").innerHTML = `
+    <div class="view-note">按源仓算子全名聚合；每个算子一行，行内展示该算子的多个特性交付条。</div>
+    <div class="operator-gantt">
+      ${rows.map((row) => {
+        const bars = row.items.map((item, index) => {
+          const clippedStart = maxDate(item.task.start_date, start);
+          const clippedEnd = minDate(item.task.end_date, end);
+          const left = daysBetween(start, clippedStart) / total * 100;
+          const width = Math.max(2, (daysBetween(clippedStart, clippedEnd) + 1) / total * 100);
+          return `
+            <span class="operator-bar ${riskClass(item.task.risk)}" style="left:${left}%;width:${width}%;top:${index * 26 + 6}px" title="${escapeAttr(displayTaskTitle(item.task))} · ${escapeAttr(item.task.start_date)} ~ ${escapeAttr(item.task.end_date)}">
+              <b>${escapeHtml(featureTitle(item.task, item.operator))}</b>
+              <small>${escapeHtml(formatMonthDay(item.task.end_date))}</small>
+            </span>
+          `;
+        }).join("");
+        return `
+          <div class="operator-gantt-row" style="--lane-count:${Math.max(1, row.items.length)}">
+            <div class="operator-name">
+              <strong>${escapeHtml(row.operator.label)}</strong>
+              <span>${row.items.length} 项</span>
             </div>
-            <small>${escapeHtml(operatorTimeRange(sorted))}</small>
-          </header>
-          <div class="operator-features">
-            ${sorted.map((task) => `
-              <div class="operator-feature">
-                <div class="feature-main">
-                  <span class="tag ${riskClass(task.risk)}">${escapeHtml(task.risk)}</span>
-                  <span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span>
-                  <strong>${escapeHtml(featureTitle(task))}</strong>
-                </div>
-                <div class="feature-meta">
-                  <span>${escapeHtml(groupTitle(task.group_id))}</span>
-                  <span>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</span>
-                  <span>${escapeHtml(task.owner || "待填写")}</span>
-                  ${linkListHtml(task.pr_link, "PR")}
-                  ${linkListHtml(task.test_report, "报告")}
-                </div>
-              </div>
-            `).join("")}
+            <div class="operator-track">${bars}</div>
           </div>
-        </article>
-      `;
-    }).join("");
-  $("#operatorView").innerHTML = `<div class="operator-grid">${cards}</div>`;
+        `;
+      }).join("")}
+    </div>
+  `;
 }
 
-function tasksForOwnerOnDay(tasks, owner, day) {
-  return tasks.filter((task) => (task.owner || "待填写") === owner && taskSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day));
+function operatorRows(tasks) {
+  const rows = new Map();
+  tasks.forEach((task) => {
+    taskOperators(task).forEach((operator) => {
+      if (!rows.has(operator.id)) rows.set(operator.id, { operator, items: [] });
+      rows.get(operator.id).items.push({ task, operator });
+    });
+  });
+  return [...rows.values()].sort((a, b) => a.operator.label.localeCompare(b.operator.label, "zh-CN"))
+    .map((row) => ({
+      ...row,
+      items: [...row.items].sort((a, b) => a.task.end_date.localeCompare(b.task.end_date) || displayTaskTitle(a.task).localeCompare(displayTaskTitle(b.task), "zh-CN")),
+    }));
+}
+
+function tasksForPersonOnDay(tasks, person, day) {
+  return tasks.filter((task) => taskPeople(task).some((item) => item.id === person.id) && taskSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day));
 }
 
 function taskChipHtml(task) {
-  return `<span class="work-chip ${riskClass(task.risk)}" title="${escapeAttr(task.title)}">${escapeHtml(featureTitle(task))}</span>`;
+  return `<span class="work-chip ${riskClass(task.risk)}" title="${escapeAttr(displayTaskTitle(task))}">${escapeHtml(compactTaskTitle(task))}</span>`;
 }
 
-function operatorTimeRange(tasks) {
-  const starts = tasks.map((task) => task.start_date).filter(Boolean).sort();
-  const ends = tasks.map((task) => task.end_date).filter(Boolean).sort();
-  return starts.length && ends.length ? `${starts[0]} ~ ${ends[ends.length - 1]}` : "";
+function featureTitle(task, operator = taskOperators(task)[0]) {
+  let title = task.title || "";
+  if (title.includes("fwd_h 与 fwd_o")) title = title.replace("fwd_h 与 fwd_o", "");
+  if (title.startsWith("多算子")) return title;
+  const aliases = operator?.aliases || [];
+  const matched = aliases.find((alias) => title.toLowerCase().startsWith(alias.toLowerCase()));
+  if (matched) title = title.slice(matched.length);
+  title = title.replace(/^新增\s*/, "").replace(/^算子\s*/, "").trim();
+  return title || displayTaskTitle(task);
 }
 
-function operatorName(task) {
+function taskOperators(task) {
   const title = task.title || "";
-  const known = [
-    "prepare_wy_repr_bwd_full",
-    "prepare_wy_bwd_full",
-    "prepare_wy_bwd_da",
-    "recompute_w_u",
-    "causal_conv1d_fwd",
-    "causal_conv1d bwd",
-    "causal_conv1d",
-    "chunk_dv_local",
-    "dv_local",
-    "dqkwg",
-    "fwd_h",
-    "fwd_o",
-    "dhu",
-    "solve_tri",
-    "KDA",
-    "ops",
-  ];
+  if (/性能看板|一键编报|ops\s*目录整改/i.test(title)) return [];
+  if (title.startsWith("多算子")) {
+    return ["chunk_fwd_o", "chunk_gated_delta_rule_fwd_h", "chunk_gated_delta_rule_bwd_dhu", "recompute_wu_fwd", "chunk_bwd_dv_local", "chunk_bwd_dqkwg"].map(operatorById).filter(Boolean);
+  }
   const lower = title.toLowerCase();
-  const found = known.find((name) => lower.includes(name.toLowerCase()));
-  if (found) return found;
-  return title.split(/\s+/)[0] || "未归类";
+  const matched = [];
+  OPERATOR_RULES.forEach((operator) => {
+    if (operator.aliases.some((alias) => lower.includes(alias.toLowerCase()))) matched.push(operator);
+  });
+  return uniqueBy(matched, "id");
 }
 
-function featureTitle(task) {
-  const operator = operatorName(task);
-  return task.title.startsWith(operator) ? task.title.slice(operator.length).trim() || task.title : task.title;
+function operatorById(id) {
+  return OPERATOR_RULES.find((operator) => operator.id === id);
+}
+
+function displayTaskTitle(task) {
+  const operators = taskOperators(task);
+  if (!operators.length) return task.title || "";
+  let title = task.title || "";
+  const placeholders = [];
+  operators.forEach((operator) => {
+    operator.aliases
+      .slice()
+      .sort((a, b) => b.length - a.length)
+      .forEach((alias) => {
+        title = title.replace(new RegExp(escapeRegExp(alias), "ig"), () => {
+          const key = `__OP_${placeholders.length}__`;
+          placeholders.push([key, operator.label]);
+          return key;
+        });
+      });
+  });
+  placeholders.forEach(([key, label]) => { title = title.replaceAll(key, label); });
+  title = title.replace(/prepare_wy_repr_bwd_full\s+prepare_wy_repr_bwd_full/ig, "prepare_wy_repr_bwd_full");
+  return title;
+}
+
+function compactTaskTitle(task) {
+  const operators = taskOperators(task);
+  if (!operators.length) return task.title || "";
+  if (operators.length > 1) return featureTitle(task, operators[0]);
+  return featureTitle(task, operators[0]);
+}
+
+function ensurePeopleCatalog() {
+  const existing = new Map((state.data.people || []).map((person) => [person.name, person]));
+  const names = [];
+  (state.data.tasks || []).forEach((task) => splitOwnerNames(task.owner).forEach((name) => {
+    if (!names.includes(name)) names.push(name);
+  }));
+  const people = [];
+  names.forEach((name, index) => {
+    const current = existing.get(name);
+    people.push({
+      id: current?.id || `P${String(index + 1).padStart(2, "0")}`,
+      name,
+      position: Number.isFinite(current?.position) ? current.position : index,
+      placeholder: isPlaceholderOwner(name),
+    });
+  });
+  state.data.people = people.sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
+}
+
+function splitOwnerNames(owner) {
+  const raw = String(owner || "待填写").trim() || "待填写";
+  return raw.split(/[、/,，;；&]+/).map((name) => name.trim()).filter(Boolean);
+}
+
+function taskPeople(task) {
+  const byName = new Map((state.data.people || []).map((person) => [person.name, person]));
+  return splitOwnerNames(task.owner).map((name) => byName.get(name) || { id: "P??", name, position: 9999, placeholder: isPlaceholderOwner(name) });
+}
+
+function peopleForTasks(tasks) {
+  return uniqueBy(tasks.flatMap(taskPeople), "id").sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
+}
+
+function personChipHtml(person) {
+  const klass = person.placeholder ? " placeholder" : "";
+  return `<span class="person-chip${klass}"><b>${escapeHtml(person.id)}</b><em>${escapeHtml(person.name)}</em></span>`;
+}
+
+function ownerChipsHtml(task) {
+  return taskPeople(task).map(personChipHtml).join("");
+}
+
+function isPlaceholderOwner(name) {
+  return /待填|待排|对应/.test(name);
+}
+
+function uniqueBy(items, field) {
+  const seen = new Set();
+  return items.filter((item) => {
+    const key = item[field];
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function dateList(start, end) {
@@ -589,8 +685,8 @@ function renderRows(tasks) {
         <tr>
           <td><span class="tag ${riskClass(task.risk)}">${escapeHtml(task.risk)}</span></td>
           <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
-          <td>${escapeHtml(task.title)}</td>
-          <td>${escapeHtml(task.owner)}</td>
+          <td>${escapeHtml(displayTaskTitle(task))}</td>
+          <td>${ownerChipsHtml(task)}</td>
           <td>${escapeHtml(groupTitle(task.group_id))}</td>
           <td>${escapeHtml(specialTitle(task.special_id))}</td>
           <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
@@ -606,7 +702,7 @@ function renderRows(tasks) {
         <td>${selectHtml("risk", [["高","高"],["中","中"],["低","低"]], task.risk)}</td>
         <td>${selectHtml("priority", [["P0","P0"],["P1","P1"],["P2","P2"]], task.priority)}</td>
         <td><input class="title-input" data-field="title" value="${escapeAttr(task.title)}"></td>
-        <td><input data-field="owner" value="${escapeAttr(task.owner)}"></td>
+        <td><input data-field="owner" value="${escapeAttr(task.owner)}"><div class="owner-preview">${ownerChipsHtml(task)}</div></td>
         <td>${selectHtml("group_id", state.data.groups.map((g) => [g.id, g.title]), task.group_id)}</td>
         <td>${selectHtml("special_id", [["","普通事项"], ...state.data.specials.map((s) => [s.id, s.title])], task.special_id || "")}</td>
         <td><input type="date" data-field="start_date" value="${escapeAttr(task.start_date)}"> ~ <input type="date" data-field="end_date" value="${escapeAttr(task.end_date)}"></td>
@@ -903,6 +999,7 @@ async function handleAdminAction(button) {
 
 async function saveRepository(summary, action, entity, id, detail = {}) {
   requireToken();
+  ensurePeopleCatalog();
   state.data.generatedAt = nowIso();
   const entry = { ts: nowIso(), action, entity, id, summary, detail, source: "github-pages" };
   state.audit.push(entry);
@@ -1074,6 +1171,10 @@ function escapeHtml(value) {
 
 function escapeAttr(value) {
   return escapeHtml(value).replace(/`/g, "&#096;");
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 ["q", "risk", "priority", "status"].forEach((id) => {
