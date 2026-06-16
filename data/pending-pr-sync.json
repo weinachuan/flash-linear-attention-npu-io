@@ -1,7 +1,176 @@
 {
-  "generatedAt": "",
+  "generatedAt": "2026-06-16T23:40:04+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
-  "pullRequests": 0,
+  "pullRequests": 56,
   "rule": "待确认：已合入 PR 建议低风险；开放 PR 建议中风险；未匹配 PR 建议高风险。",
-  "changes": []
+  "changes": [
+    {
+      "id": "t01",
+      "title": "fwd_h GVA",
+      "old_pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65",
+      "old_risk": "低",
+      "risk": "低",
+      "prs": [
+        {
+          "number": 34,
+          "title": "GDN fwd_h/fwd_o ascendc performance optim",
+          "state": "closed",
+          "merged_at": "2026-06-08T09:29:16Z",
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/34"
+        },
+        {
+          "number": 65,
+          "title": "chunk_gated_delta_rule_fwd_h支持<<<>>>调用",
+          "state": "open",
+          "merged_at": null,
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/65"
+        }
+      ]
+    },
+    {
+      "id": "t10",
+      "title": "fwd_h 与 fwd_o 性能优化",
+      "old_pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/15 https://github.com/flashserve/flash-linear-attention-npu/pull/45",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/45",
+      "old_risk": "低",
+      "risk": "低",
+      "prs": [
+        {
+          "number": 34,
+          "title": "GDN fwd_h/fwd_o ascendc performance optim",
+          "state": "closed",
+          "merged_at": "2026-06-08T09:29:16Z",
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/34"
+        },
+        {
+          "number": 45,
+          "title": "chunk_fwd_o适配<<<>>>",
+          "state": "closed",
+          "merged_at": "2026-06-15T11:44:43Z",
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/45"
+        }
+      ]
+    },
+    {
+      "id": "t13",
+      "title": "fwd_o <<<>>> 方式调用",
+      "old_pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/15",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34",
+      "old_risk": "低",
+      "risk": "低",
+      "prs": [
+        {
+          "number": 45,
+          "title": "chunk_fwd_o适配<<<>>>",
+          "state": "closed",
+          "merged_at": "2026-06-15T11:44:43Z",
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/45"
+        },
+        {
+          "number": 34,
+          "title": "GDN fwd_h/fwd_o ascendc performance optim",
+          "state": "closed",
+          "merged_at": "2026-06-08T09:29:16Z",
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/34"
+        }
+      ]
+    },
+    {
+      "id": "t17",
+      "title": "fwd_h Vdim 256",
+      "old_pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65",
+      "old_risk": "低",
+      "risk": "低",
+      "prs": [
+        {
+          "number": 34,
+          "title": "GDN fwd_h/fwd_o ascendc performance optim",
+          "state": "closed",
+          "merged_at": "2026-06-08T09:29:16Z",
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/34"
+        },
+        {
+          "number": 65,
+          "title": "chunk_gated_delta_rule_fwd_h支持<<<>>>调用",
+          "state": "open",
+          "merged_at": null,
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/65"
+        }
+      ]
+    },
+    {
+      "id": "t18",
+      "title": "fwd_o Vdim 256",
+      "old_pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/15",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45 https://github.com/flashserve/flash-linear-attention-npu/pull/34",
+      "old_risk": "低",
+      "risk": "低",
+      "prs": [
+        {
+          "number": 45,
+          "title": "chunk_fwd_o适配<<<>>>",
+          "state": "closed",
+          "merged_at": "2026-06-15T11:44:43Z",
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/45"
+        },
+        {
+          "number": 34,
+          "title": "GDN fwd_h/fwd_o ascendc performance optim",
+          "state": "closed",
+          "merged_at": "2026-06-08T09:29:16Z",
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/34"
+        }
+      ]
+    },
+    {
+      "id": "t26",
+      "title": "fwd_h 对应场景文档更新",
+      "old_pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65",
+      "old_risk": "低",
+      "risk": "低",
+      "prs": [
+        {
+          "number": 34,
+          "title": "GDN fwd_h/fwd_o ascendc performance optim",
+          "state": "closed",
+          "merged_at": "2026-06-08T09:29:16Z",
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/34"
+        },
+        {
+          "number": 65,
+          "title": "chunk_gated_delta_rule_fwd_h支持<<<>>>调用",
+          "state": "open",
+          "merged_at": null,
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/65"
+        }
+      ]
+    },
+    {
+      "id": "t34",
+      "title": "fwd_h <<<>>> 调用示例",
+      "old_pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65 https://github.com/flashserve/flash-linear-attention-npu/pull/60 https://github.com/flashserve/flash-linear-attention-npu/pull/58",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/34 https://github.com/flashserve/flash-linear-attention-npu/pull/65",
+      "old_risk": "低",
+      "risk": "低",
+      "prs": [
+        {
+          "number": 34,
+          "title": "GDN fwd_h/fwd_o ascendc performance optim",
+          "state": "closed",
+          "merged_at": "2026-06-08T09:29:16Z",
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/34"
+        },
+        {
+          "number": 65,
+          "title": "chunk_gated_delta_rule_fwd_h支持<<<>>>调用",
+          "state": "open",
+          "merged_at": null,
+          "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/65"
+        }
+      ]
+    }
+  ]
 }
