@@ -294,13 +294,16 @@ function datesOverlap(startA, endA, startB, endB) {
 
 function renderTimeAxis() {
   const full = state.baseTimeline;
-  const milestones = timelineMilestones();
-  const ticks = timelineTicks(milestones);
+  const overviewMilestones = timelineMilestones(full);
+  const overviewTicks = timelineTicks(overviewMilestones, full);
+  const detail = state.timeline;
+  const detailMilestones = timelineMilestones(detail);
+  const detailTicks = timelineTicks(detailMilestones, detail);
   $("#timeAxis").innerHTML = `
     <div class="timeline-head">
       <div>
         <strong>DDL 与时间窗口</strong>
-        <span>拖动绿色窗口条可平移，拖动两端可缩放；也可以直接输入更长日期范围</span>
+        <span>上方为全量滑窗；下方当前窗口时间线与甘特图严格对齐</span>
       </div>
       <div class="timeline-actions">
         <label>开始 <input id="viewStartDate" type="date" value="${escapeAttr(state.view.start)}"></label>
@@ -310,14 +313,14 @@ function renderTimeAxis() {
         <button id="resetTimeline" type="button">显示全量</button>
       </div>
     </div>
-    <div id="timelineScale" class="timeline-scale">
+    <div id="timelineScale" class="timeline-scale overview-scale">
       <div class="axis-line"></div>
-      ${ticks.map((offset) => `
+      ${overviewTicks.map((offset) => `
         <span class="axis-tick" style="left:${slotCenterPct(offset, full.total)}%">
           <i></i><em>${formatMonthDay(addDays(full.start, offset))}</em>
         </span>
       `).join("")}
-      ${milestones.map((item) => `
+      ${overviewMilestones.map((item) => `
         <span class="ddl-marker" style="left:${slotCenterPct(item.offset, full.total)}%" title="${escapeAttr(item.title)}：${escapeAttr(item.date)}">
           <i></i>
           <b>DDL</b>
@@ -329,6 +332,24 @@ function renderTimeAxis() {
         <span class="timeline-window-edge" data-axis-mode="start"></span>
         <span class="timeline-window-label" data-axis-mode="move" id="viewText"></span>
         <span class="timeline-window-edge" data-axis-mode="end"></span>
+      </div>
+    </div>
+    <div class="detail-axis-grid">
+      <div class="detail-axis-label">当前窗口</div>
+      <div class="detail-scale">
+        <div class="axis-line"></div>
+        ${detailTicks.map((offset) => `
+          <span class="axis-tick" style="left:${slotCenterPct(offset, detail.total)}%">
+            <i></i><em>${formatMonthDay(addDays(detail.start, offset))}</em>
+          </span>
+        `).join("")}
+        ${detailMilestones.map((item) => `
+          <span class="ddl-marker" style="left:${slotCenterPct(item.offset, detail.total)}%" title="${escapeAttr(item.title)}：${escapeAttr(item.date)}">
+            <i></i>
+            <b>DDL</b>
+            <em>${escapeHtml(formatMonthDay(item.date))}</em>
+          </span>
+        `).join("")}
       </div>
     </div>
   `;
@@ -366,22 +387,20 @@ function setAbsoluteTimelineView(start, end) {
   render();
 }
 
-function timelineMilestones() {
-  const full = state.baseTimeline;
+function timelineMilestones(range = state.baseTimeline) {
   return (state.data?.groups || []).map((group) => {
     const date = group.due_date || group.end_date || group.start_date;
-    const offset = date ? daysBetween(full.start, date) : NaN;
+    const offset = date ? daysBetween(range.start, date) : NaN;
     return { title: group.title, date, offset };
-  }).filter((item) => item.date && Number.isFinite(item.offset) && item.offset >= 0 && item.offset < full.total)
+  }).filter((item) => item.date && Number.isFinite(item.offset) && item.offset >= 0 && item.offset < range.total)
     .sort((a, b) => a.offset - b.offset || a.title.localeCompare(b.title, "zh-CN"));
 }
 
-function timelineTicks(milestones) {
-  const full = state.baseTimeline;
-  const step = full.total <= 18 ? 1 : Math.ceil(full.total / 16);
-  const offsets = new Set([0, Math.max(0, full.total - 1), ...milestones.map((item) => item.offset)]);
-  for (let offset = 0; offset < full.total; offset += step) offsets.add(offset);
-  return [...offsets].filter((offset) => offset >= 0 && offset < full.total).sort((a, b) => a - b);
+function timelineTicks(milestones, range = state.baseTimeline) {
+  const step = range.total <= 18 ? 1 : Math.ceil(range.total / 16);
+  const offsets = new Set([0, Math.max(0, range.total - 1), ...milestones.map((item) => item.offset)]);
+  for (let offset = 0; offset < range.total; offset += step) offsets.add(offset);
+  return [...offsets].filter((offset) => offset >= 0 && offset < range.total).sort((a, b) => a - b);
 }
 
 function attachTimelineDrag() {
