@@ -1,9 +1,33 @@
 {
-  "generatedAt": "2026-06-17T01:00:54+08:00",
+  "generatedAt": "2026-06-17T11:05:11+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 45,
+  "total": 47,
   "items": [
+    {
+      "number": 67,
+      "title": "fix: 把cout改成loge",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/67",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-17T01:44:47Z",
+      "createdAt": "2026-06-17T01:23:19Z",
+      "headRef": "0617-fixloge",
+      "labels": []
+    },
+    {
+      "number": 66,
+      "title": "docs: update chunk_bwd_dv_local README for head shapes",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/66",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-16T17:32:46Z",
+      "createdAt": "2026-06-16T17:18:41Z",
+      "headRef": "20260616_235015_update-chunk-bwd-dv-local-docs",
+      "labels": []
+    },
     {
       "number": 65,
       "title": "chunk_gated_delta_rule_fwd_h支持<<<>>>调用",
@@ -11,7 +35,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-16T13:29:21Z",
+      "updatedAt": "2026-06-17T01:23:11Z",
       "createdAt": "2026-06-16T13:08:37Z",
       "headRef": "6_16_1",
       "labels": []
@@ -26,30 +50,6 @@
       "updatedAt": "2026-06-16T12:27:51Z",
       "createdAt": "2026-06-16T12:27:30Z",
       "headRef": "main",
-      "labels": []
-    },
-    {
-      "number": 62,
-      "title": "fix(ci): improve gdn-verify.sh CANN detection and vendor env loading",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/62",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-16T13:02:54Z",
-      "createdAt": "2026-06-16T03:12:26Z",
-      "headRef": "fix/gdn-verify-env",
-      "labels": []
-    },
-    {
-      "number": 61,
-      "title": "feat(bwd_dhu): add GVA support for chunk_gated_delta_rule_bwd_dhu",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/61",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-16T13:02:36Z",
-      "createdAt": "2026-06-16T01:49:09Z",
-      "headRef": "feat/bwd-dhu-gva",
       "labels": []
     },
     {
@@ -83,7 +83,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-12T03:51:01Z",
+      "updatedAt": "2026-06-17T02:36:15Z",
       "createdAt": "2026-06-11T14:58:13Z",
       "headRef": "kda_merge_zcc_v2",
       "labels": []
@@ -158,6 +158,30 @@
       "updatedAt": "2026-06-15T07:32:12Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 62,
+      "title": "fix(ci): improve gdn-verify.sh CANN detection and vendor env loading",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/62",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-17T01:12:39Z",
+      "updatedAt": "2026-06-17T01:12:39Z",
+      "createdAt": "2026-06-16T03:12:26Z",
+      "headRef": "fix/gdn-verify-env",
+      "labels": []
+    },
+    {
+      "number": 61,
+      "title": "feat(bwd_dhu): add GVA support for chunk_gated_delta_rule_bwd_dhu",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/61",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-17T01:12:27Z",
+      "updatedAt": "2026-06-17T01:12:27Z",
+      "createdAt": "2026-06-16T01:49:09Z",
+      "headRef": "feat/bwd-dhu-gva",
       "labels": []
     },
     {

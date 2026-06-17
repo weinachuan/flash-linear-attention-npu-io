@@ -107,10 +107,16 @@ th,td { padding:9px 10px; border-bottom:1px solid var(--line); text-align:left; 
 th { position:sticky; top:0; background:#fff6e8; font-size:12px; z-index:1; }
 .filter-row th { top:36px; padding:5px 8px; background:#fffaf1; }
 .filter-row input,.filter-row select { width:100%; height:28px; min-width:70px; padding:0 6px; font-size:12px; border-radius:6px; }
+.filter-row select.multi-filter { height:70px; padding:5px 6px; }
 tr.dirty td { background:#fff1cf; }
 td input,td select { width:100%; min-width:86px; }
 td .title-input { min-width:260px; }
 td .link-input { min-width:220px; }
+.owner-editor { display:grid; gap:6px; min-width:230px; }
+.owner-input { min-width:230px; }
+.owner-picker { height:auto; min-height:104px; padding:5px 8px; background:#fffdf8; }
+.owner-picker option { padding:3px 5px; }
+.owner-hint { color:#8b7b67; font-size:11px; font-weight:800; }
 .pr-link-editor { display:grid; gap:6px; min-width:360px; }
 .pr-link-editor .link-input { min-width:360px; }
 .pr-quick-picker { display:grid; grid-template-columns:1fr auto; gap:6px; align-items:center; }

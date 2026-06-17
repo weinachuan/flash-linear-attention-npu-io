@@ -45,7 +45,7 @@ const state = {
   view: { start: "", end: "", total: 1 },
   timeline: { start: "", end: "", total: 1 },
   activePlanView: "timeline",
-  filters: { q: "", risk: "", priority: "", owner: "", group_id: "", special_id: "", status: "" },
+  filters: { q: "", risk: "", priority: "", owner: [], group_id: "", special_id: "", status: "" },
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -76,14 +76,21 @@ function filteredTasks() {
   return tasks.filter((task) => {
     const q = state.filters.q.toLowerCase();
     const ownerNames = taskOwnerNames(task);
+    const ownerFilters = ownerFilterValues();
     return (!q || [task.title, task.owner, task.scope, ownerNames.join(" ")].some((value) => String(value || "").toLowerCase().includes(q)))
       && (!state.filters.risk || task.risk === state.filters.risk)
       && (!state.filters.priority || task.priority === state.filters.priority)
-      && (!state.filters.owner || ownerNames.includes(state.filters.owner))
+      && (!ownerFilters.length || ownerFilters.some((name) => ownerNames.includes(name)))
       && (!state.filters.group_id || task.group_id === state.filters.group_id)
       && (!state.filters.special_id || (state.filters.special_id === "__none__" ? !task.special_id : task.special_id === state.filters.special_id))
       && (!state.filters.status || task.status === state.filters.status);
   });
+}
+
+function ownerFilterValues() {
+  const owner = state.filters.owner;
+  if (Array.isArray(owner)) return owner.filter(Boolean);
+  return owner ? [owner] : [];
 }
 
 function render() {
@@ -138,7 +145,7 @@ function renderTableFilters() {
     tableFilterSelect("risk", [["", "全部"], ["高", "高"], ["中", "中"], ["低", "低"]]),
     tableFilterSelect("priority", [["", "全部"], ["P0", "P0"], ["P1", "P1"], ["P2", "P2"]]),
     `<th><input data-table-filter="q" type="search" placeholder="筛事项" value="${escapeAttr(state.filters.q)}"></th>`,
-    tableFilterSelect("owner", [["", "全部"], ...ownerFilterOptions()]),
+    tableFilterMultiSelect("owner", ownerFilterOptions()),
     tableFilterSelect("group_id", [["", "全部"], ...state.data.groups.map((group) => [group.id, group.title])]),
     tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...state.data.specials.map((special) => [special.id, special.title])]),
     `<th></th>`,
@@ -166,6 +173,18 @@ function tableFilterSelect(field, options) {
   return `<th><select data-table-filter="${field}">${normalized.map(([id, label]) => `<option value="${escapeAttr(id)}" ${state.filters[field] === id ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select></th>`;
 }
 
+function tableFilterMultiSelect(field, options) {
+  const selected = field === "owner" ? ownerFilterValues() : [];
+  const seen = new Set();
+  const normalized = options.filter(([id]) => {
+    const key = String(id);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return `<th><select class="multi-filter" data-table-filter="${field}" multiple size="3" title="按 Ctrl/Shift 可多选；不选表示全部">${normalized.map(([id, label]) => `<option value="${escapeAttr(id)}" ${selected.includes(id) ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select></th>`;
+}
+
 function uniqueTaskValues(field) {
   return [...new Set((state.data.tasks || []).map((task) => task[field]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), "zh-CN"));
 }
@@ -190,13 +209,16 @@ function isSelectableOwnerName(name) {
 }
 
 function updateTableFilter(event) {
-  state.filters[event.target.dataset.tableFilter] = event.target.value.trim();
+  const field = event.target.dataset.tableFilter;
+  state.filters[field] = field === "owner"
+    ? [...event.target.selectedOptions].map((option) => option.value).filter(Boolean)
+    : event.target.value.trim();
   syncToolbarFilters();
   render();
 }
 
 function clearFilters() {
-  Object.keys(state.filters).forEach((key) => { state.filters[key] = ""; });
+  Object.keys(state.filters).forEach((key) => { state.filters[key] = key === "owner" ? [] : ""; });
   syncToolbarFilters();
   render();
 }
@@ -780,6 +802,60 @@ function ownerChipsHtml(task) {
   return taskPeople(task).map(personChipHtml).join("");
 }
 
+function ownerPickerOptions(task) {
+  return uniqueStrings([
+    "待排人力",
+    ...(state.data.people || []).map((person) => person.name),
+    ...(state.data.tasks || []).flatMap((item) => taskOwnerNames(item)),
+    ...taskOwnerNames(task),
+    ...operatorOwnerRuleNames(),
+  ])
+    .filter((name) => name && !/[、/,，;；&]/.test(name))
+    .sort((a, b) => {
+      if (a === "待排人力") return -1;
+      if (b === "待排人力") return 1;
+      return a.localeCompare(b, "zh-CN");
+    });
+}
+
+function ownerEditorHtml(task) {
+  const owners = taskOwnerNames(task);
+  const options = ownerPickerOptions(task).map((name) => `<option value="${escapeAttr(name)}" ${owners.includes(name) ? "selected" : ""}>${escapeHtml(name)}</option>`).join("");
+  return `
+    <div class="owner-editor">
+      <input class="owner-input" data-field="owner" value="${escapeAttr(task.owner)}" placeholder="可手动输入，或在下方多选">
+      <select class="owner-picker" data-owner-picker multiple size="5">${options}</select>
+      <div class="owner-hint">按 Ctrl/Shift 可多选；保存时写入责任人字段</div>
+      <div class="owner-preview">${ownerChipsHtml(task)}</div>
+    </div>
+  `;
+}
+
+function syncOwnerFromPicker(select) {
+  const row = select.closest("tr");
+  const input = row?.querySelector('[data-field="owner"]');
+  if (!input) return;
+  const selected = [...select.selectedOptions].map((option) => option.value).filter(Boolean);
+  input.value = selected.length ? selected.join("/") : "待排人力";
+  markTaskDirty(input);
+  syncOwnerPreview(row);
+}
+
+function syncOwnerPickerFromInput(input) {
+  const row = input.closest("tr");
+  const select = row?.querySelector("[data-owner-picker]");
+  if (!select) return;
+  const names = splitOwnerNames(input.value);
+  [...select.options].forEach((option) => { option.selected = names.includes(option.value); });
+  syncOwnerPreview(row);
+}
+
+function syncOwnerPreview(row) {
+  const task = state.data.tasks.find((item) => item.id === row?.dataset.taskId);
+  const preview = row?.querySelector(".owner-preview");
+  if (task && preview) preview.innerHTML = ownerChipsHtml(task);
+}
+
 function isPlaceholderOwner(name) {
   return /待填|待排|对应/.test(name);
 }
@@ -1008,7 +1084,7 @@ function renderRows(tasks) {
         <td>${selectHtml("risk", [["高","高"],["中","中"],["低","低"]], task.risk)}</td>
         <td>${selectHtml("priority", [["P0","P0"],["P1","P1"],["P2","P2"]], task.priority)}</td>
         <td><input class="title-input" data-field="title" value="${escapeAttr(task.title)}"></td>
-        <td><input data-field="owner" value="${escapeAttr(task.owner)}"><div class="owner-preview">${ownerChipsHtml(task)}</div></td>
+        <td>${ownerEditorHtml(task)}</td>
         <td>${selectHtml("group_id", state.data.groups.map((g) => [g.id, g.title]), task.group_id)}</td>
         <td>${selectHtml("special_id", [["","普通事项"], ...state.data.specials.map((s) => [s.id, s.title])], task.special_id || "")}</td>
         <td><input type="date" data-field="start_date" value="${escapeAttr(task.start_date)}"> ~ <input type="date" data-field="end_date" value="${escapeAttr(task.end_date)}"></td>
@@ -1021,6 +1097,8 @@ function renderRows(tasks) {
   }).join("");
   document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => handleTaskAction(button).catch(showError)));
   document.querySelectorAll("#rows [data-field]").forEach((control) => control.addEventListener("change", () => markTaskDirty(control)));
+  document.querySelectorAll('#rows [data-field="owner"]').forEach((control) => control.addEventListener("change", () => syncOwnerPickerFromInput(control)));
+  document.querySelectorAll("#rows [data-owner-picker]").forEach((control) => control.addEventListener("change", () => syncOwnerFromPicker(control)));
   document.querySelectorAll("#rows [data-pr-append]").forEach((control) => control.addEventListener("click", () => appendPrFromSearch(control)));
   document.querySelectorAll("#rows [data-pr-search]").forEach((control) => control.addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
