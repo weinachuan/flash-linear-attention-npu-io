@@ -46,6 +46,9 @@ const state = {
   timeline: { start: "", end: "", total: 1 },
   activePlanView: "timeline",
   filters: { q: "", risk: "", priority: "", owner: [], group_id: "", special_id: "", status: "" },
+  ownerFilterOpen: false,
+  ownerFilterQuery: "",
+  ownerFilterDraft: [],
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -93,7 +96,8 @@ function ownerFilterValues() {
   return owner ? [owner] : [];
 }
 
-function render() {
+function render(options = {}) {
+  const includeTableFilters = options.includeTableFilters !== false;
   const filtered = filteredTasks();
   const all = state.data.tasks || [];
   state.baseTimeline = computeTimelineRange();
@@ -119,7 +123,8 @@ function render() {
   renderGantt(tasks);
   renderPeopleView(tasks);
   renderOperatorView(tasks);
-  renderTableFilters();
+  if (includeTableFilters) renderTableFilters();
+  else updateOwnerFilterSummary();
   renderRows(tasks);
   renderAdmin();
   renderAudit();
@@ -145,7 +150,7 @@ function renderTableFilters() {
     tableFilterSelect("risk", [["", "全部"], ["高", "高"], ["中", "中"], ["低", "低"]]),
     tableFilterSelect("priority", [["", "全部"], ["P0", "P0"], ["P1", "P1"], ["P2", "P2"]]),
     `<th><input data-table-filter="q" type="search" placeholder="筛事项" value="${escapeAttr(state.filters.q)}"></th>`,
-    tableFilterMultiSelect("owner", ownerFilterOptions()),
+    ownerFilterDropdown(),
     tableFilterSelect("group_id", [["", "全部"], ...state.data.groups.map((group) => [group.id, group.title])]),
     tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...state.data.specials.map((special) => [special.id, special.title])]),
     `<th></th>`,
@@ -159,6 +164,15 @@ function renderTableFilters() {
     control.addEventListener("input", updateTableFilter);
     control.addEventListener("change", updateTableFilter);
   });
+  document.querySelector("[data-owner-filter]")?.addEventListener("click", (event) => event.stopPropagation());
+  document.querySelector("[data-owner-filter-toggle]")?.addEventListener("click", toggleOwnerFilter);
+  document.querySelector("[data-owner-filter-search]")?.addEventListener("input", updateOwnerFilterQuery);
+  document.querySelectorAll("[data-owner-filter-value]").forEach((control) => {
+    control.addEventListener("click", updateOwnerFilter);
+    control.addEventListener("change", updateOwnerFilter);
+  });
+  document.querySelector("[data-owner-filter-clear]")?.addEventListener("click", clearOwnerFilter);
+  document.querySelector("[data-owner-filter-apply]")?.addEventListener("click", applyOwnerFilter);
   document.querySelector("[data-clear-filters]")?.addEventListener("click", clearFilters);
 }
 
@@ -173,16 +187,53 @@ function tableFilterSelect(field, options) {
   return `<th><select data-table-filter="${field}">${normalized.map(([id, label]) => `<option value="${escapeAttr(id)}" ${state.filters[field] === id ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select></th>`;
 }
 
-function tableFilterMultiSelect(field, options) {
-  const selected = field === "owner" ? ownerFilterValues() : [];
+function ownerFilterDropdown() {
+  const selected = state.ownerFilterOpen ? state.ownerFilterDraft : ownerFilterValues();
+  const selectedSet = new Set(selected);
+  const query = state.ownerFilterQuery.trim().toLowerCase();
   const seen = new Set();
+  const options = ownerFilterOptions().filter(([id]) => !query || id.toLowerCase().includes(query));
   const normalized = options.filter(([id]) => {
     const key = String(id);
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
-  return `<th><select class="multi-filter" data-table-filter="${field}" multiple size="3" title="按 Ctrl/Shift 可多选；不选表示全部">${normalized.map(([id, label]) => `<option value="${escapeAttr(id)}" ${selected.includes(id) ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select></th>`;
+  const label = ownerFilterLabel();
+  return `
+    <th>
+      <div class="check-filter ${state.ownerFilterOpen ? "open" : ""}" data-owner-filter>
+        <button type="button" class="check-filter-trigger" data-owner-filter-toggle aria-expanded="${state.ownerFilterOpen ? "true" : "false"}">
+          <span>${escapeHtml(label)}</span><b>⌄</b>
+        </button>
+        <div class="check-filter-menu">
+          <input class="check-filter-search" data-owner-filter-search type="search" placeholder="搜索责任人" value="${escapeAttr(state.ownerFilterQuery)}">
+          <div class="check-filter-options">
+            ${normalized.length ? normalized.map(([id, optionLabel]) => `
+              <label class="check-option">
+                <input type="checkbox" data-owner-filter-value value="${escapeAttr(id)}" ${selectedSet.has(id) ? "checked" : ""}>
+                <span>${escapeHtml(optionLabel)}</span>
+              </label>
+            `).join("") : `<div class="check-filter-empty">无匹配责任人</div>`}
+          </div>
+          <div class="check-filter-actions">
+            <button type="button" class="check-filter-clear" data-owner-filter-clear>清空</button>
+            <button type="button" class="check-filter-apply" data-owner-filter-apply>应用</button>
+          </div>
+        </div>
+      </div>
+    </th>
+  `;
+}
+
+function ownerFilterLabel() {
+  const selected = ownerFilterValues();
+  return selected.length ? `已选 ${selected.length} 人` : "全部";
+}
+
+function updateOwnerFilterSummary() {
+  const label = document.querySelector("[data-owner-filter-toggle] span");
+  if (label) label.textContent = ownerFilterLabel();
 }
 
 function uniqueTaskValues(field) {
@@ -210,15 +261,57 @@ function isSelectableOwnerName(name) {
 
 function updateTableFilter(event) {
   const field = event.target.dataset.tableFilter;
-  state.filters[field] = field === "owner"
-    ? [...event.target.selectedOptions].map((option) => option.value).filter(Boolean)
-    : event.target.value.trim();
+  state.filters[field] = event.target.value.trim();
+  syncToolbarFilters();
+  render();
+}
+
+function toggleOwnerFilter(event) {
+  event.stopPropagation();
+  state.ownerFilterOpen = !state.ownerFilterOpen;
+  if (state.ownerFilterOpen) state.ownerFilterDraft = ownerFilterValues();
+  renderTableFilters();
+}
+
+function updateOwnerFilterQuery(event) {
+  state.ownerFilterQuery = event.target.value;
+  state.ownerFilterOpen = true;
+  renderTableFilters();
+  document.querySelector("[data-owner-filter-search]")?.focus();
+}
+
+function updateOwnerFilter(event) {
+  const selected = new Set(state.ownerFilterDraft);
+  if (event.target.checked) selected.add(event.target.value);
+  else selected.delete(event.target.value);
+  state.ownerFilterDraft = [...selected].sort((a, b) => a.localeCompare(b, "zh-CN"));
+  state.ownerFilterOpen = true;
+}
+
+function clearOwnerFilter(event) {
+  event.stopPropagation();
+  state.ownerFilterDraft = [];
+  state.filters.owner = [];
+  state.ownerFilterQuery = "";
+  state.ownerFilterOpen = false;
+  syncToolbarFilters();
+  render();
+}
+
+function applyOwnerFilter(event) {
+  event.stopPropagation();
+  state.filters.owner = [...state.ownerFilterDraft].sort((a, b) => a.localeCompare(b, "zh-CN"));
+  state.ownerFilterOpen = false;
+  state.ownerFilterQuery = "";
   syncToolbarFilters();
   render();
 }
 
 function clearFilters() {
   Object.keys(state.filters).forEach((key) => { state.filters[key] = key === "owner" ? [] : ""; });
+  state.ownerFilterOpen = false;
+  state.ownerFilterQuery = "";
+  state.ownerFilterDraft = [];
   syncToolbarFilters();
   render();
 }
@@ -1670,6 +1763,11 @@ $("#saveAll").addEventListener("click", () => saveAllTasks().catch(showError));
 $("#addGroup").addEventListener("click", () => addGroup().catch(showError));
 $("#addSpecial").addEventListener("click", () => addSpecial().catch(showError));
 $("#addPerson").addEventListener("click", () => addPerson().catch(showError));
+document.addEventListener("click", (event) => {
+  if (!state.ownerFilterOpen || event.target.closest("[data-owner-filter]")) return;
+  state.ownerFilterOpen = false;
+  renderTableFilters();
+});
 
 function showError(error) {
   $("#editStatus").textContent = `写入失败：${error.message}`;
