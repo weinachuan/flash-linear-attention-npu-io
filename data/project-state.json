@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-17T07:55:04+08:00",
+  "generatedAt": "2026-06-17T09:10:53+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -438,7 +438,7 @@
       "notes": "",
       "position": 5,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-17T07:55:04+08:00",
+      "updated_at": "2026-06-17T06:42:07+08:00",
       "segments": [
         {
           "id": "seg-5ebbafe401",
@@ -449,7 +449,7 @@
         }
       ],
       "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/49",
-      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026061711502410"
+      "test_report": "https://wiki.huawei.com/domains/124182/wiki/237757/WIKI2026061711502410"
     },
     {
       "id": "t07",
@@ -828,7 +828,7 @@
       "target": "",
       "owner": "石俊杰",
       "status": "todo",
-      "risk": "低",
+      "risk": "高",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": "",
@@ -839,7 +839,7 @@
       "notes": "",
       "position": 18,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-17T00:50:24+08:00",
+      "updated_at": "2026-06-17T09:10:53+08:00",
       "segments": [
         {
           "id": "seg-057cf6f872",
@@ -849,7 +849,7 @@
           "position": 0
         }
       ],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/54",
+      "pr_link": "",
       "test_report": ""
     },
     {
@@ -859,10 +859,10 @@
       "target": "",
       "owner": "鲍超俊",
       "status": "todo",
-      "risk": "高",
+      "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-25",
-      "special_id": null,
+      "special_id": "",
       "start_date": "2026-06-19",
       "end_date": "2026-06-25",
       "evidence": [],
@@ -870,7 +870,7 @@
       "notes": "",
       "position": 19,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-17T00:50:24+08:00",
+      "updated_at": "2026-06-17T09:10:53+08:00",
       "segments": [
         {
           "id": "seg-2015742518",
@@ -880,7 +880,8 @@
           "position": 0
         }
       ],
-      "pr_link": ""
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/54",
+      "test_report": ""
     },
     {
       "id": "t21",
