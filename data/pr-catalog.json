@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-06-17T12:03:08+08:00",
+  "generatedAt": "2026-06-17T18:54:31+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 47,
+  "total": 48,
   "items": [
+    {
+      "number": 69,
+      "title": "dump数据",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/69",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-17T08:56:42Z",
+      "createdAt": "2026-06-17T08:56:31Z",
+      "headRef": "test",
+      "labels": []
+    },
     {
       "number": 67,
       "title": "fix: 把cout改成loge",
@@ -14,18 +26,6 @@
       "updatedAt": "2026-06-17T03:43:08Z",
       "createdAt": "2026-06-17T01:23:19Z",
       "headRef": "0617-fixloge",
-      "labels": []
-    },
-    {
-      "number": 66,
-      "title": "docs: update chunk_bwd_dv_local README for head shapes",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/66",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-16T17:32:46Z",
-      "createdAt": "2026-06-16T17:18:41Z",
-      "headRef": "20260616_235015_update-chunk-bwd-dv-local-docs",
       "labels": []
     },
     {
@@ -101,18 +101,6 @@
       "labels": []
     },
     {
-      "number": 50,
-      "title": "gdn fwd_h ascendc workspace  init",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/50",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-15T06:30:37Z",
-      "createdAt": "2026-06-11T12:05:23Z",
-      "headRef": "main",
-      "labels": []
-    },
-    {
       "number": 42,
       "title": "fix: avoid Triton L2Norm recompiles for dynamic lengths",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/42",
@@ -161,6 +149,18 @@
       "labels": []
     },
     {
+      "number": 66,
+      "title": "docs: update chunk_bwd_dv_local README for head shapes",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/66",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-17T09:01:44Z",
+      "updatedAt": "2026-06-17T09:01:44Z",
+      "createdAt": "2026-06-16T17:18:41Z",
+      "headRef": "20260616_235015_update-chunk-bwd-dv-local-docs",
+      "labels": []
+    },
+    {
       "number": 62,
       "title": "fix(ci): improve gdn-verify.sh CANN detection and vendor env loading",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/62",
@@ -206,6 +206,18 @@
       "updatedAt": "2026-06-15T13:08:56Z",
       "createdAt": "2026-06-11T14:01:59Z",
       "headRef": "dv_kv_head",
+      "labels": []
+    },
+    {
+      "number": 50,
+      "title": "gdn fwd_h ascendc workspace  init",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/50",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-17T09:14:28Z",
+      "updatedAt": "2026-06-17T09:14:28Z",
+      "createdAt": "2026-06-11T12:05:23Z",
+      "headRef": "main",
       "labels": []
     },
     {
