@@ -171,6 +171,7 @@ function renderTableFilters() {
     control.addEventListener("click", updateOwnerFilter);
     control.addEventListener("change", updateOwnerFilter);
   });
+  document.querySelector("[data-owner-filter-select-all]")?.addEventListener("click", selectAllOwnerFilter);
   document.querySelector("[data-owner-filter-clear]")?.addEventListener("click", clearOwnerFilter);
   document.querySelector("[data-owner-filter-apply]")?.addEventListener("click", applyOwnerFilter);
   document.querySelector("[data-clear-filters]")?.addEventListener("click", clearFilters);
@@ -217,6 +218,7 @@ function ownerFilterDropdown() {
             `).join("") : `<div class="check-filter-empty">无匹配责任人</div>`}
           </div>
           <div class="check-filter-actions">
+            <button type="button" class="check-filter-select-all" data-owner-filter-select-all>全选</button>
             <button type="button" class="check-filter-clear" data-owner-filter-clear>清空</button>
             <button type="button" class="check-filter-apply" data-owner-filter-apply>应用</button>
           </div>
@@ -286,6 +288,20 @@ function updateOwnerFilter(event) {
   else selected.delete(event.target.value);
   state.ownerFilterDraft = [...selected].sort((a, b) => a.localeCompare(b, "zh-CN"));
   state.ownerFilterOpen = true;
+}
+
+function selectAllOwnerFilter(event) {
+  event.stopPropagation();
+  const query = state.ownerFilterQuery.trim().toLowerCase();
+  const visibleOwners = ownerFilterOptions()
+    .map(([id]) => id)
+    .filter((id) => !query || id.toLowerCase().includes(query));
+  const selected = new Set(state.ownerFilterDraft);
+  visibleOwners.forEach((owner) => selected.add(owner));
+  state.ownerFilterDraft = [...selected].sort((a, b) => a.localeCompare(b, "zh-CN"));
+  document.querySelectorAll("[data-owner-filter-value]").forEach((control) => {
+    control.checked = state.ownerFilterDraft.includes(control.value);
+  });
 }
 
 function clearOwnerFilter(event) {
