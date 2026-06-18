@@ -118,6 +118,40 @@ window.FLASH_IO_API_BASE = "https://你的-worker-url";
 
 提交并推送 `docs/config.js` 后，公开页面会从 Cloudflare D1 读取数据。编辑模式下使用账号密码登录，不再输入 GitHub token。
 
+### GitHub 到 Cloudflare 的快速部署链路
+
+本仓库已配置 `.github/workflows/deploy-cloudflare.yml`：
+
+- 修改 `cloudflare/**`、`migrations/**`、`wrangler.toml` 或部署 workflow 后，push 到 `main` 会自动部署 Worker。
+- 自动部署会先校验 `wrangler.toml`，再执行远端 D1 migration，最后执行 `wrangler deploy`。
+- 也可以在 GitHub Actions 页面手动运行 `Deploy Cloudflare Worker`，并选择是否执行 migration、是否部署 Worker。
+
+GitHub 仓库需要配置以下 Actions Secrets：
+
+- `CLOUDFLARE_ACCOUNT_ID`：Cloudflare 账号 ID。
+- `CLOUDFLARE_API_TOKEN`：Cloudflare API Token，不要写入仓库。
+
+日常修改路径：
+
+1. 改 Worker API 或权限逻辑：修改 `cloudflare/worker.js`，提交并 push，Actions 自动发布。
+2. 改数据库结构：新增 `migrations/0002_xxx.sql`，提交并 push，Actions 自动应用 migration 并发布。
+3. 改前端页面：修改 `docs/**`，GitHub Pages 按仓库 Pages 设置发布；不需要 Worker 部署。
+4. 改 Worker 地址：修改 `docs/config.js`，提交并 push，GitHub Pages 生效后前端切换到新 API。
+
+快速回滚：
+
+1. Worker 代码回滚：`git revert <有问题的提交>` 后 push，Actions 会自动重新部署旧逻辑。
+2. 前端回滚：`git revert <有问题的提交>` 后 push，GitHub Pages 自动更新。
+3. 数据库结构回滚：不要直接改旧 migration；新增一个反向 migration。高风险 migration 前建议先用 Cloudflare D1 导出备份。
+
+本地快速验证：
+
+```powershell
+python -m py_compile scripts\import_cloudflare.py scripts\create_cloudflare_user.py
+python -c "import sqlite3,pathlib; conn=sqlite3.connect(':memory:'); conn.executescript(pathlib.Path('migrations/0001_init.sql').read_text(encoding='utf-8'))"
+node --check cloudflare/worker.js
+```
+
 ## 仓库数据文件
 
 - `data/project.sqlite3`：后端数据库，包含任务、分组、专项、甘特分段和审计日志，已被 `.gitignore` 忽略。
