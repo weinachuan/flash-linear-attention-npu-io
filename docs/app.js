@@ -262,12 +262,12 @@ function render(options = {}) {
   state.baseTimeline = computeTimelineRange();
   ensureTimelineView();
   const tasks = filtered.filter(taskIntersectsView);
-  const high = all.filter((task) => task.risk === "高").length;
-  const medium = all.filter((task) => task.risk === "中").length;
-  const done = all.filter((task) => task.status === "done").length;
+  const high = tasks.filter((task) => task.risk === "高").length;
+  const medium = tasks.filter((task) => task.risk === "中").length;
+  const done = tasks.filter((task) => task.status === "done").length;
   $("#meta").textContent = `仓库数据更新时间：${state.data.generatedAt || "未知"} · 窗口 ${state.view.start} ~ ${state.view.end} · 当前显示 ${tasks.length}/${filtered.length}/${all.length} 项`;
   $("#summary").innerHTML = [
-    ["总任务", all.length],
+    ["总任务", tasks.length],
     ["高风险", high],
     ["中风险", medium],
     ["已完成", done],
