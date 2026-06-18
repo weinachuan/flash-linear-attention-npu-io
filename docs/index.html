@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>flash-linear-attention-npu 项目看板</title>
-  <link rel="stylesheet" href="./styles.css?v=20260617-owner-checkbox-select-all">
+  <link rel="stylesheet" href="./styles.css?v=20260618-delay-extension">
 </head>
 <body>
   <main class="shell">
@@ -24,7 +24,7 @@
       <label>搜索 <input id="q" type="search" placeholder="事项 / 负责人"></label>
       <label>风险 <select id="risk"><option value="">全部</option><option>高</option><option>中</option><option>低</option></select></label>
       <label>优先级 <select id="priority"><option value="">全部</option><option>P0</option><option>P1</option><option>P2</option></select></label>
-      <label>状态 <select id="status"><option value="">全部</option><option value="todo">todo</option><option value="doing">doing</option><option value="blocked">blocked</option><option value="delayed">交付延期</option><option value="done">done</option></select></label>
+      <label>状态 <select id="status"><option value="">全部</option><option value="todo">todo</option><option value="doing">doing</option><option value="blocked">blocked</option><option value="delayed">delay</option><option value="done">done</option></select></label>
       <button id="refresh" type="button">刷新仓库数据</button>
       <button id="clearFilters" type="button">清空筛选</button>
       <button id="addTask" type="button" class="edit-only">新增任务</button>
@@ -51,10 +51,10 @@
           </thead>
           <tbody>
             <tr><td>PR 已合入，且已填写转测报告</td><td><span class="tag low">低</span></td><td><span class="status-pill done">done</span></td></tr>
-            <tr><td>PR 已合入，但未填写转测报告</td><td><span class="tag low">低</span></td><td>未到 DDL 保持原状态；超过 DDL 标记交付延期</td></tr>
-            <tr><td>有匹配 PR 但未合入，距离 DDL ≤ 5 天</td><td><span class="tag medium">中</span></td><td>超过 DDL 标记交付延期</td></tr>
+            <tr><td>PR 已合入，但未填写转测报告</td><td><span class="tag low">低</span></td><td>未到 DDL 保持原状态；超过 DDL 标记 delay</td></tr>
+            <tr><td>有匹配 PR 但未合入，距离 DDL ≤ 5 天</td><td><span class="tag medium">中</span></td><td>超过 DDL 标记 delay</td></tr>
             <tr><td>有匹配 PR 但未合入，距离 DDL > 5 天</td><td><span class="tag low">低</span></td><td>保持原状态</td></tr>
-            <tr><td>未匹配 PR，距离 DDL ≤ 10 天</td><td><span class="tag high">高</span></td><td>超过 DDL 标记交付延期</td></tr>
+            <tr><td>未匹配 PR，距离 DDL ≤ 10 天</td><td><span class="tag high">高</span></td><td>超过 DDL 标记 delay</td></tr>
             <tr><td>未匹配 PR，距离 DDL > 10 天</td><td><span class="tag medium">中</span></td><td>保持原状态</td></tr>
             <tr><td>责任人为待排人力 / 待填写（优先级最高，覆盖 DDL 距离判断）</td><td><span class="tag high">高</span></td><td>状态仍按 PR / 报告 / DDL 判定</td></tr>
           </tbody>
@@ -131,6 +131,6 @@
       <div id="audit" class="audit"></div>
     </section>
   </main>
-  <script src="./app.js?v=20260617-owner-checkbox-select-all"></script>
+  <script src="./app.js?v=20260618-delay-extension"></script>
 </body>
 </html>

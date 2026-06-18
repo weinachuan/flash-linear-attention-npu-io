@@ -33,7 +33,7 @@ const OPERATOR_OWNER_RULES = {
   prepare_wy_repr_bwd_full: [{ until: "2026-06-30", owner: "张硕累" }, { owner: "周云飞" }],
 };
 
-const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "blocked"], ["delayed", "交付延期"], ["done", "done"]];
+const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "blocked"], ["delayed", "delay"], ["done", "done"]];
 
 const state = {
   data: null,
@@ -65,6 +65,7 @@ async function load() {
   state.audit = auditRes && auditRes.ok ? parseAudit(await auditRes.text()) : [];
   state.prCatalog = prCatalogRes && prCatalogRes.ok ? await prCatalogRes.json() : { generatedAt: "", sourceRepo: "", total: 0, items: [] };
   ensurePeopleCatalog();
+  syncAllTaskDeliveryRules();
   render();
 }
 
@@ -342,7 +343,7 @@ function syncToolbarFilters() {
 function computeTimelineRange() {
   const dates = [];
   (state.data?.tasks || []).forEach((task) => {
-    taskSegments(task).forEach((segment) => {
+    taskRenderSegments(task).forEach((segment) => {
       if (segment.start_date) dates.push(segment.start_date);
       if (segment.end_date) dates.push(segment.end_date);
     });
@@ -368,7 +369,7 @@ function computeTimelineRange() {
 function computeDataTimelineRange() {
   const dates = [];
   (state.data?.tasks || []).forEach((task) => {
-    taskSegments(task).forEach((segment) => {
+    taskRenderSegments(task).forEach((segment) => {
       if (segment.start_date) dates.push(segment.start_date);
       if (segment.end_date) dates.push(segment.end_date);
     });
@@ -394,6 +395,8 @@ function ensureTimelineView() {
     setTimelineView(0, full.total - 1);
     return;
   }
+  const delayedEnd = maxDelayedRenderEndDate();
+  if (delayedEnd && state.view.end < delayedEnd) state.view.end = delayedEnd;
   const rawStart = daysBetween(full.start, state.view.start);
   const rawEnd = daysBetween(full.start, state.view.end);
   const startOffset = Number.isFinite(rawStart) ? rawStart : 0;
@@ -415,8 +418,37 @@ function taskSegments(task) {
   return task.segments?.length ? task.segments : [{ start_date: task.start_date, end_date: task.end_date, reason: task.notes || "", position: 0 }];
 }
 
+function taskRenderSegments(task) {
+  const segments = taskSegments(task).map((segment, index) => ({ ...segment, source_index: index, auto_extended: false }));
+  if (!segments.length || evaluateTaskDelivery(task).status !== "delayed") return segments;
+  const today = todayBjYmd();
+  let latestIndex = 0;
+  segments.forEach((segment, index) => {
+    if ((segment.end_date || "") > (segments[latestIndex].end_date || "")) latestIndex = index;
+  });
+  if (segments[latestIndex].end_date && segments[latestIndex].end_date < today) {
+    segments[latestIndex] = { ...segments[latestIndex], end_date: today, auto_extended: true };
+  }
+  return segments;
+}
+
+function maxDelayedRenderEndDate() {
+  const delayedEnds = (state.data?.tasks || []).flatMap((task) => taskRenderSegments(task)
+    .filter((segment) => segment.auto_extended)
+    .map((segment) => segment.end_date));
+  return delayedEnds.sort().at(-1) || "";
+}
+
+function taskRenderStart(task) {
+  return taskRenderSegments(task).map((segment) => segment.start_date).filter(Boolean).sort()[0] || task.start_date;
+}
+
+function taskRenderEnd(task) {
+  return taskRenderSegments(task).map((segment) => segment.end_date).filter(Boolean).sort().at(-1) || task.end_date;
+}
+
 function taskIntersectsView(task) {
-  return taskSegments(task).some((segment) => datesOverlap(segment.start_date, segment.end_date, state.view.start, state.view.end));
+  return taskRenderSegments(task).some((segment) => datesOverlap(segment.start_date, segment.end_date, state.view.start, state.view.end));
 }
 
 function datesOverlap(startA, endA, startB, endB) {
@@ -623,13 +655,14 @@ function renderGantt(tasks) {
   }
   const { start, end, total } = state.timeline;
   $("#gantt").innerHTML = tasks.map((task) => {
-    const bars = taskSegments(task).map((segment, index) => {
+    const bars = taskRenderSegments(task).map((segment, index) => {
       if (!datesOverlap(segment.start_date, segment.end_date, start, end)) return "";
       const clippedStart = maxDate(segment.start_date, start);
       const clippedEnd = minDate(segment.end_date, end);
       const left = daysBetween(start, clippedStart) / total * 100;
       const width = Math.max(1.2, (daysBetween(clippedStart, clippedEnd) + 1) / total * 100);
-      return `<span class="bar" data-risk="${task.risk}" data-task-id="${escapeAttr(task.id)}" data-segment-index="${index}" style="left:${left}%;width:${width}%" title="${escapeHtml(displayTaskTitle(task))}：${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}；编辑模式下拖动移动，边缘拉伸"></span>`;
+      const titleSuffix = segment.auto_extended ? "；delay 自动延长至今日，交付件完备后停止延长" : "；编辑模式下拖动移动，边缘拉伸";
+      return `<span class="bar" data-risk="${task.risk}" data-status="${statusClass(evaluateTaskDelivery(task).status)}" data-auto-extended="${segment.auto_extended ? "true" : "false"}" data-task-id="${escapeAttr(task.id)}" data-segment-index="${segment.source_index ?? index}" style="left:${left}%;width:${width}%" title="${escapeHtml(displayTaskTitle(task))}：${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}${titleSuffix}"></span>`;
     }).join("");
     return `<div class="gantt-row"><div class="gantt-title">${escapeHtml(displayTaskTitle(task))}</div><div class="track">${bars}</div></div>`;
   }).join("");
@@ -683,14 +716,16 @@ function renderOperatorView(tasks) {
     <div class="operator-gantt">
       ${rows.map((row) => {
         const bars = row.items.map((item, index) => {
-          const clippedStart = maxDate(item.task.start_date, start);
-          const clippedEnd = minDate(item.task.end_date, end);
+          const renderStart = taskRenderStart(item.task);
+          const renderEnd = taskRenderEnd(item.task);
+          const clippedStart = maxDate(renderStart, start);
+          const clippedEnd = minDate(renderEnd, end);
           const left = daysBetween(start, clippedStart) / total * 100;
           const width = Math.max(2, (daysBetween(clippedStart, clippedEnd) + 1) / total * 100);
           return `
-            <span class="operator-bar ${riskClass(item.task.risk)}" style="left:${left}%;width:${width}%;top:${index * 26 + 6}px" title="${escapeAttr(displayTaskTitle(item.task))} · ${escapeAttr(item.task.start_date)} ~ ${escapeAttr(item.task.end_date)}">
+            <span class="operator-bar ${riskClass(item.task.risk)}" style="left:${left}%;width:${width}%;top:${index * 26 + 6}px" title="${escapeAttr(displayTaskTitle(item.task))} · ${escapeAttr(renderStart)} ~ ${escapeAttr(renderEnd)}">
               <b>${escapeHtml(featureTitle(item.task, item.operator))}</b>
-              <small>${escapeHtml(formatMonthDay(item.task.end_date))}</small>
+              <small>${escapeHtml(formatMonthDay(renderEnd))}</small>
             </span>
           `;
         }).join("");
@@ -724,7 +759,7 @@ function operatorRows(tasks) {
 }
 
 function tasksForPersonOnDay(tasks, person, day) {
-  return tasks.filter((task) => taskPeople(task, day).some((item) => item.id === person.id) && taskSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day));
+  return tasks.filter((task) => taskPeople(task, day).some((item) => item.id === person.id) && taskRenderSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day));
 }
 
 function tasksForPerson(person) {
@@ -899,7 +934,7 @@ function comparePeopleForView(a, b, tasks) {
 function personIsIdleInView(person, tasks) {
   const days = dateList(state.view.start, state.view.end);
   return !tasks.some((task) => days.some((day) => taskPeople(task, day).some((item) => item.id === person.id)
-    && taskSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day)));
+    && taskRenderSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day)));
 }
 
 function personChipHtml(person) {
@@ -1217,6 +1252,7 @@ function renderRows(tasks) {
 }
 
 function attachGanttDrag(bar) {
+  if (bar.dataset.autoExtended === "true") return;
   bar.addEventListener("mousemove", (event) => {
     if (!state.token || bar.classList.contains("dragging")) return;
     bar.style.cursor = event.offsetX <= 8 || bar.offsetWidth - event.offsetX <= 8 ? "ew-resize" : "grab";

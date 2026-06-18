@@ -183,7 +183,7 @@ td .link-input { min-width:220px; }
 .p2 { background:var(--p2); }
 .status-pill { display:inline-flex; min-width:54px; justify-content:center; padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:#fffaf1; color:#4d4235; font-size:12px; font-weight:900; }
 .status-pill.done { border-color:rgba(39,117,96,.25); background:#e7f3ee; color:#1d6a56; }
-.status-pill.delayed { border-color:rgba(207,61,50,.3); background:#ffe4df; color:#b12f27; }
+.status-pill.delayed { border-color:var(--high); background:#fffdf8; color:var(--high); }
 .status-pill.blocked { border-color:rgba(207,61,50,.24); background:#fff0df; color:#9a3a24; }
 .status-pill.doing { border-color:rgba(186,121,14,.26); background:#fff1d2; color:#875407; }
 .audit { display:grid; gap:8px; }
