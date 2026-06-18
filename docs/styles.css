@@ -282,6 +282,7 @@ td .link-input { min-width:220px; }
 .people-grid .people-owner-head,.people-grid .people-owner { position:sticky; left:0; min-width:150px; z-index:4; background:#efe4d0; color:#3b342d; }
 .people-grid .people-owner { z-index:2; font-size:13px; }
 .work-chip { display:block; margin:0 0 4px; padding:4px 6px; border-radius:8px; color:white; font-size:11px; font-weight:900; line-height:1.18; overflow:hidden; }
+.work-lane-placeholder { display:block; min-height:34px; margin:0 0 4px; visibility:hidden; }
 .work-chip em,.work-chip b { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .work-chip em { margin-bottom:2px; font-size:9px; font-style:normal; opacity:.86; }
 .work-chip b { font-size:11px; }

@@ -876,6 +876,7 @@ function renderGantt(tasks) {
 function renderPeopleView(tasks) {
   const days = dateList(state.view.start, state.view.end);
   const people = peopleForTasks(tasks);
+  const lanePlans = new Map(people.map((person) => [person.id, peopleLanePlan(tasks, person)]));
   if (!people.length) {
     $("#peopleView").innerHTML = `<p class="empty">当前时间窗口内没有符合筛选条件的人力安排。</p>`;
     return;
@@ -901,7 +902,7 @@ function renderPeopleView(tasks) {
               ${days.map((day) => {
                 const workday = chinaWorkdayInfo(day);
                 const className = workday.nonWorking ? " class=\"non-working-day\"" : "";
-                return `<td${className} title="${escapeAttr(workday.label)}">${tasksForPersonOnDay(tasks, person, day).map(taskChipHtml).join("")}</td>`;
+                return `<td${className} title="${escapeAttr(workday.label)}">${peopleLaneCellHtml(lanePlans.get(person.id), day)}</td>`;
               }).join("")}
             </tr>
           `).join("")}
@@ -909,6 +910,43 @@ function renderPeopleView(tasks) {
       </table>
     </div>
   `;
+}
+
+function peopleLanePlan(tasks, person) {
+  const days = dateList(state.view.start, state.view.end);
+  const assignments = tasks
+    .map((task) => {
+      const activeDays = days.filter((day) => taskPeople(task, day).some((item) => item.id === person.id)
+        && taskRenderSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day));
+      return activeDays.length ? { task, start: activeDays[0], end: activeDays.at(-1) } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.start.localeCompare(b.start) || a.end.localeCompare(b.end) || displayTaskTitle(a.task).localeCompare(displayTaskTitle(b.task), "zh-CN"));
+  const laneEnds = [];
+  const taskLane = new Map();
+  const taskById = new Map();
+  assignments.forEach((item) => {
+    let lane = laneEnds.findIndex((end) => end < item.start);
+    if (lane < 0) lane = laneEnds.length;
+    laneEnds[lane] = item.end;
+    taskLane.set(item.task.id, lane);
+    taskById.set(item.task.id, item.task);
+  });
+  return { personId: person.id, taskLane, taskById, laneCount: laneEnds.length };
+}
+
+function peopleLaneCellHtml(plan, day) {
+  const laneCount = Math.max(1, plan?.laneCount || 0);
+  const slots = Array.from({ length: laneCount }, () => `<span class="work-lane-placeholder"></span>`);
+  if (!plan) return slots.join("");
+  const tasks = [...plan.taskById.values()]
+    .filter((task) => taskPeople(task, day).some((person) => person.id === plan.personId)
+      && taskRenderSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day));
+  tasks.forEach((task) => {
+    const lane = plan.taskLane.get(task.id);
+    slots[lane] = taskChipHtml(task);
+  });
+  return slots.join("");
 }
 
 function renderOperatorView(tasks) {
