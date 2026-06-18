@@ -211,6 +211,19 @@ td .link-input { min-width:220px; }
 .audit { display:grid; gap:8px; }
 .audit-item { display:grid; grid-template-columns:190px 1fr; gap:10px; padding:9px 10px; border:1px solid var(--line); background:#fffaf1; }
 .audit-item time { color:var(--muted); font-size:12px; }
+.audit-item strong { display:block; margin-bottom:4px; }
+.audit-detail { margin-top:4px; color:#4d4235; }
+.audit-detail summary { cursor:pointer; width:max-content; color:#87570a; font-size:12px; font-weight:900; }
+.audit-change-list { display:grid; gap:7px; margin-top:7px; }
+.audit-change { padding:8px 10px; border:1px solid #e8d8bd; background:#fffdf8; }
+.audit-change h3 { margin:0 0 6px; font-size:13px; }
+.audit-change ul { display:grid; gap:4px; margin:0; padding:0; list-style:none; }
+.audit-change li { display:grid; grid-template-columns:88px minmax(0,1fr) 16px minmax(0,1fr); gap:6px; align-items:start; font-size:12px; }
+.audit-change li span { color:#6f6254; font-weight:900; }
+.audit-change li em { overflow-wrap:anywhere; font-style:normal; color:#28221c; }
+.audit-change li strong { display:inline; margin:0; text-align:center; color:#a97620; }
+.audit-id-list { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
+.audit-id-list code { padding:3px 6px; border:1px solid var(--line); border-radius:999px; background:#fffdf8; color:#6f6254; }
 .empty { color:var(--muted); }
 .admin-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
 .admin-grid h3 { margin:0 0 8px; font-size:14px; color:#514638; }

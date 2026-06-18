@@ -34,6 +34,22 @@ const OPERATOR_OWNER_RULES = {
 };
 
 const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "Pending"], ["delayed", "delay"], ["done", "done"]];
+const AUDIT_TASK_FIELDS = ["title", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "pr_link", "test_report", "notes"];
+const AUDIT_FIELD_LABELS = {
+  title: "事项",
+  owner: "责任人",
+  risk: "风险",
+  priority: "优先级",
+  status: "状态",
+  group_id: "分组",
+  special_id: "专项",
+  start_date: "开始日期",
+  end_date: "结束日期",
+  pr_link: "PR 链接",
+  test_report: "转测报告",
+  notes: "备注",
+  segments: "甘特分段",
+};
 
 const state = {
   data: null,
@@ -41,6 +57,7 @@ const state = {
   audit: [],
   token: sessionStorage.getItem("flashPagesToken") || "",
   dirtyTaskIds: new Set(),
+  taskBaselines: new Map(),
   baseTimeline: { start: "", end: "", total: 1 },
   view: { start: "", end: "", total: 1 },
   timeline: { start: "", end: "", total: 1 },
@@ -73,6 +90,102 @@ function parseAudit(text) {
   return text.trim().split(/\n+/).filter(Boolean).map((line) => {
     try { return JSON.parse(line); } catch { return null; }
   }).filter(Boolean);
+}
+
+function taskSnapshot(task) {
+  const snapshot = {};
+  AUDIT_TASK_FIELDS.forEach((field) => {
+    snapshot[field] = normalizeAuditValue(task?.[field]);
+  });
+  snapshot.segments = JSON.stringify((task?.segments || []).map((segment) => ({
+    start_date: normalizeAuditValue(segment.start_date),
+    end_date: normalizeAuditValue(segment.end_date),
+    reason: normalizeAuditValue(segment.reason),
+  })));
+  return snapshot;
+}
+
+function normalizeAuditValue(value) {
+  return value == null ? "" : String(value);
+}
+
+function rememberTaskBaseline(taskId) {
+  if (!taskId || state.taskBaselines.has(taskId)) return;
+  const task = state.data.tasks.find((item) => item.id === taskId);
+  if (task) state.taskBaselines.set(taskId, taskSnapshot(task));
+}
+
+function taskAuditChange(task, beforeSnapshot = null) {
+  if (!task) return null;
+  const before = beforeSnapshot || state.taskBaselines.get(task.id) || taskSnapshot(task);
+  const after = taskSnapshot(task);
+  const changes = {};
+  [...AUDIT_TASK_FIELDS, "segments"].forEach((field) => {
+    if (before[field] !== after[field]) changes[field] = { from: before[field] || "", to: after[field] || "" };
+  });
+  return Object.keys(changes).length ? { id: task.id, title: task.title || task.id, changes } : null;
+}
+
+function auditDetailHtml(item) {
+  const changes = item.detail?.changes || [];
+  if (changes.length) {
+    return `
+      <details class="audit-detail">
+        <summary>查看 ${changes.length} 项字段变更</summary>
+        <div class="audit-change-list">${changes.map(auditTaskChangeHtml).join("")}</div>
+      </details>
+    `;
+  }
+  const ids = item.detail?.ids || [];
+  if (ids.length) {
+    return `
+      <details class="audit-detail">
+        <summary>查看记录到的 ${ids.length} 个任务 ID</summary>
+        <div class="audit-id-list">${ids.map((id) => `<code>${escapeHtml(id)}</code>`).join("")}</div>
+      </details>
+    `;
+  }
+  return "";
+}
+
+function auditTaskChangeHtml(change) {
+  const rows = Object.entries(change.changes || {}).map(([field, diff]) => `
+    <li>
+      <span>${escapeHtml(AUDIT_FIELD_LABELS[field] || field)}</span>
+      <em>${escapeHtml(formatAuditValue(field, diff.from))}</em>
+      <strong>→</strong>
+      <em>${escapeHtml(formatAuditValue(field, diff.to))}</em>
+    </li>
+  `).join("");
+  return `
+    <section class="audit-change">
+      <h3>${escapeHtml(change.title || change.id)}</h3>
+      <ul>${rows}</ul>
+    </section>
+  `;
+}
+
+function formatAuditValue(field, value) {
+  const text = normalizeAuditValue(value);
+  if (!text) return "空";
+  if (field === "status") return statusLabel(text);
+  if (field === "group_id") return groupTitle(text) || text;
+  if (field === "special_id") return specialTitle(text) || text;
+  if (field === "segments") return formatAuditSegments(text);
+  return text;
+}
+
+function formatAuditSegments(value) {
+  try {
+    const segments = JSON.parse(value);
+    if (!segments.length) return "空";
+    return segments.map((segment) => {
+      const range = `${segment.start_date || "?"} ~ ${segment.end_date || "?"}`;
+      return segment.reason ? `${range}（${segment.reason}）` : range;
+    }).join("；");
+  } catch {
+    return value || "空";
+  }
 }
 
 function filteredTasks() {
@@ -1285,6 +1398,7 @@ function attachGanttDrag(bar) {
     event.preventDefault();
     const task = state.data.tasks.find((item) => item.id === bar.dataset.taskId);
     if (!task) return;
+    rememberTaskBaseline(task.id);
     const segments = task.segments?.length ? task.segments : [{ id: `seg-${crypto.randomUUID().slice(0, 10)}`, start_date: task.start_date, end_date: task.end_date, reason: "", position: 0 }];
     task.segments = segments;
     const segment = segments[Number(bar.dataset.segmentIndex || 0)];
@@ -1387,7 +1501,15 @@ function renderAdmin() {
 function renderAudit() {
   const recent = state.audit.slice(-10).reverse();
   $("#audit").innerHTML = recent.length
-    ? recent.map((item) => `<div class="audit-item"><time>${escapeHtml(item.ts)}</time><div>${escapeHtml(item.summary || item.action)}</div></div>`).join("")
+    ? recent.map((item) => `
+      <div class="audit-item">
+        <time>${escapeHtml(item.ts)}</time>
+        <div>
+          <strong>${escapeHtml(item.summary || item.action)}</strong>
+          ${auditDetailHtml(item)}
+        </div>
+      </div>
+    `).join("")
     : `<p class="empty">暂无变更日志。</p>`;
 }
 
@@ -1398,8 +1520,7 @@ async function handleTaskAction(button) {
   if (!task) return;
   const action = button.dataset.action;
   if (action === "save") {
-    applyRowToTask(row);
-    await saveRepository(`更新任务：${task.title}`, "task.update", "task", task.id, { title: task.title });
+    await saveTaskRows([row]);
   }
   if (action === "split") {
     await splitTask(task.id);
@@ -1414,6 +1535,7 @@ async function handleTaskAction(button) {
 function markTaskDirty(control) {
   const row = control.closest("tr");
   if (!row?.dataset.taskId) return;
+  rememberTaskBaseline(row.dataset.taskId);
   applyRowToTask(row, false);
   row.classList.add("dirty");
   state.dirtyTaskIds.add(row.dataset.taskId);
@@ -1421,6 +1543,7 @@ function markTaskDirty(control) {
 }
 
 function markTaskDirtyById(taskId) {
+  rememberTaskBaseline(taskId);
   state.dirtyTaskIds.add(taskId);
   updateEditStatus();
 }
@@ -1459,9 +1582,39 @@ async function saveAllTasks() {
     alert("没有待保存的任务变更。");
     return;
   }
-  document.querySelectorAll("#rows tr.dirty").forEach((row) => applyRowToTask(row));
+  await saveTaskRows();
+}
+
+async function saveTaskRows(extraRows = []) {
+  const rows = new Map([...document.querySelectorAll("#rows tr.dirty"), ...extraRows]
+    .filter((row) => row?.dataset?.taskId)
+    .map((row) => [row.dataset.taskId, row]));
+  extraRows.forEach((row) => {
+    if (!row?.dataset?.taskId) return;
+    rememberTaskBaseline(row.dataset.taskId);
+    state.dirtyTaskIds.add(row.dataset.taskId);
+  });
   const ids = [...state.dirtyTaskIds];
-  await saveRepository(`批量更新任务：${ids.length}项`, "task.batch_update", "task", "batch", { ids });
+  if (!ids.length) {
+    alert("没有待保存的任务变更。");
+    return;
+  }
+  ids.forEach((id) => {
+    const row = rows.get(id);
+    if (row) applyRowToTask(row);
+  });
+  const changes = ids.map((id) => taskAuditChange(state.data.tasks.find((task) => task.id === id))).filter(Boolean);
+  if (!changes.length) {
+    state.dirtyTaskIds.clear();
+    state.taskBaselines.clear();
+    render();
+    alert("没有检测到字段变更。");
+    return;
+  }
+  const summary = changes.length === 1 ? `更新任务：${changes[0].title}` : `批量更新任务：${changes.length}项`;
+  const action = changes.length === 1 ? "task.update" : "task.batch_update";
+  const id = changes.length === 1 ? changes[0].id : "batch";
+  await saveRepository(summary, action, "task", id, { ids: changes.map((change) => change.id), changes });
 }
 
 async function addTask() {
@@ -1644,6 +1797,7 @@ async function saveRepository(summary, action, entity, id, detail = {}) {
     [DATA_PATHS.pageAudit]: auditText,
   }, `记录数据变更: ${summary}`);
   state.dirtyTaskIds.clear();
+  state.taskBaselines.clear();
   $("#editStatus").textContent = "已写入 GitHub 仓库，Pages 稍后刷新";
   render();
 }
