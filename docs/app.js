@@ -861,7 +861,7 @@ function renderGantt(tasks) {
       const left = daysBetween(start, clippedStart) / total * 100;
       const width = Math.max(1.2, (daysBetween(clippedStart, clippedEnd) + 1) / total * 100);
       const titleSuffix = segment.auto_extended ? "；delay 自动延长至今日，交付件完备后停止延长" : "；编辑模式下拖动移动，边缘拉伸";
-      return `<span class="bar" data-risk="${task.risk}" data-status="${statusClass(evaluateTaskDelivery(task).status)}" data-auto-extended="${segment.auto_extended ? "true" : "false"}" data-task-id="${escapeAttr(task.id)}" data-segment-index="${segment.source_index ?? index}" style="left:${left}%;width:${width}%" title="${escapeHtml(displayTaskTitle(task))}：${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}${titleSuffix}"></span>`;
+      return `<span class="bar" data-risk="${task.risk}" data-status="${statusClass(evaluateTaskDelivery(task).status)}" data-auto-extended="${segment.auto_extended ? "true" : "false"}" data-task-id="${escapeAttr(task.id)}" data-segment-index="${segment.source_index ?? index}" style="left:${left}%;width:${width}%" title="${escapeHtml(displayTaskTitle(task))}：${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}${titleSuffix}"><small>${escapeHtml(formatMonthDay(segment.end_date))}</small></span>`;
     }).join("");
     return `<div class="gantt-row"><div class="gantt-title">${escapeHtml(displayTaskTitle(task))}</div><div class="track">${bars}</div></div>`;
   }).join("");

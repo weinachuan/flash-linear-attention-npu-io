@@ -97,7 +97,8 @@ body.editing .edit-status { color:#277560; }
 .gantt-row { display:grid; grid-template-columns:var(--gantt-label-width) 1fr; gap:var(--gantt-gap); align-items:center; min-height:26px; }
 .gantt-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#40382e; font-size:12px; font-weight:850; }
 .track { position:relative; height:20px; border-radius:999px; background:#eee3d2; overflow:hidden; }
-.bar { position:absolute; top:3px; height:14px; min-width:8px; border-radius:999px; background:var(--medium); }
+.bar { position:absolute; top:3px; height:14px; min-width:8px; border-radius:999px; background:var(--medium); display:flex; align-items:center; justify-content:flex-end; overflow:hidden; }
+.bar small { flex:0 0 auto; max-width:100%; padding:0 5px; color:#fffdf8; font-size:9px; font-weight:950; line-height:1; white-space:nowrap; pointer-events:none; }
 body.editing .bar { cursor:grab; touch-action:none; }
 body.editing .bar:hover { box-shadow:0 0 0 2px rgba(32,37,31,.18); }
 .bar.dragging { cursor:grabbing; opacity:.82; }
@@ -248,6 +249,7 @@ td .link-input { min-width:220px; }
   border-radius:16px;
   background:#fffaf1;
 }
+.bar[data-auto-extended="true"] small { display:none; }
 .plan-view.active { display:block; }
 .time-axis { padding:14px 16px; border-radius:16px; background:linear-gradient(180deg,#fffdf8,#f4ead9); }
 .timeline-head { align-items:center; }
