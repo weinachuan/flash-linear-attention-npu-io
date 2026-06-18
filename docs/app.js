@@ -257,6 +257,7 @@ function render(options = {}) {
   const includeTableFilters = options.includeTableFilters !== false;
   const filtered = filteredTasks();
   const all = state.data.tasks || [];
+  ensureDefaultTimelineView();
   state.baseTimeline = computeTimelineRange();
   ensureTimelineView();
   const tasks = filtered.filter(taskIntersectsView);
@@ -516,6 +517,10 @@ function syncToolbarFilters() {
 }
 
 function computeTimelineRange() {
+  if (isYmd(state.view.start) && isYmd(state.view.end)) {
+    const delayedEnd = maxDelayedRenderEndDate();
+    return timelineRangeFromDates(state.view.start, delayedEnd ? maxDate(state.view.end, delayedEnd) : state.view.end);
+  }
   const dates = [];
   (state.data?.tasks || []).forEach((task) => {
     taskRenderSegments(task).forEach((segment) => {
@@ -538,7 +543,7 @@ function computeTimelineRange() {
   }
   const start = toDay(Math.min(...parsed));
   const end = toDay(Math.max(...parsed));
-  return { start, end, total: Math.max(1, daysBetween(start, end) + 1) };
+  return timelineRangeFromDates(start, end);
 }
 
 function computeDataTimelineRange() {
@@ -561,7 +566,38 @@ function computeDataTimelineRange() {
   }
   const start = toDay(Math.min(...parsed));
   const end = toDay(Math.max(...parsed));
-  return { start, end, total: Math.max(1, daysBetween(start, end) + 1) };
+  return timelineRangeFromDates(start, end);
+}
+
+function ensureDefaultTimelineView() {
+  if (isYmd(state.view.start) && isYmd(state.view.end)) return;
+  const start = todayBjYmd();
+  const end = maxDate(start, latestPlannedCompletionDate() || start);
+  state.view = timelineRangeFromDates(start, end);
+}
+
+function latestPlannedCompletionDate() {
+  const taskDates = [];
+  (state.data?.tasks || []).forEach((task) => {
+    if (isYmd(task.end_date)) taskDates.push(task.end_date);
+    taskSegments(task).forEach((segment) => {
+      if (isYmd(segment.end_date)) taskDates.push(segment.end_date);
+    });
+  });
+  if (taskDates.length) return taskDates.sort().at(-1);
+  const groupDates = [];
+  (state.data?.groups || []).forEach((group) => {
+    [group.end_date, group.due_date, group.start_date].forEach((date) => {
+      if (isYmd(date)) groupDates.push(date);
+    });
+  });
+  return groupDates.sort().at(-1) || "";
+}
+
+function timelineRangeFromDates(start, end) {
+  const safeStart = minDate(start, end);
+  const safeEnd = maxDate(start, end);
+  return { start: safeStart, end: safeEnd, total: Math.max(1, daysBetween(safeStart, safeEnd) + 1) };
 }
 
 function ensureTimelineView() {
@@ -587,6 +623,12 @@ function setTimelineView(startOffset, endOffset) {
   const end = addDays(full.start, safeEnd);
   state.view = { start, end, total: safeEnd - safeStart + 1 };
   state.timeline = { ...state.view };
+}
+
+function setTimelineViewDates(start, end) {
+  state.view = timelineRangeFromDates(start, end);
+  state.baseTimeline = computeTimelineRange();
+  state.timeline = { ...state.baseTimeline };
 }
 
 function taskSegments(task) {
@@ -651,7 +693,7 @@ function renderTimeAxis() {
     <div class="timeline-head">
       <div>
         <strong>DDL 与时间窗口</strong>
-        <span>上方为全量滑窗；下方当前窗口时间线与甘特图严格对齐</span>
+        <span>时间条从开始日期绘制；拖整条平移窗口，拖两端缩放窗口</span>
       </div>
       <div class="timeline-actions">
         <label>开始 <input id="viewStartDate" type="date" value="${escapeAttr(state.view.start)}"></label>
@@ -757,17 +799,17 @@ function attachTimelineDrag() {
   scale.addEventListener("pointerdown", (event) => {
     const target = event.target.closest("[data-axis-mode]");
     const mode = target?.dataset.axisMode || "jump";
-    const full = state.baseTimeline;
-    const startOffset = daysBetween(full.start, state.view.start);
-    const endOffset = daysBetween(full.start, state.view.end);
-    const span = endOffset - startOffset + 1;
+    const original = { ...state.view };
+    const span = original.total;
+    const rect = scale.getBoundingClientRect();
+    const unit = rect.width / Math.max(1, span);
     const firstOffset = pointerToTimelineOffset(event, scale);
-    const grabOffset = firstOffset - startOffset;
     event.preventDefault();
 
     if (mode === "jump") {
-      const nextStart = clamp(firstOffset - Math.floor(span / 2), 0, Math.max(0, full.total - span));
-      setTimelineView(nextStart, nextStart + span - 1);
+      const clicked = addDays(original.start, firstOffset);
+      const nextStart = addDays(clicked, -Math.floor(span / 2));
+      setTimelineViewDates(nextStart, addDays(nextStart, span - 1));
       render();
       return;
     }
@@ -775,18 +817,18 @@ function attachTimelineDrag() {
     scale.setPointerCapture(event.pointerId);
     scale.classList.add("dragging");
     const move = (moveEvent) => {
-      const offset = pointerToTimelineOffset(moveEvent, scale);
-      let nextStart = startOffset;
-      let nextEnd = endOffset;
+      const deltaDays = Math.round((moveEvent.clientX - event.clientX) / Math.max(1, unit));
+      let nextStart = original.start;
+      let nextEnd = original.end;
       if (mode === "move") {
-        nextStart = clamp(offset - grabOffset, 0, Math.max(0, full.total - span));
-        nextEnd = nextStart + span - 1;
+        nextStart = addDays(original.start, deltaDays);
+        nextEnd = addDays(original.end, deltaDays);
       } else if (mode === "start") {
-        nextStart = clamp(offset, 0, endOffset);
+        nextStart = minDate(addDays(original.start, deltaDays), original.end);
       } else {
-        nextEnd = clamp(offset, startOffset, full.total - 1);
+        nextEnd = maxDate(addDays(original.end, deltaDays), original.start);
       }
-      setTimelineView(nextStart, nextEnd);
+      setTimelineViewDates(nextStart, nextEnd);
       paintTimelineWindow();
     };
     const finish = () => {
@@ -805,7 +847,7 @@ function attachTimelineDrag() {
 function pointerToTimelineOffset(event, scale) {
   const rect = scale.getBoundingClientRect();
   const ratio = clamp((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
-  return clamp(Math.floor(ratio * state.baseTimeline.total), 0, state.baseTimeline.total - 1);
+  return clamp(Math.floor(ratio * state.timeline.total), 0, state.timeline.total - 1);
 }
 
 function paintTimelineWindow() {

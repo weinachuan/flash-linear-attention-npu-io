@@ -14,6 +14,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PASSWORD_HASH_ITERATIONS = 100000
 
 
 def read_json(path: Path, fallback: Any = None) -> Any:
@@ -77,7 +78,7 @@ class RawSql:
 
 
 def password_hash(password: str, salt: str) -> str:
-    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 120000, dklen=32)
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), PASSWORD_HASH_ITERATIONS, dklen=32)
     return base64.urlsafe_b64encode(digest).decode().rstrip("=")
 
 

@@ -4,6 +4,7 @@ const DEFAULT_PROJECT = {
   baselineDate: "2026-06-15",
   projectOwner: { name: "待填写", email: "待填写" },
 };
+const PASSWORD_HASH_ITERATIONS = 100000;
 
 export default {
   async fetch(request, env) {
@@ -315,7 +316,15 @@ async function createUser(request, env) {
   const now = nowIso();
   await env.DB.prepare(
     `INSERT INTO users(id, username, display_name, owner_name, role, password_hash, salt, active, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(username) DO UPDATE SET
+       display_name = excluded.display_name,
+       owner_name = excluded.owner_name,
+       role = excluded.role,
+       password_hash = excluded.password_hash,
+       salt = excluded.salt,
+       active = excluded.active,
+       updated_at = excluded.updated_at`
   ).bind(
     id,
     username,
@@ -328,7 +337,7 @@ async function createUser(request, env) {
     now,
     now,
   ).run();
-  const row = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(id).first();
+  const row = await env.DB.prepare("SELECT * FROM users WHERE username = ?").bind(username).first();
   return { ok: true, user: publicUser(row) };
 }
 
@@ -447,7 +456,7 @@ async function hashPassword(password, salt) {
   const bits = await crypto.subtle.deriveBits({
     name: "PBKDF2",
     salt: encoder.encode(salt),
-    iterations: 120000,
+    iterations: PASSWORD_HASH_ITERATIONS,
     hash: "SHA-256",
   }, material, 256);
   return base64Url(new Uint8Array(bits));

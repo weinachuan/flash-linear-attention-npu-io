@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create a Cloudflare Worker application user."""
+"""Create or update a Cloudflare Worker application user."""
 
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ def post_json(url: str, token: str, payload: dict) -> dict:
 def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    parser = argparse.ArgumentParser(description="创建 Cloudflare Worker 登录用户。")
+    parser = argparse.ArgumentParser(description="创建或更新 Cloudflare Worker 登录用户。")
     parser.add_argument("--api", required=True, help="Worker URL，例如 https://xxx.workers.dev")
     parser.add_argument("--admin-token", required=True, help="Wrangler secret ADMIN_TOKEN 的值")
     parser.add_argument("--username", required=True)
@@ -50,7 +50,7 @@ def main() -> int:
         "ownerName": args.owner_name or args.display_name or args.username,
     })
     user = result.get("user", {})
-    print(f"创建完成：{user.get('username')} / {user.get('role')} / {user.get('ownerName')}")
+    print(f"创建/更新完成：{user.get('username')} / {user.get('role')} / {user.get('ownerName')}")
     return 0
 
 
