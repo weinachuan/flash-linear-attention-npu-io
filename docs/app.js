@@ -1155,6 +1155,13 @@ function taskPeople(task, referenceDate = "") {
 
 function peopleForTasks(tasks) {
   ensurePeopleCatalog();
+  const selectedOwners = ownerFilterValues();
+  if (selectedOwners.length) {
+    const selected = new Set(selectedOwners);
+    return (state.data.people || [])
+      .filter((person) => selected.has(person.name))
+      .sort(comparePeople);
+  }
   const people = uniqueBy([
     ...(state.data.people || []),
     ...tasks.flatMap(taskPeople),
