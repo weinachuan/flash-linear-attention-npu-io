@@ -1,6 +1,8 @@
 name = "flash-linear-attention-npu-io"
 main = "cloudflare/worker.js"
 compatibility_date = "2026-06-18"
+workers_dev = true
+preview_urls = false
 
 [vars]
 ALLOWED_ORIGINS = "https://weinachuan.github.io,http://127.0.0.1:8787,http://localhost:8787"
@@ -8,4 +10,4 @@ ALLOWED_ORIGINS = "https://weinachuan.github.io,http://127.0.0.1:8787,http://loc
 [[d1_databases]]
 binding = "DB"
 database_name = "flash-linear-attention-npu-io"
-database_id = "replace-with-cloudflare-d1-database-id"
+database_id = "be0c2c39-b440-40fc-86ce-cb6d90c12e6a"
