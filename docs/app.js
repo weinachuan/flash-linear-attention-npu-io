@@ -33,7 +33,7 @@ const OPERATOR_OWNER_RULES = {
   prepare_wy_repr_bwd_full: [{ until: "2026-06-30", owner: "张硕累" }, { owner: "周云飞" }],
 };
 
-const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "blocked"], ["delayed", "delay"], ["done", "done"]];
+const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "Pending"], ["delayed", "delay"], ["done", "done"]];
 
 const state = {
   data: null,
@@ -1095,32 +1095,45 @@ function taskHasWaitingOwner(task) {
   return taskOwnerNames(task).includes("待排人力");
 }
 
-function evaluateTaskDelivery(task) {
+function taskHasClosedSchedule(task) {
+  return isYmd(task.start_date) && isYmd(task.end_date);
+}
+
+function evaluateTaskRisk(task) {
   const pr = prLinkSummary(task.pr_link);
-  const hasReport = taskHasReport(task);
-  const forceCompleted = taskIsCompletionOverride(task);
   const daysUntilDdl = taskDaysUntilDdl(task);
-  const completed = forceCompleted || (pr.allMerged && hasReport);
-  const delayed = !completed && taskPastDdlMidnight(task);
-  let risk = "中";
   if (taskHasWaitingOwner(task)) {
-    risk = "高";
-  } else if (pr.allMerged) {
-    risk = "低";
-  } else if (pr.hasOpen) {
-    risk = daysUntilDdl <= 5 ? "中" : "低";
-  } else {
-    risk = daysUntilDdl <= 10 ? "高" : "中";
+    return "高";
   }
-  let status = task.status || "todo";
+  if (pr.allMerged) {
+    return "低";
+  }
+  if (pr.hasOpen) {
+    return daysUntilDdl <= 5 ? "中" : "低";
+  }
+  return daysUntilDdl <= 10 ? "高" : "中";
+}
+
+function evaluateTaskStatus(task) {
+  const pr = prLinkSummary(task.pr_link);
+  const completed = taskIsCompletionOverride(task) || (pr.allMerged && taskHasReport(task));
   if (completed) {
-    status = "done";
-  } else if (delayed) {
-    status = "delayed";
-  } else if (status === "done" || status === "delayed") {
-    status = "todo";
+    return "done";
   }
-  return { risk, status };
+  if (taskPastDdlMidnight(task)) {
+    return "delayed";
+  }
+  if (task.status === "blocked") {
+    return "blocked";
+  }
+  if (taskHasWaitingOwner(task) || !taskHasClosedSchedule(task)) {
+    return "todo";
+  }
+  return "doing";
+}
+
+function evaluateTaskDelivery(task) {
+  return { risk: evaluateTaskRisk(task), status: evaluateTaskStatus(task) };
 }
 
 function syncTaskDeliveryRules(task) {

@@ -205,8 +205,9 @@ td .link-input { min-width:220px; }
 .status-pill { display:inline-flex; min-width:54px; justify-content:center; padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:#fffaf1; color:#4d4235; font-size:12px; font-weight:900; }
 .status-pill.done { border-color:rgba(39,117,96,.25); background:#e7f3ee; color:#1d6a56; }
 .status-pill.delayed { border-color:var(--high); background:#fffdf8; color:var(--high); }
-.status-pill.blocked { border-color:rgba(207,61,50,.24); background:#fff0df; color:#9a3a24; }
-.status-pill.doing { border-color:rgba(186,121,14,.26); background:#fff1d2; color:#875407; }
+.status-pill.blocked { border-color:#8a857a; background:#f2efe8; color:#5f5a52; }
+.status-pill.doing { border-color:#d99814; background:#fffdf8; color:#9b6508; }
+.status-pill.todo { border-color:#2f73c8; background:#f7fbff; color:#235a9f; }
 .audit { display:grid; gap:8px; }
 .audit-item { display:grid; grid-template-columns:190px 1fr; gap:10px; padding:9px 10px; border:1px solid var(--line); background:#fffaf1; }
 .audit-item time { color:var(--muted); font-size:12px; }

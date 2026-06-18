@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>flash-linear-attention-npu 项目看板</title>
-  <link rel="stylesheet" href="./styles.css?v=20260618-delay-stage-critical">
+  <link rel="stylesheet" href="./styles.css?v=20260618-status-risk-priority-rules">
 </head>
 <body>
   <main class="shell">
@@ -24,7 +24,7 @@
       <label>搜索 <input id="q" type="search" placeholder="事项 / 负责人"></label>
       <label>风险 <select id="risk"><option value="">全部</option><option>高</option><option>中</option><option>低</option></select></label>
       <label>优先级 <select id="priority"><option value="">全部</option><option>P0</option><option>P1</option><option>P2</option></select></label>
-      <label>状态 <select id="status"><option value="">全部</option><option value="todo">todo</option><option value="doing">doing</option><option value="blocked">blocked</option><option value="delayed">delay</option><option value="done">done</option></select></label>
+      <label>状态 <select id="status"><option value="">全部</option><option value="todo">todo</option><option value="doing">doing</option><option value="blocked">Pending</option><option value="delayed">delay</option><option value="done">done</option></select></label>
       <button id="refresh" type="button">刷新仓库数据</button>
       <button id="clearFilters" type="button">清空筛选</button>
       <button id="addTask" type="button" class="edit-only">新增任务</button>
@@ -37,26 +37,33 @@
 
     <section class="panel risk-rule-panel">
       <div class="panel-title-row">
-        <h2>风险与交付判定规则</h2>
+        <h2>状态、风险与优先级规则</h2>
         <span class="rule-note">以任务计划结束日作为 DDL；北京时间 DDL 当天 24:00 后进入延期判断。</span>
       </div>
       <div class="rule-table-wrap">
         <table class="rule-table">
           <thead>
             <tr>
+              <th>类型</th>
               <th>条件</th>
-              <th>风险</th>
-              <th>状态</th>
+              <th>结果</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td>PR 已合入，且已填写转测报告</td><td><span class="tag low">低</span></td><td><span class="status-pill done">done</span></td></tr>
-            <tr><td>PR 已合入，但未填写转测报告</td><td><span class="tag low">低</span></td><td>未到 DDL 保持原状态；超过 DDL 标记 delay</td></tr>
-            <tr><td>有匹配 PR 但未合入，距离 DDL ≤ 5 天</td><td><span class="tag medium">中</span></td><td>超过 DDL 标记 delay</td></tr>
-            <tr><td>有匹配 PR 但未合入，距离 DDL > 5 天</td><td><span class="tag low">低</span></td><td>保持原状态</td></tr>
-            <tr><td>未匹配 PR，距离 DDL ≤ 10 天</td><td><span class="tag high">高</span></td><td>超过 DDL 标记 delay</td></tr>
-            <tr><td>未匹配 PR，距离 DDL > 10 天</td><td><span class="tag medium">中</span></td><td>保持原状态</td></tr>
-            <tr><td>责任人为待排人力 / 待填写（优先级最高，覆盖 DDL 距离判断）</td><td><span class="tag high">高</span></td><td>状态仍按 PR / 报告 / DDL 判定</td></tr>
+            <tr><td>状态</td><td>超过 DDL，直到交付件完备前</td><td><span class="status-pill delayed">delay</span></td></tr>
+            <tr><td>状态</td><td>交付件完备</td><td><span class="status-pill done">done</span></td></tr>
+            <tr><td>状态</td><td>未超过 DDL，且已规定起始闭环时间、正在推进</td><td><span class="status-pill doing">doing</span></td></tr>
+            <tr><td>状态</td><td>待排人力，或只有事项但未规定起始闭环时间</td><td><span class="status-pill todo">todo</span></td></tr>
+            <tr><td>状态</td><td>更高优先级事项插入，导致该事项因人力问题挂起</td><td><span class="status-pill blocked">Pending</span></td></tr>
+            <tr><td>风险</td><td>PR 已合入</td><td><span class="tag low">低</span></td></tr>
+            <tr><td>风险</td><td>有匹配 PR 但未合入，距离 DDL ≤ 5 天</td><td><span class="tag medium">中</span></td></tr>
+            <tr><td>风险</td><td>有匹配 PR 但未合入，距离 DDL > 5 天</td><td><span class="tag low">低</span></td></tr>
+            <tr><td>风险</td><td>未匹配 PR，距离 DDL ≤ 10 天</td><td><span class="tag high">高</span></td></tr>
+            <tr><td>风险</td><td>未匹配 PR，距离 DDL > 10 天</td><td><span class="tag medium">中</span></td></tr>
+            <tr><td>风险</td><td>责任人为待排人力 / 待填写</td><td><span class="tag high">高</span></td></tr>
+            <tr><td>优先级</td><td>有对外承诺</td><td><span class="tag p0">P0</span></td></tr>
+            <tr><td>优先级</td><td>没有对外承诺，或交付承诺晚于内部目标；自规划但收益较高；涉及易用性</td><td><span class="tag p1">P1</span></td></tr>
+            <tr><td>优先级</td><td>不阻塞使用，收益较小，自规划类型</td><td><span class="tag p2">P2</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -131,6 +138,6 @@
       <div id="audit" class="audit"></div>
     </section>
   </main>
-  <script src="./app.js?v=20260618-delay-stage-critical"></script>
+  <script src="./app.js?v=20260618-status-risk-priority-rules"></script>
 </body>
 </html>
