@@ -407,7 +407,7 @@ function updateTableFilter(event) {
   const field = event.target.dataset.tableFilter;
   state.filters[field] = event.target.value.trim();
   syncToolbarFilters();
-  render();
+  render({ includeTableFilters: false });
 }
 
 function toggleOwnerFilter(event) {
