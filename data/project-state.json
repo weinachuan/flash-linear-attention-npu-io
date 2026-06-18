@@ -1,6 +1,6 @@
 {
   "storageVersion": 1,
-  "generatedAt": "2026-06-18T01:50:00+08:00",
+  "generatedAt": "2026-06-18T02:13:29+08:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -302,7 +302,7 @@
       "scope": "",
       "target": "",
       "owner": "吴雨舒",
-      "status": "todo",
+      "status": "done",
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
@@ -314,7 +314,7 @@
       "notes": "",
       "position": 1,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-18T02:12:17+08:00",
       "segments": [
         {
           "id": "seg-9f801d9dcb",
@@ -325,7 +325,7 @@
         }
       ],
       "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/1",
-      "test_report": ""
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026061711514377"
     },
     {
       "id": "t03",
@@ -333,7 +333,7 @@
       "scope": "",
       "target": "",
       "owner": "方梓阳",
-      "status": "todo",
+      "status": "done",
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
@@ -345,7 +345,7 @@
       "notes": "",
       "position": 2,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-18T02:12:40+08:00",
       "segments": [
         {
           "id": "seg-0801e04687",
@@ -356,7 +356,7 @@
         }
       ],
       "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/44",
-      "test_report": ""
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026061711512455"
     },
     {
       "id": "t04",
@@ -395,7 +395,7 @@
       "scope": "",
       "target": "",
       "owner": "黄浚哲",
-      "status": "todo",
+      "status": "done",
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-18",
@@ -407,7 +407,7 @@
       "notes": "",
       "position": 4,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-18T02:13:04+08:00",
       "segments": [
         {
           "id": "seg-71650b131f",
@@ -418,7 +418,7 @@
         }
       ],
       "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/18",
-      "test_report": ""
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026061711505063"
     },
     {
       "id": "t06",
@@ -643,7 +643,7 @@
       "scope": "",
       "target": "",
       "owner": "吴雨舒",
-      "status": "todo",
+      "status": "done",
       "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-18",
@@ -655,7 +655,7 @@
       "notes": "",
       "position": 12,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T16:31:53+08:00",
+      "updated_at": "2026-06-18T02:12:18+08:00",
       "segments": [
         {
           "id": "seg-15b69a8629",
@@ -666,7 +666,7 @@
         }
       ],
       "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/45",
-      "test_report": ""
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026061711514377"
     },
     {
       "id": "t14",
