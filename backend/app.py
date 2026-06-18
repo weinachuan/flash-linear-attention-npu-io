@@ -14,8 +14,10 @@ try:
         connect,
         export_all,
         init_db,
+        list_audit_entries,
         load_repo_state_or_seed,
         make_id,
+        seed_audit_if_empty,
         seed_if_empty,
         task_to_dict,
         update_task,
@@ -29,8 +31,10 @@ except ImportError:
         connect,
         export_all,
         init_db,
+        list_audit_entries,
         load_repo_state_or_seed,
         make_id,
+        seed_audit_if_empty,
         seed_if_empty,
         task_to_dict,
         update_task,
@@ -85,10 +89,15 @@ class Handler(BaseHTTPRequestHandler):
         with connect() as conn:
             init_db(conn)
             seed_if_empty(conn)
+            seed_audit_if_empty(conn)
             if path == "/api/health":
-                self.send_json({"ok": True, "storage": "repository", "state": "data/project-state.json", "auditLog": "data/audit-log.jsonl"})
+                self.send_json({"ok": True, "storage": "sqlite", "database": "data/project.sqlite3", "snapshot": "data/project-state.json", "auditLog": "data/audit-log.jsonl"})
             elif path == "/api/export":
                 self.send_json(export_all(conn))
+            elif path == "/api/audit":
+                limit = int((query.get("limit") or ["10"])[0])
+                q = (query.get("q") or [""])[0]
+                self.send_json(list_audit_entries(conn, limit=limit, q=q))
             elif path == "/api/groups":
                 rows = conn.execute("SELECT * FROM groups ORDER BY position, due_date").fetchall()
                 self.send_json([dict(row) for row in rows])
@@ -114,6 +123,7 @@ class Handler(BaseHTTPRequestHandler):
         with connect() as conn:
             init_db(conn)
             seed_if_empty(conn)
+            seed_audit_if_empty(conn)
             try:
                 if path == "/api/tasks" and method == "POST":
                     self.create_task(conn, payload)

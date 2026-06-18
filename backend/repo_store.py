@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import json
 import os
 import subprocess
 from pathlib import Path
 from typing import Any
 
 try:
-    from .db import AUDIT_LOG_PATH, ROOT, STATE_PATH, now_iso, write_state_snapshot
+    from .db import AUDIT_LOG_PATH, ROOT, STATE_PATH, insert_audit_entry, now_iso, write_audit_snapshot, write_state_snapshot
 except ImportError:
-    from db import AUDIT_LOG_PATH, ROOT, STATE_PATH, now_iso, write_state_snapshot  # type: ignore
+    from db import AUDIT_LOG_PATH, ROOT, STATE_PATH, insert_audit_entry, now_iso, write_audit_snapshot, write_state_snapshot  # type: ignore
 
 
 PAGES_STATE_PATH = ROOT / "docs" / "project-state.json"
@@ -23,7 +22,6 @@ TRACKED_DATA_FILES = [
 
 
 def persist_change(conn, action: str, entity: str, entity_id: str, summary: str, detail: dict[str, Any] | None = None) -> dict[str, Any]:
-    write_state_snapshot(conn)
     entry = {
         "ts": now_iso(),
         "action": action,
@@ -31,21 +29,18 @@ def persist_change(conn, action: str, entity: str, entity_id: str, summary: str,
         "id": entity_id,
         "summary": summary,
         "detail": detail or {},
-        "source": "web",
+        "source": "backend",
     }
-    append_audit_log(entry)
+    insert_audit_entry(conn, entry)
+    conn.commit()
+    write_state_snapshot(conn)
+    write_audit_snapshot(conn)
     mirror_pages_data()
     if os.environ.get("FLASH_IO_DISABLE_GIT_SYNC") == "1":
         return {"ok": True, "mode": "disabled", "entry": entry}
     result = commit_and_push(f"{summary} ({entity_id})")
     result["entry"] = entry
     return result
-
-
-def append_audit_log(entry: dict[str, Any]) -> None:
-    AUDIT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with AUDIT_LOG_PATH.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(entry, ensure_ascii=False, sort_keys=True) + "\n")
 
 
 def mirror_pages_data() -> None:

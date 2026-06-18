@@ -118,6 +118,17 @@ def init_db(conn: sqlite3.Connection) -> None:
           position INTEGER NOT NULL DEFAULT 0,
           FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS audit_entries (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          ts TEXT NOT NULL,
+          action TEXT NOT NULL,
+          entity TEXT NOT NULL,
+          entity_id TEXT NOT NULL,
+          summary TEXT NOT NULL,
+          detail TEXT NOT NULL DEFAULT '{}',
+          source TEXT NOT NULL DEFAULT 'backend'
+        );
         """
     )
     conn.commit()
@@ -139,11 +150,27 @@ def seed_if_empty(conn: sqlite3.Connection) -> None:
 
 
 def load_repo_state_or_seed(conn: sqlite3.Connection) -> None:
-    if STATE_PATH.exists():
-        import_state_snapshot(conn, STATE_PATH)
-        conn.commit()
-        return
+    # Backward-compatible entrypoint: SQLite is the source of truth now.
+    # Repository JSON is only used for first boot or rebuild.
     seed_if_empty(conn)
+    seed_audit_if_empty(conn)
+
+
+def seed_audit_if_empty(conn: sqlite3.Connection) -> None:
+    count = conn.execute("SELECT COUNT(*) FROM audit_entries").fetchone()[0]
+    if count or not AUDIT_LOG_PATH.exists():
+        return
+    with AUDIT_LOG_PATH.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            insert_audit_entry(conn, entry)
+    conn.commit()
 
 
 def first_existing(paths: list[Path]) -> Path | None:
@@ -510,3 +537,74 @@ def write_state_snapshot(conn: sqlite3.Connection) -> dict[str, Any]:
     state = export_all(conn)
     STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return state
+
+
+def insert_audit_entry(conn: sqlite3.Connection, entry: dict[str, Any]) -> None:
+    conn.execute(
+        """
+        INSERT INTO audit_entries(ts, action, entity, entity_id, summary, detail, source)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            entry.get("ts") or now_iso(),
+            entry.get("action") or "",
+            entry.get("entity") or "",
+            entry.get("id") or entry.get("entity_id") or "",
+            entry.get("summary") or "",
+            as_json(entry.get("detail", {})),
+            entry.get("source") or "backend",
+        ),
+    )
+
+
+def audit_row_to_dict(row: sqlite3.Row) -> dict[str, Any]:
+    return {
+        "ts": row["ts"],
+        "action": row["action"],
+        "entity": row["entity"],
+        "id": row["entity_id"],
+        "summary": row["summary"],
+        "detail": parse_json(row["detail"], {}),
+        "source": row["source"],
+    }
+
+
+def list_audit_entries(conn: sqlite3.Connection, limit: int = 10, q: str = "") -> list[dict[str, Any]]:
+    limit = max(1, min(limit, 200))
+    values: list[Any] = []
+    where = ""
+    if q:
+        where = """
+        WHERE summary LIKE ?
+           OR action LIKE ?
+           OR entity_id LIKE ?
+           OR detail LIKE ?
+        """
+        like = f"%{q}%"
+        values.extend([like, like, like, like])
+    values.append(limit)
+    rows = conn.execute(
+        f"""
+        SELECT ts, action, entity, entity_id, summary, detail, source
+        FROM audit_entries
+        {where}
+        ORDER BY id DESC
+        LIMIT ?
+        """,
+        values,
+    ).fetchall()
+    return [audit_row_to_dict(row) for row in rows]
+
+
+def write_audit_snapshot(conn: sqlite3.Connection) -> None:
+    AUDIT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    rows = conn.execute(
+        """
+        SELECT ts, action, entity, entity_id, summary, detail, source
+        FROM audit_entries
+        ORDER BY id
+        """
+    ).fetchall()
+    with AUDIT_LOG_PATH.open("w", encoding="utf-8") as handle:
+        for row in rows:
+            handle.write(json.dumps(audit_row_to_dict(row), ensure_ascii=False, sort_keys=True) + "\n")

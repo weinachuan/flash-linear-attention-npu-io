@@ -6,11 +6,11 @@
 
 - 前端：原生 HTML/CSS/JavaScript，入口 `/io`
 - 后端：Python 标准库 HTTP API
-- 数据源：仓库文件 `data/project-state.json`
-- 审计日志：仓库文件 `data/audit-log.jsonl`
-- 运行缓存：SQLite，仅用于本地服务运行时加速，不作为最终数据源
+- 后端数据库：SQLite `data/project.sqlite3`，作为任务、分组、专项和审计日志的主数据源
+- 数据快照：`data/project-state.json`，由 SQLite 导出，用于备份和 GitHub Pages 只读展示
+- 审计快照：`data/audit-log.jsonl`，由 SQLite 审计表导出，便于 grep/脚本检索
 - 数据操作：任务增删改查、筛选、分组、专项、甘特图展示、双击甘特条切分、JSON 导出
-- 每次写操作都会更新数据快照、追加日志，并自动提交推送到 GitHub 私有仓库
+- 每次写操作都会先写入 SQLite，再导出快照，并自动提交推送到 GitHub 私有仓库
 
 ## 本地运行
 
@@ -24,14 +24,14 @@ python .\backend\app.py
 http://127.0.0.1:8787/io
 ```
 
-首次启动会优先从 `data/project-state.json` 恢复数据；如果该文件不存在，则从内置 seed 数据初始化。
+首次启动如果 SQLite 为空，会从 `data/project-state.json` 和 `data/audit-log.jsonl` 初始化；如果快照不存在，则从内置 seed 数据初始化。后续以 SQLite 为准，不会在每次启动时用 JSON 覆盖数据库。
 
 ## GitHub Pages 查看
 
 本仓库使用 `docs/` 作为 GitHub Pages 静态站点目录。
 
-- 本地 `/io` 页面用于编辑数据。
-- 每次本地写操作会更新 `data/project-state.json` 和 `data/audit-log.jsonl`。
+- 本地 `/io` 页面通过后端 API 编辑 SQLite 数据库。
+- 每次本地写操作会从 SQLite 导出 `data/project-state.json` 和 `data/audit-log.jsonl`。
 - 同时会把最新数据镜像到 `docs/project-state.json` 和 `docs/audit-log.jsonl`。
 - GitHub Pages 页面只读展示仓库里的最新数据，不运行 Python 后端。
 - GitHub Pages 页面也支持编辑模式：输入你自己的 GitHub fine-grained token 后，可以直接在网页上增删改查并写回仓库。
@@ -44,9 +44,9 @@ https://weinachuan.github.io/flash-linear-attention-npu-io/
 
 ## 仓库数据文件
 
-- `data/project-state.json`：最新项目数据快照。
-- `data/audit-log.jsonl`：追加式操作日志，每行是一条 JSON 记录。
-- `data/project.sqlite3`：运行时缓存，已被 `.gitignore` 忽略。
+- `data/project.sqlite3`：后端数据库，包含任务、分组、专项、甘特分段和审计日志，已被 `.gitignore` 忽略。
+- `data/project-state.json`：从数据库导出的最新项目数据快照。
+- `data/audit-log.jsonl`：从数据库导出的追加式操作日志，每行是一条 JSON 记录。
 
 如果 GitHub 访问需要代理，服务会优先读取环境变量 `HTTP_PROXY` / `HTTPS_PROXY`；未设置时会尝试读取 Windows 用户代理配置。
 
@@ -71,6 +71,7 @@ https://weinachuan.github.io/flash-linear-attention-npu-io/
 ## API
 
 - `GET /api/health`
+- `GET /api/audit`
 - `GET /api/tasks`
 - `POST /api/tasks`
 - `PATCH /api/tasks/{id}`

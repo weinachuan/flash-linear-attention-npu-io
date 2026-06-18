@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 import sys
 from pathlib import Path
 from typing import Any
@@ -39,6 +40,47 @@ def load_audit(path: Path) -> list[dict[str, Any]]:
             except json.JSONDecodeError:
                 continue
     return entries
+
+
+def load_audit_from_sqlite(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    try:
+        conn = sqlite3.connect(path)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            """
+            SELECT ts, action, entity, entity_id, summary, detail, source
+            FROM audit_entries
+            ORDER BY id
+            """
+        ).fetchall()
+    except sqlite3.Error:
+        return []
+    finally:
+        try:
+            conn.close()
+        except UnboundLocalError:
+            pass
+    return [
+        {
+            "ts": row["ts"],
+            "action": row["action"],
+            "entity": row["entity"],
+            "id": row["entity_id"],
+            "summary": row["summary"],
+            "detail": parse_detail(row["detail"]),
+            "source": row["source"],
+        }
+        for row in rows
+    ]
+
+
+def parse_detail(value: str) -> Any:
+    try:
+        return json.loads(value or "{}")
+    except json.JSONDecodeError:
+        return {}
 
 
 def matches(entry: dict[str, Any], keyword: str) -> bool:
@@ -95,16 +137,24 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="检索项目审计日志，输出批量更新的字段级明细。")
     parser.add_argument("keyword", nargs="?", default="", help="按任务名、任务 ID、责任人、PR 链接等关键词检索。")
     parser.add_argument("--path", default="data/audit-log.jsonl", help="审计日志文件，默认 data/audit-log.jsonl。")
+    parser.add_argument("--db", default="data/project.sqlite3", help="SQLite 数据库，默认 data/project.sqlite3。")
+    parser.add_argument("--source", choices=["auto", "sqlite", "jsonl"], default="auto", help="日志来源，默认优先 SQLite。")
     parser.add_argument("--limit", type=int, default=20, help="最多展示多少条，默认 20。")
     parser.add_argument("--json", action="store_true", help="输出匹配到的原始 JSON。")
     args = parser.parse_args()
 
-    path = Path(args.path)
-    if not path.exists():
+    entries: list[dict[str, Any]] = []
+    if args.source in {"auto", "sqlite"}:
+        entries = load_audit_from_sqlite(Path(args.db))
+    if not entries and args.source in {"auto", "jsonl"}:
+        path = Path(args.path)
+        if path.exists():
+            entries = load_audit(path)
+    if not entries:
         print("未找到审计日志文件。", file=sys.stderr)
         return 1
 
-    entries = [entry for entry in reversed(load_audit(path)) if matches(entry, args.keyword)]
+    entries = [entry for entry in reversed(entries) if matches(entry, args.keyword)]
     entries = entries[: max(args.limit, 0)]
     if args.json:
         print(json.dumps(entries, ensure_ascii=False, indent=2))
