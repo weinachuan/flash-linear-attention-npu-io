@@ -19,6 +19,7 @@ def post_json(url: str, token: str, payload: dict) -> dict:
         headers={
             "Content-Type": "application/json; charset=utf-8",
             "Authorization": f"Bearer {token}",
+            "User-Agent": "Mozilla/5.0 flash-linear-attention-npu-io-admin",
         },
     )
     try:
