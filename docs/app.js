@@ -405,9 +405,24 @@ function isSelectableOwnerName(name) {
 
 function updateTableFilter(event) {
   const field = event.target.dataset.tableFilter;
+  const anchor = captureViewportAnchor(event.target);
   state.filters[field] = event.target.value.trim();
   syncToolbarFilters();
   render({ includeTableFilters: false });
+  restoreViewportAnchor(anchor);
+}
+
+function captureViewportAnchor(element) {
+  if (!element) return null;
+  const rect = element.getBoundingClientRect();
+  return { element, top: rect.top };
+}
+
+function restoreViewportAnchor(anchor) {
+  if (!anchor?.element?.isConnected) return;
+  const rect = anchor.element.getBoundingClientRect();
+  const delta = rect.top - anchor.top;
+  if (Math.abs(delta) > 0.5) window.scrollBy(0, delta);
 }
 
 function toggleOwnerFilter(event) {
