@@ -126,7 +126,8 @@ body.editing .bar:hover { box-shadow:0 0 0 2px rgba(32,37,31,.18); }
   letter-spacing:.02em;
   text-transform:uppercase;
 }
-.table-wrap { overflow:auto; max-height:58vh; }
+.task-detail-panel { min-height:340px; }
+.table-wrap { overflow:auto; min-height:220px; max-height:58vh; }
 table { width:100%; min-width:1500px; border-collapse:collapse; }
 th,td { padding:9px 10px; border-bottom:1px solid var(--line); text-align:left; font-size:13px; vertical-align:middle; }
 th { position:sticky; top:0; background:#fff6e8; font-size:12px; z-index:10; }
@@ -149,9 +150,9 @@ th { position:sticky; top:0; background:#fff6e8; font-size:12px; z-index:10; }
 .check-filter-trigger b { color:#8a7a67; font-size:14px; line-height:1; }
 .check-filter.open .check-filter-trigger { border-color:rgba(39,117,96,.45); box-shadow:0 0 0 2px rgba(39,117,96,.1); }
 .check-filter-menu {
-  position:absolute;
-  top:33px;
-  left:0;
+  position:fixed;
+  top:var(--filter-menu-top, 0);
+  left:var(--filter-menu-left, 0);
   z-index:1000;
   display:none;
   width:220px;

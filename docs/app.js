@@ -338,6 +338,7 @@ function renderTableFilters() {
   document.querySelector("[data-owner-filter-clear]")?.addEventListener("click", clearOwnerFilter);
   document.querySelector("[data-owner-filter-apply]")?.addEventListener("click", applyOwnerFilter);
   document.querySelector("[data-clear-filters]")?.addEventListener("click", clearFilters);
+  positionOwnerFilterMenu();
 }
 
 function tableFilterSelect(field, options) {
@@ -399,6 +400,24 @@ function ownerFilterLabel() {
 function updateOwnerFilterSummary() {
   const label = document.querySelector("[data-owner-filter-toggle] span");
   if (label) label.textContent = ownerFilterLabel();
+  positionOwnerFilterMenu();
+}
+
+function positionOwnerFilterMenu() {
+  if (!state.ownerFilterOpen) return;
+  const trigger = document.querySelector("[data-owner-filter-toggle]");
+  const menu = document.querySelector(".check-filter-menu");
+  if (!trigger || !menu) return;
+  const rect = trigger.getBoundingClientRect();
+  const menuWidth = menu.offsetWidth || 220;
+  const menuHeight = menu.offsetHeight || 320;
+  const left = clamp(rect.left, 8, Math.max(8, window.innerWidth - menuWidth - 8));
+  let top = rect.bottom + 4;
+  if (top + menuHeight > window.innerHeight - 8) {
+    top = Math.max(8, rect.top - menuHeight - 4);
+  }
+  menu.style.setProperty("--filter-menu-left", `${left}px`);
+  menu.style.setProperty("--filter-menu-top", `${top}px`);
 }
 
 function uniqueTaskValues(field) {
@@ -2217,6 +2236,8 @@ document.addEventListener("click", (event) => {
   state.ownerFilterOpen = false;
   renderTableFilters();
 });
+document.addEventListener("scroll", positionOwnerFilterMenu, true);
+window.addEventListener("resize", positionOwnerFilterMenu);
 
 function showError(error) {
   $("#editStatus").textContent = `写入失败：${error.message}`;
