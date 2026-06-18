@@ -7,6 +7,7 @@ const DATA_PATHS = {
   pageState: "docs/project-state.json",
   pageAudit: "docs/audit-log.jsonl",
 };
+const TIMELINE_AXIS_PADDING_DAYS = 7;
 
 const CHINA_WORK_CALENDARS = {
   2026: buildChinaWorkCalendar([
@@ -517,10 +518,6 @@ function syncToolbarFilters() {
 }
 
 function computeTimelineRange() {
-  if (isYmd(state.view.start) && isYmd(state.view.end)) {
-    const delayedEnd = maxDelayedRenderEndDate();
-    return timelineRangeFromDates(state.view.start, delayedEnd ? maxDate(state.view.end, delayedEnd) : state.view.end);
-  }
   const dates = [];
   (state.data?.tasks || []).forEach((task) => {
     taskRenderSegments(task).forEach((segment) => {
@@ -536,14 +533,16 @@ function computeTimelineRange() {
   [state.view.start, state.view.end].forEach((date) => {
     if (date) dates.push(date);
   });
+  const delayedEnd = maxDelayedRenderEndDate();
+  if (delayedEnd) dates.push(delayedEnd);
   const parsed = dates.map(Date.parse).filter(Number.isFinite);
   if (!parsed.length) {
-    const today = toDay(Date.now());
-    return { start: today, end: today, total: 1 };
+    const today = todayBjYmd();
+    return timelineRangeWithPadding(today, today, TIMELINE_AXIS_PADDING_DAYS);
   }
   const start = toDay(Math.min(...parsed));
   const end = toDay(Math.max(...parsed));
-  return timelineRangeFromDates(start, end);
+  return timelineRangeWithPadding(start, end, TIMELINE_AXIS_PADDING_DAYS);
 }
 
 function computeDataTimelineRange() {
@@ -600,6 +599,10 @@ function timelineRangeFromDates(start, end) {
   return { start: safeStart, end: safeEnd, total: Math.max(1, daysBetween(safeStart, safeEnd) + 1) };
 }
 
+function timelineRangeWithPadding(start, end, paddingDays) {
+  return timelineRangeFromDates(addDays(start, -paddingDays), addDays(end, paddingDays));
+}
+
 function ensureTimelineView() {
   const full = state.baseTimeline;
   if (!state.view.start || !state.view.end) {
@@ -627,8 +630,7 @@ function setTimelineView(startOffset, endOffset) {
 
 function setTimelineViewDates(start, end) {
   state.view = timelineRangeFromDates(start, end);
-  state.baseTimeline = computeTimelineRange();
-  state.timeline = { ...state.baseTimeline };
+  state.timeline = { ...state.view };
 }
 
 function taskSegments(task) {
@@ -693,7 +695,7 @@ function renderTimeAxis() {
     <div class="timeline-head">
       <div>
         <strong>DDL 与时间窗口</strong>
-        <span>时间条从开始日期绘制；拖整条平移窗口，拖两端缩放窗口</span>
+        <span>时间轴包含项目范围；绿色窗口为当前显示范围，可拖动平移或拖两端缩放</span>
       </div>
       <div class="timeline-actions">
         <label>开始 <input id="viewStartDate" type="date" value="${escapeAttr(state.view.start)}"></label>
@@ -799,17 +801,17 @@ function attachTimelineDrag() {
   scale.addEventListener("pointerdown", (event) => {
     const target = event.target.closest("[data-axis-mode]");
     const mode = target?.dataset.axisMode || "jump";
-    const original = { ...state.view };
-    const span = original.total;
-    const rect = scale.getBoundingClientRect();
-    const unit = rect.width / Math.max(1, span);
+    const full = state.baseTimeline;
+    const startOffset = daysBetween(full.start, state.view.start);
+    const endOffset = daysBetween(full.start, state.view.end);
+    const span = endOffset - startOffset + 1;
     const firstOffset = pointerToTimelineOffset(event, scale);
+    const grabOffset = firstOffset - startOffset;
     event.preventDefault();
 
     if (mode === "jump") {
-      const clicked = addDays(original.start, firstOffset);
-      const nextStart = addDays(clicked, -Math.floor(span / 2));
-      setTimelineViewDates(nextStart, addDays(nextStart, span - 1));
+      const nextStart = clamp(firstOffset - Math.floor(span / 2), 0, Math.max(0, full.total - span));
+      setTimelineView(nextStart, nextStart + span - 1);
       render();
       return;
     }
@@ -817,18 +819,18 @@ function attachTimelineDrag() {
     scale.setPointerCapture(event.pointerId);
     scale.classList.add("dragging");
     const move = (moveEvent) => {
-      const deltaDays = Math.round((moveEvent.clientX - event.clientX) / Math.max(1, unit));
-      let nextStart = original.start;
-      let nextEnd = original.end;
+      const offset = pointerToTimelineOffset(moveEvent, scale);
+      let nextStart = startOffset;
+      let nextEnd = endOffset;
       if (mode === "move") {
-        nextStart = addDays(original.start, deltaDays);
-        nextEnd = addDays(original.end, deltaDays);
+        nextStart = clamp(offset - grabOffset, 0, Math.max(0, full.total - span));
+        nextEnd = nextStart + span - 1;
       } else if (mode === "start") {
-        nextStart = minDate(addDays(original.start, deltaDays), original.end);
+        nextStart = clamp(offset, 0, endOffset);
       } else {
-        nextEnd = maxDate(addDays(original.end, deltaDays), original.start);
+        nextEnd = clamp(offset, startOffset, full.total - 1);
       }
-      setTimelineViewDates(nextStart, nextEnd);
+      setTimelineView(nextStart, nextEnd);
       paintTimelineWindow();
     };
     const finish = () => {
@@ -847,7 +849,7 @@ function attachTimelineDrag() {
 function pointerToTimelineOffset(event, scale) {
   const rect = scale.getBoundingClientRect();
   const ratio = clamp((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
-  return clamp(Math.floor(ratio * state.timeline.total), 0, state.timeline.total - 1);
+  return clamp(Math.floor(ratio * state.baseTimeline.total), 0, state.baseTimeline.total - 1);
 }
 
 function paintTimelineWindow() {
