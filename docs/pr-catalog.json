@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-18T11:54:24+08:00",
+  "generatedAt": "2026-06-18T18:19:40+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 49,
+  "total": 50,
   "items": [
     {
       "number": 70,
@@ -11,7 +11,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-18T02:40:49Z",
+      "updatedAt": "2026-06-18T08:30:03Z",
       "createdAt": "2026-06-18T02:40:40Z",
       "headRef": "main",
       "labels": []
@@ -71,7 +71,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-17T04:00:20Z",
+      "updatedAt": "2026-06-18T07:02:37Z",
       "createdAt": "2026-06-13T06:33:24Z",
       "headRef": "main",
       "labels": []
@@ -146,6 +146,18 @@
       "updatedAt": "2026-06-15T07:32:12Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 71,
+      "title": "da supports JSON performance test && update README",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/71",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-18T07:50:48Z",
+      "updatedAt": "2026-06-18T07:50:49Z",
+      "createdAt": "2026-06-18T07:01:09Z",
+      "headRef": "da_gva",
       "labels": []
     },
     {
