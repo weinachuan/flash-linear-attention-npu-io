@@ -25,3 +25,4 @@
 {"ts":"2026-06-18T08:05:54+08:00","action":"task.batch_update","entity":"task","id":"batch","summary":"批量更新任务：2项","detail":{"ids":["t08","t42-wy-da-regbase"]},"source":"github-pages"}
 {"ts":"2026-06-18T08:40:02+08:00","action":"task.update","entity":"task","id":"t10","summary":"更新任务：fwd_h 与 fwd_o 性能优化","detail":{"title":"fwd_h 与 fwd_o 性能优化"},"source":"github-pages"}
 {"ts":"2026-06-18T09:54:58+08:00","action":"task.update","entity":"task","id":"t01","summary":"更新任务：fwd_h GVA","detail":{"title":"fwd_h GVA"},"source":"github-pages"}
+{"ts":"2026-06-18T15:06:39+08:00","action":"task.update","entity":"task","id":"t07","summary":"更新任务：prepare_wy_repr_bwd_full 深融合优化","detail":{"ids":["t07"],"changes":[{"id":"t07","title":"prepare_wy_repr_bwd_full 深融合优化","changes":{"status":{"from":"doing","to":"done"},"test_report":{"from":"","to":"https://github.com/flashserve/flash-linear-attention-npu/pull/14"}}}]},"source":"github-pages"}
