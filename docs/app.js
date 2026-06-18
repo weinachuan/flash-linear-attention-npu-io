@@ -8,6 +8,25 @@ const DATA_PATHS = {
   pageAudit: "docs/audit-log.jsonl",
 };
 
+const CHINA_WORK_CALENDARS = {
+  2026: buildChinaWorkCalendar([
+    ["元旦", "2026-01-01", "2026-01-03"],
+    ["春节", "2026-02-15", "2026-02-23"],
+    ["清明节", "2026-04-04", "2026-04-06"],
+    ["劳动节", "2026-05-01", "2026-05-05"],
+    ["端午节", "2026-06-19", "2026-06-21"],
+    ["中秋节", "2026-09-25", "2026-09-27"],
+    ["国庆节", "2026-10-01", "2026-10-07"],
+  ], [
+    ["2026-01-04", "元旦调休上班"],
+    ["2026-02-14", "春节调休上班"],
+    ["2026-02-28", "春节调休上班"],
+    ["2026-05-09", "劳动节调休上班"],
+    ["2026-09-20", "国庆节调休上班"],
+    ["2026-10-10", "国庆节调休上班"],
+  ]),
+};
+
 const OPERATOR_RULES = [
   { id: "chunk_gated_delta_rule_fwd_h", label: "chunk_gated_delta_rule_fwd_h", aliases: ["chunk_gated_delta_rule_fwd_h", "fwd_h"] },
   { id: "chunk_fwd_o", label: "chunk_fwd_o", aliases: ["chunk_fwd_o", "fwd_o"] },
@@ -854,14 +873,22 @@ function renderPeopleView(tasks) {
         <thead>
           <tr>
             <th class="people-owner-head">人员</th>
-            ${days.map((day) => `<th><strong>${formatMonthDay(day)}</strong><small>${weekdayName(day)}</small></th>`).join("")}
+            ${days.map((day) => {
+              const workday = chinaWorkdayInfo(day);
+              const className = workday.nonWorking ? " class=\"non-working-day\"" : "";
+              return `<th${className} title="${escapeAttr(workday.label)}"><strong>${formatMonthDay(day)}</strong><small>${weekdayName(day)}${workday.nonWorking ? ` · ${escapeHtml(workday.label)}` : ""}</small></th>`;
+            }).join("")}
           </tr>
         </thead>
         <tbody>
           ${people.map((person) => `
             <tr>
               <th class="people-owner">${personChipHtml(person)}</th>
-              ${days.map((day) => `<td>${tasksForPersonOnDay(tasks, person, day).map(taskChipHtml).join("")}</td>`).join("")}
+              ${days.map((day) => {
+                const workday = chinaWorkdayInfo(day);
+                const className = workday.nonWorking ? " class=\"non-working-day\"" : "";
+                return `<td${className} title="${escapeAttr(workday.label)}">${tasksForPersonOnDay(tasks, person, day).map(taskChipHtml).join("")}</td>`;
+              }).join("")}
             </tr>
           `).join("")}
         </tbody>
@@ -1182,6 +1209,37 @@ function uniqueBy(items, field) {
 
 function uniqueStrings(items) {
   return [...new Set(items.filter(Boolean))];
+}
+
+function buildChinaWorkCalendar(holidayRanges, adjustedWorkdays) {
+  const holidays = {};
+  holidayRanges.forEach(([name, start, end]) => {
+    dateList(start, end).forEach((day) => { holidays[day] = name; });
+  });
+  return {
+    holidays,
+    adjustedWorkdays: Object.fromEntries(adjustedWorkdays),
+  };
+}
+
+function chinaWorkdayInfo(value) {
+  if (!isYmd(value)) return { nonWorking: false, label: "" };
+  const calendar = CHINA_WORK_CALENDARS[value.slice(0, 4)];
+  if (calendar?.adjustedWorkdays?.[value]) {
+    return { nonWorking: false, adjustedWorkday: true, label: calendar.adjustedWorkdays[value] };
+  }
+  if (calendar?.holidays?.[value]) {
+    return { nonWorking: true, holiday: true, label: calendar.holidays[value] };
+  }
+  if (isWeekend(value)) {
+    return { nonWorking: true, weekend: true, label: "周末" };
+  }
+  return { nonWorking: false, label: "工作日" };
+}
+
+function isWeekend(value) {
+  const day = dateFromYmd(value).getUTCDay();
+  return day === 0 || day === 6;
 }
 
 function dateList(start, end) {
