@@ -7,6 +7,7 @@
 - 前端：原生 HTML/CSS/JavaScript，入口 `/io`
 - 后端：Python 标准库 HTTP API
 - 后端数据库：SQLite `data/project.sqlite3`，作为任务、分组、专项和审计日志的主数据源
+- 公网后端：Cloudflare Workers + D1，可作为低成本公网 API 和 SQL 数据库
 - 数据快照：`data/project-state.json`，由 SQLite 导出，用于备份和 GitHub Pages 只读展示
 - 审计快照：`data/audit-log.jsonl`，由 SQLite 审计表导出，便于 grep/脚本检索
 - 数据操作：任务增删改查、筛选、分组、专项、甘特图展示、双击甘特条切分、JSON 导出
@@ -42,6 +43,81 @@ http://127.0.0.1:8787/io
 https://weinachuan.github.io/flash-linear-attention-npu-io/
 ```
 
+## Cloudflare Workers + D1 公网部署
+
+Cloudflare 方案用于把 GitHub Pages 前端接到公网后端数据库。部署后：
+
+- 前端仍可放在 GitHub Pages。
+- Worker 提供 `/api/export`、`/api/save`、`/api/audit`、`/api/pr-catalog`。
+- D1 存任务、人员、分组、专项、甘特分段和审计日志。
+- `docs/config.js` 配置 Worker URL 后，页面读写都会走 Cloudflare D1。
+
+准备 Node.js 后安装依赖：
+
+```powershell
+npm install
+```
+
+登录 Cloudflare：
+
+```powershell
+npx wrangler login
+```
+
+创建 D1 数据库：
+
+```powershell
+npx wrangler d1 create flash-linear-attention-npu-io
+```
+
+把命令输出里的 `database_id` 填入 `wrangler.toml` 的 `database_id`。
+
+设置写入密钥：
+
+```powershell
+npx wrangler secret put ADMIN_TOKEN
+npx wrangler secret put AUTH_SECRET
+```
+
+应用 D1 表结构：
+
+```powershell
+npm run cf:migrate:remote
+```
+
+部署 Worker：
+
+```powershell
+npm run cf:deploy
+```
+
+把现有仓库快照导入 D1：
+
+```powershell
+python .\scripts\import_cloudflare.py --api https://你的-worker-url --token 你的-ADMIN_TOKEN
+```
+
+创建管理员账号：
+
+```powershell
+python .\scripts\create_cloudflare_user.py --api https://你的-worker-url --admin-token 你的-ADMIN_TOKEN --username admin --password 一个强密码 --role admin --display-name 管理员 --owner-name 管理员
+```
+
+创建开发账号时，`--owner-name` 要写成任务里的责任人姓名。开发账号默认只能更新自己名下的既有任务：
+
+```powershell
+python .\scripts\create_cloudflare_user.py --api https://你的-worker-url --admin-token 你的-ADMIN_TOKEN --username dev-chen --password 一个强密码 --role developer --display-name 陈琳鑫 --owner-name 陈琳鑫
+```
+
+配置 GitHub Pages 前端使用 Worker：
+
+```javascript
+// docs/config.js
+window.FLASH_IO_API_BASE = "https://你的-worker-url";
+```
+
+提交并推送 `docs/config.js` 后，公开页面会从 Cloudflare D1 读取数据。编辑模式下使用账号密码登录，不再输入 GitHub token。
+
 ## 仓库数据文件
 
 - `data/project.sqlite3`：后端数据库，包含任务、分组、专项、甘特分段和审计日志，已被 `.gitignore` 忽略。
@@ -52,7 +128,16 @@ https://weinachuan.github.io/flash-linear-attention-npu-io/
 
 ## Pages 编辑模式
 
-公开页面默认只读。需要编辑时点击“启用编辑”，输入 GitHub fine-grained token。
+公开页面默认只读。
+
+- 未配置 `docs/config.js` 的 Worker URL 时，点击“启用编辑”，输入 GitHub fine-grained token 写回仓库文件。
+- 配置 Worker URL 后，使用账号密码登录，写回 Cloudflare D1。
+
+Cloudflare 权限模型：
+
+- `admin`：可全量修改任务、人员、分组、专项和项目数据。
+- `developer`：只能修改责任人字段包含自己 `ownerName` 的既有任务；不能新增/删除任务、人员、分组和专项。
+- 密码不会明文存储，Worker 会保存加盐 PBKDF2-SHA256 哈希。
 
 建议 token 设置：
 
@@ -69,6 +154,18 @@ https://weinachuan.github.io/flash-linear-attention-npu-io/
 - 每次写回都会更新 `data/` 和 `docs/` 下的数据快照和审计日志。
 
 ## API
+
+Cloudflare Worker API：
+
+- `GET /api/health`
+- `GET /api/export`
+- `GET /api/state`
+- `GET /api/audit`
+- `GET /api/pr-catalog`
+- `POST /api/save`
+- `POST /api/import`
+
+本地 Python API：
 
 - `GET /api/health`
 - `GET /api/audit`

@@ -45,6 +45,8 @@ body.editing .edit-only { display:inline-flex !important; }
 body.editing section.edit-only { display:block !important; }
 body.editing th.edit-only,body.editing td.edit-only { display:table-cell !important; }
 .token-box input { min-width:270px; }
+.worker-login { display:flex; align-items:end; gap:8px; flex-wrap:wrap; }
+.worker-login input { width:126px; }
 .edit-status { color:var(--muted); font-size:12px; font-weight:850; }
 body.editing .edit-status { color:#277560; }
 .panel { padding:14px; }

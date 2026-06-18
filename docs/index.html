@@ -18,8 +18,13 @@
     </header>
 
     <section class="toolbar">
-      <label class="token-box">GitHub Token <input id="token" type="password" autocomplete="off" placeholder="仅当前会话使用"></label>
+      <label class="token-box">写入 Token <input id="token" type="password" autocomplete="off" placeholder="GitHub / Cloudflare，仅当前会话使用"></label>
       <button id="editMode" type="button">启用编辑</button>
+      <span id="workerLogin" class="worker-login hidden">
+        <label>账号 <input id="loginUser" autocomplete="username" placeholder="账号"></label>
+        <label>密码 <input id="loginPassword" type="password" autocomplete="current-password" placeholder="密码"></label>
+        <button id="loginBtn" type="button">登录</button>
+      </span>
       <button id="logout" type="button" class="hidden">退出编辑</button>
       <label>搜索 <input id="q" type="search" placeholder="事项 / 负责人"></label>
       <label>风险 <select id="risk"><option value="">全部</option><option>高</option><option>中</option><option>低</option></select></label>
@@ -138,6 +143,7 @@
       <div id="audit" class="audit"></div>
     </section>
   </main>
-  <script src="./app.js?v=20260618-audit-diff"></script>
+  <script src="./config.js?v=20260618-cloudflare-d1"></script>
+  <script src="./app.js?v=20260618-cloudflare-d1"></script>
 </body>
 </html>

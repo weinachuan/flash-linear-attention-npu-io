@@ -1,5 +1,6 @@
 const REPO = { owner: "weinachuan", name: "flash-linear-attention-npu-io", branch: "main" };
 const API_ROOT = `https://api.github.com/repos/${REPO.owner}/${REPO.name}`;
+const WORKER_API_BASE = String(window.FLASH_IO_API_BASE || localStorage.getItem("flashWorkerApiBase") || "").replace(/\/+$/, "");
 const DATA_PATHS = {
   state: "data/project-state.json",
   audit: "data/audit-log.jsonl",
@@ -55,7 +56,8 @@ const state = {
   data: null,
   prCatalog: { generatedAt: "", sourceRepo: "", total: 0, items: [] },
   audit: [],
-  token: sessionStorage.getItem("flashPagesToken") || "",
+  token: sessionStorage.getItem(WORKER_API_BASE ? "flashWorkerAuthToken" : "flashPagesToken") || "",
+  authUser: null,
   dirtyTaskIds: new Set(),
   taskBaselines: new Map(),
   baseTimeline: { start: "", end: "", total: 1 },
@@ -72,6 +74,28 @@ const $ = (selector) => document.querySelector(selector);
 
 async function load() {
   const stamp = Date.now();
+  if (WORKER_API_BASE) {
+    const [data, audit, prCatalog, me] = await Promise.all([
+      workerGet("/api/export"),
+      workerGet("/api/audit?limit=10").catch(() => []),
+      workerGet("/api/pr-catalog").catch(() => ({ generatedAt: "", sourceRepo: "", total: 0, items: [] })),
+      state.token ? workerGet("/api/me").catch(() => null) : Promise.resolve(null),
+    ]);
+    if (state.token && !me) {
+      state.token = "";
+      state.authUser = null;
+      sessionStorage.removeItem("flashWorkerAuthToken");
+    } else if (me?.user) {
+      state.authUser = me.user;
+    }
+    state.data = data;
+    state.audit = audit;
+    state.prCatalog = prCatalog || { generatedAt: "", sourceRepo: "", total: 0, items: [] };
+    ensurePeopleCatalog();
+    syncAllTaskDeliveryRules();
+    render();
+    return;
+  }
   const [dataRes, auditRes, prCatalogRes] = await Promise.all([
     fetch(`./project-state.json?v=${stamp}`),
     fetch(`./audit-log.jsonl?v=${stamp}`).catch(() => null),
@@ -227,10 +251,14 @@ function render(options = {}) {
     ["中风险", medium],
     ["已完成", done],
   ].map(([label, value]) => `<div class="metric"><small>${label}</small><strong>${value}</strong></div>`).join("");
+  const workerMode = Boolean(WORKER_API_BASE);
   document.body.classList.toggle("editing", Boolean(state.token));
+  document.body.classList.toggle("worker-mode", workerMode);
   $("#token").value = state.token ? "********" : "";
+  $(".token-box").classList.toggle("hidden", workerMode);
+  $("#workerLogin").classList.toggle("hidden", !workerMode || Boolean(state.token));
   $("#logout").classList.toggle("hidden", !state.token);
-  $("#editMode").classList.toggle("hidden", Boolean(state.token));
+  $("#editMode").classList.toggle("hidden", Boolean(state.token) || workerMode);
   updateEditStatus();
   renderPlanTabs();
   renderTimeAxis();
@@ -1785,7 +1813,21 @@ async function saveRepository(summary, action, entity, id, detail = {}) {
   ensurePeopleCatalog();
   syncAllTaskDeliveryRules();
   state.data.generatedAt = nowIso();
-  const entry = { ts: nowIso(), action, entity, id, summary, detail, source: "github-pages" };
+  const entry = { ts: nowIso(), action, entity, id, summary, detail, source: WORKER_API_BASE ? "cloudflare-d1" : "github-pages" };
+  if (WORKER_API_BASE) {
+    $("#editStatus").textContent = "正在写入 Cloudflare D1...";
+    await workerPost("/api/save", {
+      state: state.data,
+      auditEntry: entry,
+      prCatalog: state.prCatalog,
+    });
+    state.audit.push(entry);
+    state.dirtyTaskIds.clear();
+    state.taskBaselines.clear();
+    $("#editStatus").textContent = "已写入 Cloudflare D1";
+    render();
+    return;
+  }
   state.audit.push(entry);
   const stateText = JSON.stringify(state.data, null, 2) + "\n";
   const auditText = state.audit.map((item) => JSON.stringify(item)).join("\n") + "\n";
@@ -1804,11 +1846,13 @@ async function saveRepository(summary, action, entity, id, detail = {}) {
 
 function updateEditStatus() {
   if (!state.token) {
-    $("#editStatus").textContent = "只读模式";
+    $("#editStatus").textContent = WORKER_API_BASE ? "只读模式：请登录账号" : "只读模式";
     return;
   }
   const dirtyCount = state.dirtyTaskIds.size;
-  $("#editStatus").textContent = dirtyCount ? `编辑模式：${dirtyCount} 项待保存` : "编辑模式：甘特条可拖动，边缘可拉伸；保存会写入 GitHub 仓库";
+  const target = WORKER_API_BASE ? "Cloudflare D1" : "GitHub 仓库";
+  const user = WORKER_API_BASE && state.authUser ? `（${state.authUser.displayName || state.authUser.username} / ${state.authUser.role}）` : "";
+  $("#editStatus").textContent = dirtyCount ? `编辑模式${user}：${dirtyCount} 项待保存` : `编辑模式${user}：甘特条可拖动，边缘可拉伸；保存会写入 ${target}`;
 }
 
 async function commitFiles(files, message) {
@@ -1851,21 +1895,59 @@ async function gh(path, options = {}) {
   return data;
 }
 
+async function workerGet(path) {
+  return workerFetch(path);
+}
+
+async function workerPost(path, body) {
+  return workerFetch(path, {
+    method: "POST",
+    body,
+  });
+}
+
+async function workerFetch(path, options = {}) {
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+  if (state.token) headers.Authorization = `Bearer ${state.token}`;
+  const response = await fetch(`${WORKER_API_BASE}${path}`, {
+    method: options.method || "GET",
+    headers,
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `Cloudflare API ${response.status}`);
+  return data;
+}
+
 function requireToken() {
-  if (!state.token) throw new Error("请先启用编辑模式并输入 GitHub token。");
+  if (!state.token) throw new Error(WORKER_API_BASE ? "请先启用编辑模式并输入 Cloudflare ADMIN_TOKEN。" : "请先启用编辑模式并输入 GitHub token。");
 }
 
 function enableEditMode() {
   const token = $("#token").value.trim();
-  if (!token || token === "********") return alert("请输入 GitHub fine-grained token。");
+  if (!token || token === "********") return alert(WORKER_API_BASE ? "请输入 Cloudflare ADMIN_TOKEN。" : "请输入 GitHub fine-grained token。");
   state.token = token;
   sessionStorage.setItem("flashPagesToken", token);
   render();
 }
 
+async function loginWorker() {
+  const username = $("#loginUser").value.trim();
+  const password = $("#loginPassword").value;
+  if (!username || !password) return alert("请输入账号和密码。");
+  const data = await workerPost("/api/login", { username, password });
+  state.token = data.token;
+  state.authUser = data.user;
+  sessionStorage.setItem("flashWorkerAuthToken", data.token);
+  $("#loginPassword").value = "";
+  render();
+}
+
 function logout() {
   state.token = "";
+  state.authUser = null;
   sessionStorage.removeItem("flashPagesToken");
+  sessionStorage.removeItem("flashWorkerAuthToken");
   render();
 }
 
@@ -1986,6 +2068,12 @@ function escapeRegExp(value) {
 $("#refresh").addEventListener("click", load);
 $("#clearFilters").addEventListener("click", clearFilters);
 $("#editMode").addEventListener("click", enableEditMode);
+$("#loginBtn").addEventListener("click", () => loginWorker().catch(showError));
+$("#loginPassword").addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  loginWorker().catch(showError);
+});
 $("#logout").addEventListener("click", logout);
 $("#addTask").addEventListener("click", () => addTask().catch(showError));
 $("#saveAll").addEventListener("click", () => saveAllTasks().catch(showError));

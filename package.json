@@ -1,0 +1,14 @@
+{
+  "name": "flash-linear-attention-npu-io",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cf:dev": "wrangler dev",
+    "cf:deploy": "wrangler deploy",
+    "cf:migrate:local": "wrangler d1 migrations apply flash-linear-attention-npu-io --local",
+    "cf:migrate:remote": "wrangler d1 migrations apply flash-linear-attention-npu-io --remote"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

@@ -2,6 +2,8 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+node_modules/
+.wrangler/
 data/*.sqlite3
 data/*.sqlite3-*
 *.log
