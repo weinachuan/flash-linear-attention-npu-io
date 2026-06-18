@@ -426,8 +426,18 @@ function taskRenderSegments(task) {
   segments.forEach((segment, index) => {
     if ((segment.end_date || "") > (segments[latestIndex].end_date || "")) latestIndex = index;
   });
-  if (segments[latestIndex].end_date && segments[latestIndex].end_date < today) {
-    segments[latestIndex] = { ...segments[latestIndex], end_date: today, auto_extended: true };
+  const latestEnd = segments[latestIndex].end_date;
+  if (latestEnd && latestEnd < today) {
+    const delayStart = addDays(latestEnd, 1);
+    segments.push({
+      id: `delay-${segments[latestIndex].id || latestIndex}`,
+      start_date: delayStart,
+      end_date: today,
+      reason: "delay 自动延长",
+      position: segments.length,
+      source_index: latestIndex,
+      auto_extended: true,
+    });
   }
   return segments;
 }

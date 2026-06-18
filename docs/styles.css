@@ -101,6 +101,27 @@ body.editing .bar:hover { box-shadow:0 0 0 2px rgba(32,37,31,.18); }
 .bar[data-risk="高"] { background:var(--high); }
 .bar[data-risk="中"] { background:var(--medium); }
 .bar[data-risk="低"] { background:var(--low); }
+.bar[data-auto-extended="true"] {
+  overflow:hidden;
+  border:2px solid var(--high);
+  background:
+    repeating-linear-gradient(-45deg, rgba(207,61,50,.18) 0 4px, transparent 4px 8px),
+    #fffdf8 !important;
+  box-shadow:0 0 0 1px rgba(207,61,50,.35), 0 0 14px rgba(207,61,50,.42);
+}
+.bar[data-auto-extended="true"]::after {
+  content:"delay";
+  position:absolute;
+  right:5px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--high);
+  font-size:9px;
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+}
 .table-wrap { overflow:auto; max-height:58vh; }
 table { width:100%; min-width:1500px; border-collapse:collapse; }
 th,td { padding:9px 10px; border-bottom:1px solid var(--line); text-align:left; font-size:13px; vertical-align:middle; }
