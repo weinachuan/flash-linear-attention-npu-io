@@ -7,7 +7,6 @@ const DATA_PATHS = {
   pageState: "docs/project-state.json",
   pageAudit: "docs/audit-log.jsonl",
 };
-const TIMELINE_AXIS_PADDING_DAYS = 7;
 
 const CHINA_WORK_CALENDARS = {
   2026: buildChinaWorkCalendar([
@@ -80,6 +79,7 @@ const state = {
   authUser: null,
   dirtyTaskIds: new Set(),
   taskBaselines: new Map(),
+  axis: { start: "", end: "", total: 1 },
   baseTimeline: { start: "", end: "", total: 1 },
   view: { start: "", end: "", total: 1 },
   timeline: { start: "", end: "", total: 1 },
@@ -518,31 +518,7 @@ function syncToolbarFilters() {
 }
 
 function computeTimelineRange() {
-  const dates = [];
-  (state.data?.tasks || []).forEach((task) => {
-    taskRenderSegments(task).forEach((segment) => {
-      if (segment.start_date) dates.push(segment.start_date);
-      if (segment.end_date) dates.push(segment.end_date);
-    });
-  });
-  (state.data?.groups || []).forEach((group) => {
-    [group.start_date, group.end_date, group.due_date].forEach((date) => {
-      if (date) dates.push(date);
-    });
-  });
-  [state.view.start, state.view.end].forEach((date) => {
-    if (date) dates.push(date);
-  });
-  const delayedEnd = maxDelayedRenderEndDate();
-  if (delayedEnd) dates.push(delayedEnd);
-  const parsed = dates.map(Date.parse).filter(Number.isFinite);
-  if (!parsed.length) {
-    const today = todayBjYmd();
-    return timelineRangeWithPadding(today, today, TIMELINE_AXIS_PADDING_DAYS);
-  }
-  const start = toDay(Math.min(...parsed));
-  const end = toDay(Math.max(...parsed));
-  return timelineRangeWithPadding(start, end, TIMELINE_AXIS_PADDING_DAYS);
+  return timelineRangeFromDates(state.axis.start, state.axis.end);
 }
 
 function computeDataTimelineRange() {
@@ -569,10 +545,13 @@ function computeDataTimelineRange() {
 }
 
 function ensureDefaultTimelineView() {
+  if (!isYmd(state.axis.start) || !isYmd(state.axis.end)) {
+    const start = todayBjYmd();
+    const end = maxDate(start, latestPlannedCompletionDate() || start);
+    state.axis = timelineRangeFromDates(start, end);
+  }
   if (isYmd(state.view.start) && isYmd(state.view.end)) return;
-  const start = todayBjYmd();
-  const end = maxDate(start, latestPlannedCompletionDate() || start);
-  state.view = timelineRangeFromDates(start, end);
+  state.view = { ...state.axis };
 }
 
 function latestPlannedCompletionDate() {
@@ -599,22 +578,16 @@ function timelineRangeFromDates(start, end) {
   return { start: safeStart, end: safeEnd, total: Math.max(1, daysBetween(safeStart, safeEnd) + 1) };
 }
 
-function timelineRangeWithPadding(start, end, paddingDays) {
-  return timelineRangeFromDates(addDays(start, -paddingDays), addDays(end, paddingDays));
-}
-
 function ensureTimelineView() {
   const full = state.baseTimeline;
   if (!state.view.start || !state.view.end) {
     setTimelineView(0, full.total - 1);
     return;
   }
-  const delayedEnd = maxDelayedRenderEndDate();
-  if (delayedEnd && state.view.end < delayedEnd) state.view.end = delayedEnd;
   const rawStart = daysBetween(full.start, state.view.start);
   const rawEnd = daysBetween(full.start, state.view.end);
-  const startOffset = Number.isFinite(rawStart) ? rawStart : 0;
-  const endOffset = Number.isFinite(rawEnd) ? rawEnd : full.total - 1;
+  const startOffset = Number.isFinite(rawStart) ? clamp(rawStart, 0, full.total - 1) : 0;
+  const endOffset = Number.isFinite(rawEnd) ? clamp(rawEnd, startOffset, full.total - 1) : full.total - 1;
   setTimelineView(startOffset, endOffset);
 }
 
@@ -625,11 +598,6 @@ function setTimelineView(startOffset, endOffset) {
   const start = addDays(full.start, safeStart);
   const end = addDays(full.start, safeEnd);
   state.view = { start, end, total: safeEnd - safeStart + 1 };
-  state.timeline = { ...state.view };
-}
-
-function setTimelineViewDates(start, end) {
-  state.view = timelineRangeFromDates(start, end);
   state.timeline = { ...state.view };
 }
 
@@ -695,11 +663,11 @@ function renderTimeAxis() {
     <div class="timeline-head">
       <div>
         <strong>DDL 与时间窗口</strong>
-        <span>时间轴包含项目范围；绿色窗口为当前显示范围，可拖动平移或拖两端缩放</span>
+        <span>开始/结束定义整条时间轴；绿色窗口为当前显示范围，初始铺满时间轴，可在轴内拖动或缩放</span>
       </div>
       <div class="timeline-actions">
-        <label>开始 <input id="viewStartDate" type="date" value="${escapeAttr(state.view.start)}"></label>
-        <label>结束 <input id="viewEndDate" type="date" value="${escapeAttr(state.view.end)}"></label>
+        <label>开始 <input id="viewStartDate" type="date" value="${escapeAttr(state.axis.start)}"></label>
+        <label>结束 <input id="viewEndDate" type="date" value="${escapeAttr(state.axis.end)}"></label>
         <button id="expandStart" type="button">前扩 7 天</button>
         <button id="expandEnd" type="button">后扩 7 天</button>
         <button id="resetTimeline" type="button">显示全量</button>
@@ -749,13 +717,14 @@ function renderTimeAxis() {
   attachTimelineDrag();
   $("#viewStartDate").addEventListener("change", applyTimelineDateInputs);
   $("#viewEndDate").addEventListener("change", applyTimelineDateInputs);
-  $("#expandStart").addEventListener("click", () => setAbsoluteTimelineView(addDays(state.view.start, -7), state.view.end));
-  $("#expandEnd").addEventListener("click", () => setAbsoluteTimelineView(state.view.start, addDays(state.view.end, 7)));
+  $("#expandStart").addEventListener("click", () => setAbsoluteTimelineView(addDays(state.axis.start, -7), state.axis.end));
+  $("#expandEnd").addEventListener("click", () => setAbsoluteTimelineView(state.axis.start, addDays(state.axis.end, 7)));
   $("#resetTimeline").addEventListener("click", () => {
     const dataRange = computeDataTimelineRange();
-    state.baseTimeline = dataRange;
-    state.view = { start: "", end: "", total: 1 };
-    setTimelineView(0, dataRange.total - 1);
+    state.axis = dataRange;
+    state.baseTimeline = { ...dataRange };
+    state.view = { ...dataRange };
+    state.timeline = { ...dataRange };
     render();
   });
 }
@@ -773,9 +742,10 @@ function setAbsoluteTimelineView(start, end) {
   }
   const nextStart = minDate(start, end);
   const nextEnd = maxDate(start, end);
-  state.view = { start: nextStart, end: nextEnd, total: Math.max(1, daysBetween(nextStart, nextEnd) + 1) };
-  state.baseTimeline = computeTimelineRange();
-  ensureTimelineView();
+  state.axis = timelineRangeFromDates(nextStart, nextEnd);
+  state.baseTimeline = { ...state.axis };
+  state.view = { ...state.axis };
+  state.timeline = { ...state.axis };
   render();
 }
 
