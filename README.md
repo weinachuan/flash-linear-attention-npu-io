@@ -132,7 +132,7 @@ GitHub 仓库需要配置以下 Actions Secrets：
 
 - `CLOUDFLARE_ACCOUNT_ID`：Cloudflare 账号 ID。
 - `CLOUDFLARE_API_TOKEN`：Cloudflare API Token，不要写入仓库。
-- `FLASH_IO_ADMIN_TOKEN`：Worker 的 `ADMIN_TOKEN` 值，仅用于定时 PR 候选池同步到 D1，不要写入仓库。
+- `FLASH_IO_ADMIN_TOKEN`：Worker 的 `ADMIN_TOKEN` 值，仅用于定时 PR 候选池同步和 D1 快照备份，不要写入仓库。
 
 日常修改路径：
 
@@ -147,10 +147,48 @@ GitHub 仓库需要配置以下 Actions Secrets：
 2. 前端回滚：`git revert <有问题的提交>` 后 push，GitHub Pages 自动更新。
 3. 数据库结构回滚：不要直接改旧 migration；新增一个反向 migration。高风险 migration 前建议先用 Cloudflare D1 导出备份。
 
+### D1 备份与恢复
+
+本仓库配置 `.github/workflows/backup-d1.yml`，每天北京时间 02:00 自动备份，也可以在 GitHub Actions 页面手动运行 `Backup Cloudflare D1`。
+
+备份内容：
+
+- `data/project-state.json` 和 `docs/project-state.json`：D1 当前项目状态快照。
+- `data/audit-log.jsonl` 和 `docs/audit-log.jsonl`：完整审计日志快照。
+- `data/pr-catalog.json` 和 `docs/pr-catalog.json`：PR 候选池快照。
+- Actions artifact `d1-latest-sql`：完整 D1 SQL 导出，保留 30 天；该文件可能包含账号密码哈希和盐，只作为私有恢复材料，不提交到仓库。
+
+优先恢复方式是 D1 Time Travel：
+
+```powershell
+npx wrangler d1 time-travel info flash-linear-attention-npu-io --timestamp="2026-06-19T10:00:00+08:00"
+npx wrangler d1 time-travel restore flash-linear-attention-npu-io --timestamp="2026-06-19T10:00:00+08:00"
+```
+
+恢复前建议先导出事故现场：
+
+```powershell
+npx wrangler d1 export flash-linear-attention-npu-io --remote --output=./backup-before-restore.sql
+```
+
+如果 D1 被误删或不可用，可新建 D1、应用 migrations，再从仓库 JSON 快照恢复业务数据：
+
+```powershell
+npx wrangler d1 create flash-linear-attention-npu-io
+npm run cf:migrate:remote
+python .\scripts\import_cloudflare.py --api https://你的-worker-url --token 你的-ADMIN_TOKEN
+```
+
+如果需要完整恢复账号表等整库内容，可下载最近一次 `d1-latest-sql` artifact 后导入：
+
+```powershell
+npx wrangler d1 execute flash-linear-attention-npu-io --remote --file=.\d1-latest.sql
+```
+
 本地快速验证：
 
 ```powershell
-python -m py_compile scripts\import_cloudflare.py scripts\create_cloudflare_user.py
+python -m py_compile scripts\import_cloudflare.py scripts\create_cloudflare_user.py scripts\backup_cloudflare.py
 python -c "import sqlite3,pathlib; conn=sqlite3.connect(':memory:'); conn.executescript(pathlib.Path('migrations/0001_init.sql').read_text(encoding='utf-8'))"
 node --check cloudflare/worker.js
 ```

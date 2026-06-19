@@ -24,6 +24,10 @@ export default {
       if (url.pathname === "/api/audit") {
         return jsonResponse(request, env, await listAudit(env, url));
       }
+      if (url.pathname === "/api/audit/export") {
+        await requireAdminLike(request, env);
+        return jsonResponse(request, env, await exportAudit(env));
+      }
       if (url.pathname === "/api/pr-catalog") {
         return jsonResponse(request, env, await getJsonMeta(env, "prCatalog", emptyPrCatalog()));
       }
@@ -434,6 +438,15 @@ async function listAudit(env, url) {
   `;
   const params = q ? [`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, limit] : [limit];
   const result = await env.DB.prepare(sql).bind(...params).all();
+  return (result.results || []).map(auditRowToEntry);
+}
+
+async function exportAudit(env) {
+  const result = await env.DB.prepare(`
+    SELECT ts, action, entity, entity_id, summary, detail, source
+    FROM audit_entries
+    ORDER BY id ASC
+  `).all();
   return (result.results || []).map(auditRowToEntry);
 }
 
