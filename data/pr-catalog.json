@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-19T12:13:52+08:00",
+  "generatedAt": "2026-06-19T18:25:14+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
   "total": 50,
@@ -35,7 +35,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-18T02:05:45Z",
+      "updatedAt": "2026-06-19T05:42:48Z",
       "createdAt": "2026-06-16T13:08:37Z",
       "headRef": "6_16_1",
       "labels": []
