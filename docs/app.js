@@ -70,6 +70,27 @@ const AUDIT_FIELD_LABELS = {
   notes: "备注",
   segments: "甘特分段",
 };
+const TABLE_SORT_LABELS = {
+  risk: "风险",
+  priority: "优先级",
+  title: "事项",
+  owner: "责任人",
+  group_id: "分组",
+  special_id: "专项",
+  date: "计划日期",
+  pr_link: "PR 链接",
+  test_report: "转测报告",
+  status: "状态",
+};
+const TABLE_SORT_DEFAULT_DIRECTION = {
+  risk: "desc",
+  priority: "asc",
+  date: "asc",
+  status: "asc",
+};
+const RISK_SORT_WEIGHT = { 高: 3, 中: 2, 低: 1 };
+const PRIORITY_SORT_WEIGHT = { P0: 0, P1: 1, P2: 2 };
+const STATUS_SORT_WEIGHT = { delayed: 0, blocked: 1, todo: 2, doing: 3, done: 4 };
 
 const state = {
   data: null,
@@ -89,6 +110,7 @@ const state = {
   timeline: { start: "", end: "", total: 1 },
   activePlanView: "timeline",
   filters: { q: "", risk: "", priority: "", owner: [], group_id: "", special_id: "", status: "" },
+  sort: { field: "risk", direction: "desc" },
   ownerFilterOpen: false,
   ownerFilterQuery: "",
   ownerFilterDraft: [],
@@ -260,6 +282,42 @@ function filteredTasks() {
   });
 }
 
+function sortTasksForTable(tasks) {
+  const field = state.sort?.field || "risk";
+  const direction = state.sort?.direction === "asc" ? "asc" : "desc";
+  const factor = direction === "asc" ? 1 : -1;
+  return [...tasks].sort((a, b) => {
+    const primary = compareTaskByField(a, b, field);
+    if (primary) return primary * factor;
+    const fallback = compareTaskByField(a, b, "risk") * -1
+      || compareTaskByField(a, b, "priority")
+      || compareTaskByField(a, b, "date")
+      || displayTaskTitle(a).localeCompare(displayTaskTitle(b), "zh-CN")
+      || String(a.id || "").localeCompare(String(b.id || ""));
+    return fallback;
+  });
+}
+
+function compareTaskByField(a, b, field) {
+  if (field === "risk") return numberCompare(RISK_SORT_WEIGHT[a.risk] || 0, RISK_SORT_WEIGHT[b.risk] || 0);
+  if (field === "priority") return numberCompare(PRIORITY_SORT_WEIGHT[a.priority] ?? 99, PRIORITY_SORT_WEIGHT[b.priority] ?? 99);
+  if (field === "status") return numberCompare(STATUS_SORT_WEIGHT[a.status] ?? 99, STATUS_SORT_WEIGHT[b.status] ?? 99);
+  if (field === "date") {
+    return String(taskRenderEnd(a) || a.end_date || "").localeCompare(String(taskRenderEnd(b) || b.end_date || ""))
+      || String(taskRenderStart(a) || a.start_date || "").localeCompare(String(taskRenderStart(b) || b.start_date || ""));
+  }
+  if (field === "group_id") return groupTitle(a.group_id).localeCompare(groupTitle(b.group_id), "zh-CN");
+  if (field === "special_id") return specialTitle(a.special_id).localeCompare(specialTitle(b.special_id), "zh-CN");
+  if (field === "owner") return taskOwnerNames(a).join("、").localeCompare(taskOwnerNames(b).join("、"), "zh-CN");
+  if (field === "title") return displayTaskTitle(a).localeCompare(displayTaskTitle(b), "zh-CN");
+  if (field === "pr_link" || field === "test_report") return String(a[field] || "").localeCompare(String(b[field] || ""), "zh-CN");
+  return 0;
+}
+
+function numberCompare(a, b) {
+  return Number(a) - Number(b);
+}
+
 function ownerFilterValues() {
   const owner = state.filters.owner;
   if (Array.isArray(owner)) return owner.filter(Boolean);
@@ -346,7 +404,8 @@ function render(options = {}) {
   renderOperatorView(tasks);
   if (includeTableFilters) renderTableFilters();
   else updateOwnerFilterSummary();
-  renderRows(tasks);
+  renderTableSortHeaders();
+  renderRows(sortTasksForTable(tasks));
   renderAdmin();
   renderAudit();
 }
@@ -402,6 +461,30 @@ function renderTableFilters() {
   document.querySelector("[data-owner-filter-apply]")?.addEventListener("click", applyOwnerFilter);
   document.querySelector("[data-clear-filters]")?.addEventListener("click", clearFilters);
   positionOwnerFilterMenu();
+}
+
+function renderTableSortHeaders() {
+  document.querySelectorAll("[data-sort-field]").forEach((button) => {
+    const field = button.dataset.sortField;
+    const active = state.sort.field === field;
+    const direction = active ? state.sort.direction : "";
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-sort", active ? (direction === "asc" ? "ascending" : "descending") : "none");
+    button.title = `按${TABLE_SORT_LABELS[field] || field}排序`;
+    const indicator = button.querySelector("[data-sort-indicator]");
+    if (indicator) indicator.textContent = active ? (direction === "asc" ? "↑" : "↓") : "↕";
+    button.onclick = () => updateTableSort(field);
+  });
+}
+
+function updateTableSort(field) {
+  if (!TABLE_SORT_LABELS[field]) return;
+  if (state.sort.field === field) {
+    state.sort.direction = state.sort.direction === "asc" ? "desc" : "asc";
+  } else {
+    state.sort = { field, direction: TABLE_SORT_DEFAULT_DIRECTION[field] || "asc" };
+  }
+  render({ includeTableFilters: false });
 }
 
 function tableFilterSelect(field, options) {

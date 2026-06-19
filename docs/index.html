@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>flash-linear-attention-npu 项目看板</title>
-  <link rel="stylesheet" href="./styles.css?v=20260619-dev-window-related">
+  <link rel="stylesheet" href="./styles.css?v=20260619-task-table-sort-priority">
 </head>
 <body>
   <main class="shell">
@@ -102,16 +102,16 @@
         <table class="task-table">
           <thead>
             <tr>
-              <th>风险</th>
-              <th>优先级</th>
-              <th>事项</th>
-              <th>责任人</th>
-              <th>分组</th>
-              <th>专项</th>
-              <th>计划日期</th>
-              <th>PR 链接</th>
-              <th>转测报告</th>
-              <th>状态</th>
+              <th><button type="button" class="sort-button" data-sort-field="risk">风险 <span data-sort-indicator>↓</span></button></th>
+              <th><button type="button" class="sort-button" data-sort-field="priority">优先级 <span data-sort-indicator>↕</span></button></th>
+              <th><button type="button" class="sort-button" data-sort-field="title">事项 <span data-sort-indicator>↕</span></button></th>
+              <th><button type="button" class="sort-button" data-sort-field="owner">责任人 <span data-sort-indicator>↕</span></button></th>
+              <th><button type="button" class="sort-button" data-sort-field="group_id">分组 <span data-sort-indicator>↕</span></button></th>
+              <th><button type="button" class="sort-button" data-sort-field="special_id">专项 <span data-sort-indicator>↕</span></button></th>
+              <th><button type="button" class="sort-button" data-sort-field="date">计划日期 <span data-sort-indicator>↕</span></button></th>
+              <th><button type="button" class="sort-button" data-sort-field="pr_link">PR 链接 <span data-sort-indicator>↕</span></button></th>
+              <th><button type="button" class="sort-button" data-sort-field="test_report">转测报告 <span data-sort-indicator>↕</span></button></th>
+              <th><button type="button" class="sort-button" data-sort-field="status">状态 <span data-sort-indicator>↕</span></button></th>
               <th class="edit-only">操作</th>
             </tr>
             <tr class="filter-row" id="tableFilters"></tr>
@@ -144,7 +144,7 @@
       <div id="audit" class="audit"></div>
     </section>
   </main>
-  <script src="./config.js?v=20260619-dev-window-related"></script>
-  <script src="./app.js?v=20260619-dev-window-related"></script>
+  <script src="./config.js?v=20260619-task-table-sort-priority"></script>
+  <script src="./app.js?v=20260619-task-table-sort-priority"></script>
 </body>
 </html>
