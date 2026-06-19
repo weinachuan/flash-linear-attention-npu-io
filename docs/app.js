@@ -269,7 +269,7 @@ function ownerFilterValues() {
 function visibleTasksForCurrentUser() {
   const tasks = state.data?.tasks || [];
   if (!isDeveloperEditMode()) return tasks;
-  const relatedOperatorIds = developerOwnedOperatorIds();
+  const relatedOperatorIds = developerOwnedOperatorIdsInCurrentView();
   return tasks.filter((task) => canEditTask(task) || taskOperators(task).some((operator) => relatedOperatorIds.has(operator.id)));
 }
 
@@ -296,22 +296,23 @@ function canScheduleTask(task) {
   return Boolean(task && isAdminEditMode());
 }
 
-function developerOwnedOperatorIds() {
+function developerOwnedOperatorIdsInCurrentView() {
+  const ownerName = currentDeveloperOwnerName();
+  if (!ownerName || !isYmd(state.view.start) || !isYmd(state.view.end)) return new Set();
   const ownedTasks = (state.data?.tasks || []).filter((task) => {
-    const ownerName = currentDeveloperOwnerName();
-    return ownerName && taskOwnerNames(task).includes(ownerName);
+    return taskOwnerNames(task).includes(ownerName) && taskIntersectsView(task);
   });
   return new Set(ownedTasks.flatMap((task) => taskOperators(task).map((operator) => operator.id)));
 }
 
 function render(options = {}) {
   const includeTableFilters = options.includeTableFilters !== false;
-  const scoped = visibleTasksForCurrentUser();
-  const filtered = filteredTasks();
   const all = state.data.tasks || [];
   ensureDefaultTimelineView();
   state.baseTimeline = computeTimelineRange();
   ensureTimelineView();
+  const scoped = visibleTasksForCurrentUser();
+  const filtered = filteredTasks();
   const tasks = filtered.filter(taskIntersectsView);
   const high = tasks.filter((task) => task.risk === "高").length;
   const medium = tasks.filter((task) => task.risk === "中").length;
