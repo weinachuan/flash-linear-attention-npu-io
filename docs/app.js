@@ -303,8 +303,8 @@ function compareTaskByField(a, b, field) {
   if (field === "priority") return numberCompare(PRIORITY_SORT_WEIGHT[a.priority] ?? 99, PRIORITY_SORT_WEIGHT[b.priority] ?? 99);
   if (field === "status") return numberCompare(STATUS_SORT_WEIGHT[a.status] ?? 99, STATUS_SORT_WEIGHT[b.status] ?? 99);
   if (field === "date") {
-    return String(taskRenderEnd(a) || a.end_date || "").localeCompare(String(taskRenderEnd(b) || b.end_date || ""))
-      || String(taskRenderStart(a) || a.start_date || "").localeCompare(String(taskRenderStart(b) || b.start_date || ""));
+    return String(taskSortDdl(a)).localeCompare(String(taskSortDdl(b)))
+      || String(taskSortStart(a)).localeCompare(String(taskSortStart(b)));
   }
   if (field === "group_id") return groupTitle(a.group_id).localeCompare(groupTitle(b.group_id), "zh-CN");
   if (field === "special_id") return specialTitle(a.special_id).localeCompare(specialTitle(b.special_id), "zh-CN");
@@ -312,6 +312,14 @@ function compareTaskByField(a, b, field) {
   if (field === "title") return displayTaskTitle(a).localeCompare(displayTaskTitle(b), "zh-CN");
   if (field === "pr_link" || field === "test_report") return String(a[field] || "").localeCompare(String(b[field] || ""), "zh-CN");
   return 0;
+}
+
+function taskSortDdl(task) {
+  return task.end_date || taskSegments(task).map((segment) => segment.end_date).filter(Boolean).sort().at(-1) || "";
+}
+
+function taskSortStart(task) {
+  return task.start_date || taskSegments(task).map((segment) => segment.start_date).filter(Boolean).sort()[0] || "";
 }
 
 function numberCompare(a, b) {
