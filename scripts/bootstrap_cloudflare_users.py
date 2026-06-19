@@ -126,6 +126,7 @@ def main() -> int:
             "displayName": name,
             "ownerName": name,
             "active": True,
+            "resetPassword": username in existing,
         })
         rows.append({
             "username": username,

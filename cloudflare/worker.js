@@ -56,6 +56,11 @@ export default {
         await requireAdminLike(request, env);
         return jsonResponse(request, env, await createUser(request, env), 201);
       }
+      const userMatch = url.pathname.match(/^\/api\/users\/([^/]+)$/);
+      if (userMatch && request.method === "PATCH") {
+        await requireAdminLike(request, env);
+        return jsonResponse(request, env, await patchUser(request, env, decodeURIComponent(userMatch[1])));
+      }
       if (url.pathname === "/api/tasks" && request.method === "POST") {
         return jsonResponse(request, env, await createTask(request, env), 201);
       }
@@ -90,6 +95,7 @@ export default {
         const user = await requireUser(request, env);
         const payload = await readJson(request);
         if (!payload.state) return errorResponse(request, env, 400, "state is required");
+        await assertExpectedVersion(env, payload.expectedVersion);
         await authorizeStateChange(env, user, payload.state);
         await replaceState(env, payload.state);
         if (payload.prCatalog && user.role === "admin") await setJsonMeta(env, "prCatalog", payload.prCatalog);
@@ -116,7 +122,7 @@ export default {
       return errorResponse(request, env, 404, "api not found");
     } catch (error) {
       const status = error.status || 500;
-      return errorResponse(request, env, status, error.message || "internal error");
+      return errorResponse(request, env, status, error.message || "internal error", error.version ? { version: error.version } : {});
     }
   },
 };
@@ -559,6 +565,16 @@ async function bumpStateVersion(env) {
   return version;
 }
 
+async function assertExpectedVersion(env, expectedVersion) {
+  if (!expectedVersion) return;
+  const current = await getStateVersion(env);
+  if (String(expectedVersion) !== String(current)) {
+    const error = withStatus(409, "state version conflict; refresh or merge before saving");
+    error.version = current;
+    throw error;
+  }
+}
+
 async function login(request, env) {
   const payload = await readJson(request);
   const username = String(payload.username || "").trim();
@@ -586,6 +602,10 @@ async function createUser(request, env) {
   const username = String(payload.username || "").trim();
   const password = String(payload.password || "");
   if (!username || !password) throw withStatus(400, "username and password are required");
+  const existing = await env.DB.prepare("SELECT * FROM users WHERE username = ?").bind(username).first();
+  if (existing && payload.resetPassword !== true && payload.confirmReset !== true) {
+    throw withStatus(409, "user already exists; resetPassword=true is required to reset password");
+  }
   const role = payload.role === "admin" ? "admin" : "developer";
   const salt = randomToken(18);
   const passwordHash = await hashPassword(password, salt);
@@ -615,7 +635,61 @@ async function createUser(request, env) {
     now,
   ).run();
   const row = await env.DB.prepare("SELECT * FROM users WHERE username = ?").bind(username).first();
+  await insertAudit(env, {
+    ts: now,
+    action: existing ? "user.password_reset" : "user.create",
+    entity: "user",
+    id: row.id,
+    summary: existing ? `重置账号密码：${username}` : `创建账号：${username}`,
+    detail: { username, role },
+    source: "cloudflare-d1",
+  });
   return { ok: true, user: publicUser(row) };
+}
+
+async function patchUser(request, env, userId) {
+  const payload = await readJson(request);
+  const row = await env.DB.prepare("SELECT * FROM users WHERE id = ? OR username = ?").bind(userId, userId).first();
+  if (!row) throw withStatus(404, "user not found");
+  const fields = normalizeUserPatchFields(payload.fields || payload);
+  const changedFields = Object.keys(fields).filter((field) => !sameJson(row[field], fields[field]));
+  if (!changedFields.length) return { ok: true, user: publicUser(row), entry: null };
+  const assignments = changedFields.map((field) => `${field} = ?`).join(", ");
+  const values = changedFields.map((field) => fields[field]);
+  await env.DB.prepare(`UPDATE users SET ${assignments}, updated_at = ? WHERE id = ?`)
+    .bind(...values, nowIso(), row.id)
+    .run();
+  const next = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(row.id).first();
+  const entry = payload.auditEntry || {
+    ts: nowIso(),
+    action: "user.patch",
+    entity: "user",
+    id: row.id,
+    summary: `更新账号：${next.username}`,
+    detail: { fields: changedFields },
+    source: "cloudflare-d1",
+  };
+  await insertAudit(env, { ...entry, source: "cloudflare-d1" });
+  return { ok: true, user: publicUser(next), entry };
+}
+
+function normalizeUserPatchFields(fields) {
+  const next = {};
+  for (const [rawField, value] of Object.entries(fields || {})) {
+    const field = rawField === "displayName" ? "display_name"
+      : rawField === "ownerName" ? "owner_name"
+        : rawField;
+    if (field === "role") {
+      next.role = value === "admin" ? "admin" : "developer";
+    } else if (field === "active") {
+      next.active = value === false || value === 0 || value === "0" ? 0 : 1;
+    } else if (field === "display_name" || field === "owner_name") {
+      next[field] = String(value || "").trim();
+    } else {
+      throw withStatus(400, `unsupported user field: ${rawField}`);
+    }
+  }
+  return next;
 }
 
 async function createTask(request, env) {
@@ -744,6 +818,15 @@ async function changePassword(request, env) {
   await env.DB.prepare("UPDATE users SET password_hash = ?, salt = ?, updated_at = ? WHERE id = ?")
     .bind(passwordHash, salt, nowIso(), user.id)
     .run();
+  await insertAudit(env, {
+    ts: nowIso(),
+    action: "user.password_change",
+    entity: "user",
+    id: user.id,
+    summary: `修改账号密码：${user.username}`,
+    detail: { username: user.username },
+    source: "cloudflare-d1",
+  });
   return { ok: true };
 }
 
@@ -757,6 +840,7 @@ const TASK_JSON_PATCH_FIELDS = new Set(["evidence", "dependencies"]);
 async function patchTask(request, env, taskId) {
   const user = await requireUser(request, env);
   const payload = await readJson(request);
+  await assertExpectedVersion(env, payload.expectedVersion);
   const oldTask = await getTaskById(env, taskId);
   if (!oldTask) throw withStatus(404, "task not found");
   const fields = normalizeTaskPatchFields(payload.fields || {});
@@ -774,6 +858,7 @@ async function patchTask(request, env, taskId) {
       throw withStatus(403, `developer can only update PR/test report fields: ${forbiddenFields.join(", ")}`);
     }
   }
+  assertSchedulePatchHasReason(oldTask, fields, changedFields);
 
   const now = nowIso();
   const taskUpdates = {};
@@ -809,6 +894,14 @@ async function patchTask(request, env, taskId) {
   };
   await insertAudit(env, { ...entry, source: "cloudflare-d1" });
   return { ok: true, version, entry, task: await getTaskById(env, taskId) };
+}
+
+function assertSchedulePatchHasReason(oldTask, fields, changedFields) {
+  if (!changedFields.some((field) => field === "start_date" || field === "end_date" || field === "segments")) return;
+  const noteReason = Object.prototype.hasOwnProperty.call(fields, "notes") && String(fields.notes || "").trim();
+  const segmentReason = Array.isArray(fields.segments) && fields.segments.some((segment) => String(segment.reason || "").trim());
+  if (noteReason || segmentReason) return;
+  throw withStatus(400, `schedule change reason is required for task: ${oldTask.title || oldTask.id}`);
 }
 
 function normalizeTaskPatchFields(fields) {
@@ -1269,8 +1362,8 @@ function jsonResponse(request, env, data, status = 200) {
   });
 }
 
-function errorResponse(request, env, status, message) {
-  return jsonResponse(request, env, { ok: false, error: message }, status);
+function errorResponse(request, env, status, message, extra = {}) {
+  return jsonResponse(request, env, { ok: false, error: message, ...extra }, status);
 }
 
 function emptyResponse(request, env) {

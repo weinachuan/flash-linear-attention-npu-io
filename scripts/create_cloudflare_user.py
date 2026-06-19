@@ -41,6 +41,7 @@ def main() -> int:
     parser.add_argument("--role", choices=["admin", "developer"], default="developer")
     parser.add_argument("--display-name", default="")
     parser.add_argument("--owner-name", default="", help="对应任务责任人姓名；开发账号只能改该责任人名下任务。")
+    parser.add_argument("--reset-existing", action="store_true", help="如果账号已存在，显式确认重置该账号密码。")
     args = parser.parse_args()
 
     result = post_json(args.api, args.admin_token, {
@@ -49,6 +50,7 @@ def main() -> int:
         "role": args.role,
         "displayName": args.display_name or args.username,
         "ownerName": args.owner_name or args.display_name or args.username,
+        "resetPassword": args.reset_existing,
     })
     user = result.get("user", {})
     print(f"创建/更新完成：{user.get('username')} / {user.get('role')} / {user.get('ownerName')}")

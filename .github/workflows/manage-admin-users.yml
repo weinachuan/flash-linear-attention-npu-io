@@ -1,0 +1,62 @@
+name: Manage Admin Users
+
+on:
+  workflow_dispatch:
+    inputs:
+      admins:
+        description: "Comma-separated admin accounts to create or promote"
+        required: true
+        default: "罗书惟,鞠阳"
+      promote:
+        description: "Comma-separated existing accounts to promote without password reset"
+        required: true
+        default: "陈琳鑫"
+
+permissions:
+  contents: read
+
+jobs:
+  manage-admin-users:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Create or promote admin users
+        env:
+          FLASH_IO_ADMIN_TOKEN: ${{ secrets.FLASH_IO_ADMIN_TOKEN }}
+          ADMINS: ${{ inputs.admins }}
+          PROMOTE: ${{ inputs.promote }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p generated
+          args=(--out generated/admin-account-updates.csv)
+          IFS=',' read -ra admin_names <<< "$ADMINS"
+          for name in "${admin_names[@]}"; do
+            trimmed="$(echo "$name" | xargs)"
+            if [ -n "$trimmed" ]; then
+              args+=(--admin "$trimmed")
+            fi
+          done
+          IFS=',' read -ra promote_names <<< "$PROMOTE"
+          for name in "${promote_names[@]}"; do
+            trimmed="$(echo "$name" | xargs)"
+            if [ -n "$trimmed" ]; then
+              args+=(--promote "$trimmed")
+            fi
+          done
+          python scripts/manage_admin_users.py "${args[@]}"
+
+      - name: Upload generated admin credentials
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-account-updates
+          path: generated/admin-account-updates.csv
+          retention-days: 7

@@ -91,6 +91,7 @@ const TABLE_SORT_DEFAULT_DIRECTION = {
 const RISK_SORT_WEIGHT = { 高: 3, 中: 2, 低: 1 };
 const PRIORITY_SORT_WEIGHT = { P0: 0, P1: 1, P2: 2 };
 const STATUS_SORT_WEIGHT = { delayed: 0, blocked: 1, todo: 2, doing: 3, done: 4 };
+const SCHEDULE_CHANGE_FIELDS = new Set(["start_date", "end_date", "segments"]);
 
 const state = {
   data: null,
@@ -140,6 +141,8 @@ async function load() {
       state.data = data;
       state.serverVersion = data.version || data.generatedAt || "";
       state.pendingRemoteVersion = "";
+      state.dirtyTaskIds.clear();
+      state.taskBaselines.clear();
       state.audit = audit;
       state.prCatalog = prCatalog || { generatedAt: "", sourceRepo: "", total: 0, items: [] };
       ensurePeopleCatalog();
@@ -156,6 +159,8 @@ async function load() {
     state.data = await dataRes.json();
     state.audit = auditRes && auditRes.ok ? parseAudit(await auditRes.text()) : [];
     state.prCatalog = prCatalogRes && prCatalogRes.ok ? await prCatalogRes.json() : { generatedAt: "", sourceRepo: "", total: 0, items: [] };
+    state.dirtyTaskIds.clear();
+    state.taskBaselines.clear();
     ensurePeopleCatalog();
     syncAllTaskDeliveryRules();
     render();
@@ -1913,7 +1918,8 @@ async function handleTaskAction(button) {
       alert("普通开发账号不能删除任务。");
       return;
     }
-    if (!confirm(`确认删除任务：${task.title}？`)) return;
+    if (!confirmHighRisk("确认删除任务", `任务：${task.title}\n会删除该任务及其甘特分段记录，页面内不能撤销。`)) return;
+    if (!(await ensureNoVersionConflict())) return;
     state.data.tasks = state.data.tasks.filter((item) => item.id !== task.id);
     if (WORKER_API_BASE) {
       const entry = cloudflareAuditEntry("task.delete", "task", task.id, `删除任务：${task.title}`, { title: task.title });
@@ -1972,6 +1978,55 @@ function syncTaskDatesFromSegments(task) {
   task.updated_at = nowIso();
 }
 
+function confirmHighRisk(title, detail) {
+  return confirm(`${title}\n\n${detail}\n\n这是高风险操作，请确认继续。`);
+}
+
+function changeTouchesSchedule(change) {
+  return Object.keys(change?.changes || {}).some((field) => SCHEDULE_CHANGE_FIELDS.has(field));
+}
+
+function promptScheduleChangeReason(task, change) {
+  if (!changeTouchesSchedule(change)) return true;
+  const reason = prompt(`任务「${task.title}」排期发生变化，请填写变更原因（必填）：`, String(task.notes || "").trim());
+  if (!reason || !reason.trim()) {
+    alert("改任务排期必须填写变更原因，本次保存已取消。");
+    return false;
+  }
+  const cleanReason = reason.trim();
+  task.notes = cleanReason;
+  if (Array.isArray(task.segments)) {
+    task.segments = task.segments.map((segment) => ({
+      ...segment,
+      reason: String(segment.reason || "").trim() || cleanReason,
+    }));
+  }
+  task.updated_at = nowIso();
+  const refreshed = taskAuditChange(task);
+  if (refreshed) change.changes = refreshed.changes;
+  return true;
+}
+
+async function ensureNoVersionConflict() {
+  if (!WORKER_API_BASE || !state.serverVersion) return true;
+  const result = await workerGet("/api/version");
+  const latest = result.version || "";
+  if (!latest || latest === state.serverVersion) return true;
+  state.pendingRemoteVersion = latest;
+  updateEditStatus();
+  const shouldRefresh = confirm(
+    "后台数据已被其他人更新。为避免覆盖他人修改，本次保存已暂停。\n\n" +
+    "点击“确定”刷新页面数据（会放弃当前未保存修改）；点击“取消”保留当前页面，手动复制修改后再刷新合并。"
+  );
+  if (shouldRefresh) {
+    state.dirtyTaskIds.clear();
+    state.taskBaselines.clear();
+    state.serverVersion = latest;
+    await load();
+  }
+  return false;
+}
+
 async function saveAllTasks() {
   if (!state.dirtyTaskIds.size) {
     alert("没有待保存的任务变更。");
@@ -1994,6 +2049,7 @@ async function saveTaskRows(extraRows = []) {
     alert("没有待保存的任务变更。");
     return;
   }
+  if (!(await ensureNoVersionConflict())) return;
   ids.forEach((id) => {
     const row = rows.get(id);
     if (row) applyRowToTask(row);
@@ -2005,6 +2061,10 @@ async function saveTaskRows(extraRows = []) {
     render();
     alert("没有检测到字段变更。");
     return;
+  }
+  for (const change of changes) {
+    const task = state.data.tasks.find((item) => item.id === change.id);
+    if (task && !promptScheduleChangeReason(task, change)) return;
   }
   const summary = changes.length === 1 ? `更新任务：${changes[0].title}` : `批量更新任务：${changes.length}项`;
   const action = changes.length === 1 ? "task.update" : "task.batch_update";
@@ -2097,6 +2157,7 @@ async function splitTask(taskId) {
   if (!breakEnd) return;
   const reason = prompt("中断原因：", "临时插入其它任务");
   if (!reason) return;
+  if (WORKER_API_BASE && !(await ensureNoVersionConflict())) return;
   const segments = task.segments?.length ? task.segments : [{ id: `seg-${crypto.randomUUID().slice(0, 10)}`, start_date: task.start_date, end_date: task.end_date, reason: "", position: 0 }];
   const next = [];
   for (const segment of segments) {
@@ -2222,8 +2283,9 @@ async function handleAdminAction(button) {
   if (action === "delete-group") {
     const group = state.data.groups.find((item) => item.id === groupId);
     if (!group || state.data.groups.length <= 1) return alert("至少保留一个分组。");
-    if (!confirm(`确认删除分组：${group.title}？任务会转入第一个其它分组。`)) return;
     const fallback = state.data.groups.find((item) => item.id !== group.id);
+    if (!confirmHighRisk("确认删除分组", `分组：${group.title}\n不会删除任何任务；关联任务和专项的分组字段会转入默认分组：${fallback.title}。`)) return;
+    if (!(await ensureNoVersionConflict())) return;
     state.data.tasks.forEach((task) => { if (task.group_id === group.id) task.group_id = fallback.id; });
     state.data.specials.forEach((special) => { if (special.group_id === group.id) special.group_id = fallback.id; });
     state.data.groups = state.data.groups.filter((item) => item.id !== group.id);
@@ -2261,7 +2323,9 @@ async function handleAdminAction(button) {
   }
   if (action === "delete-special") {
     const special = state.data.specials.find((item) => item.id === specialId);
-    if (!special || !confirm(`确认删除专项：${special.title}？专项下任务会转为普通事项。`)) return;
+    if (!special) return;
+    if (!confirmHighRisk("确认删除专项", `专项：${special.title}\n不会删除任何任务；关联任务的专项字段会变为默认字段：普通事项。`)) return;
+    if (!(await ensureNoVersionConflict())) return;
     state.data.tasks.forEach((task) => { if (task.special_id === special.id) task.special_id = null; });
     state.data.specials = state.data.specials.filter((item) => item.id !== special.id);
     if (WORKER_API_BASE) {
@@ -2303,7 +2367,8 @@ async function handleAdminAction(button) {
     if (!person || person.placeholder) return;
     const assignments = tasksForPerson(person);
     if (assignments.length) return alert(`该人员仍关联 ${assignments.length} 项任务，请先调整任务责任人。`);
-    if (!confirm(`确认删除人员：${person.name}？`)) return;
+    if (!confirmHighRisk("确认删除人员", `人员：${person.name}\n仅删除人员档案；不会删除任务。已确认该人员当前没有关联任务。`)) return;
+    if (!(await ensureNoVersionConflict())) return;
     state.data.people = state.data.people.filter((item) => item.id !== person.id);
     if (WORKER_API_BASE) {
       const entry = cloudflareAuditEntry("person.delete", "person", person.id, `删除人员：${person.name}`, { name: person.name });
@@ -2334,6 +2399,7 @@ async function patchTask(task, fields, auditEntry) {
   const result = await workerPatch(`/api/tasks/${encodeURIComponent(task.id)}`, {
     fields,
     auditEntry,
+    expectedVersion: state.serverVersion || "",
   });
   if (result.task) mergeTask(result.task);
   if (result.version) {
@@ -2383,6 +2449,7 @@ async function saveRepository(summary, action, entity, id, detail = {}) {
       state: state.data,
       auditEntry: entry,
       prCatalog: state.prCatalog,
+      expectedVersion: state.serverVersion || "",
     });
     if (result.state) state.data = result.state;
     if (result.version) state.serverVersion = result.version;
@@ -2420,7 +2487,7 @@ function updateEditStatus() {
   const user = WORKER_API_BASE && state.authUser ? `（${state.authUser.displayName || state.authUser.username} / ${state.authUser.role}）` : "";
   const scope = isDeveloperEditMode() ? "仅显示自己任务及同算子关联任务；只能提交自己任务的 PR/转测报告链接" : "甘特条可拖动，边缘可拉伸";
   if (dirtyCount && state.pendingRemoteVersion) {
-    $("#editStatus").textContent = `编辑模式${user}：${dirtyCount} 项待保存；后台已有新数据，保存后会同步刷新`;
+    $("#editStatus").textContent = `编辑模式${user}：${dirtyCount} 项待保存；后台已有新数据，请先刷新或手动合并`;
     return;
   }
   $("#editStatus").textContent = dirtyCount ? `编辑模式${user}：${dirtyCount} 项待保存` : `编辑模式${user}：${scope}；保存会写入 ${target}`;
@@ -2525,7 +2592,13 @@ async function workerFetch(path, options = {}) {
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || `Cloudflare API ${response.status}`);
+  if (!response.ok) {
+    if (response.status === 409 && data.version) {
+      state.pendingRemoteVersion = data.version;
+      updateEditStatus();
+    }
+    throw new Error(data.error || `Cloudflare API ${response.status}`);
+  }
   return data;
 }
 
@@ -2562,7 +2635,7 @@ async function changePassword() {
   if (newPassword.length < 8) return alert("新密码至少 8 位。");
   const repeatPassword = prompt("请再次输入新密码：", "");
   if (newPassword !== repeatPassword) return alert("两次输入的新密码不一致。");
-  if (!confirm("确认修改当前账号密码？确认后新密码立即生效。")) return;
+  if (!confirmHighRisk("确认修改账号密码", "确认后新密码立即生效，旧密码将无法继续登录。")) return;
   await workerPost("/api/me/password", { oldPassword, newPassword });
   alert("密码已修改，请妥善保存新密码。");
 }
