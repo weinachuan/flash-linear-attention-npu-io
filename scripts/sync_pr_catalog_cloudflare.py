@@ -41,8 +41,10 @@ def post_json(url: str, token: str, payload: dict[str, Any]) -> dict[str, Any]:
         data=data,
         method="POST",
         headers={
+            "Accept": "application/json",
             "Content-Type": "application/json; charset=utf-8",
             "Authorization": f"Bearer {token}",
+            "User-Agent": "flash-linear-attention-npu-io-pr-sync",
         },
     )
     try:
