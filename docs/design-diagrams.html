@@ -3,103 +3,257 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>flash-linear-attention-npu-io 设计图集</title>
+  <title>flash-linear-attention-npu-io 软件设计图集</title>
   <style>
     :root {
-      --ink:#20312a;
-      --muted:#6d6251;
-      --paper:#fffaf1;
-      --panel:#fffdf8;
-      --line:#ddcfb7;
-      --green:#26795f;
-      --green-2:#e7f3ed;
-      --red:#d63b31;
-      --red-2:#fff0ed;
-      --amber:#bf7609;
-      --amber-2:#fff3d9;
-      --blue:#2f5f91;
-      --blue-2:#e9f1fb;
-      --dark:#1f3028;
-      --gray:#eef0ec;
+      --ink: #17231e;
+      --muted: #647067;
+      --paper: #f7f2e8;
+      --card: #fffdf7;
+      --line: #d8ccb8;
+      --grid: #efe5d4;
+      --green: #26795f;
+      --green-soft: #e7f2ed;
+      --red: #cf3d34;
+      --red-soft: #fff0ed;
+      --amber: #b87508;
+      --amber-soft: #fff1d5;
+      --blue: #315f91;
+      --blue-soft: #e8f0fb;
+      --violet: #67538b;
+      --violet-soft: #f0ecf7;
+      --dark: #1f3028;
     }
-    * { box-sizing:border-box; }
+
+    * { box-sizing: border-box; }
+
     body {
-      margin:0;
-      font-family:"Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
-      color:var(--ink);
+      margin: 0;
+      color: var(--ink);
       background:
-        radial-gradient(circle at 12% 4%, rgba(191,118,9,.16), transparent 32%),
-        linear-gradient(145deg, #fffaf1 0%, #f3eadb 46%, #fffaf1 100%);
+        radial-gradient(circle at 10% 0%, rgba(184,117,8,.16), transparent 32%),
+        linear-gradient(145deg, #fffaf1 0%, #f1e8d9 48%, #fffaf1 100%);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
     }
-    main { max-width:1420px; margin:0 auto; padding:28px 28px 54px; }
+
+    main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px 28px 56px;
+    }
+
     header {
-      display:flex;
-      justify-content:space-between;
-      gap:22px;
-      align-items:flex-end;
-      padding:26px 28px;
-      margin-bottom:22px;
-      border:1px solid var(--line);
-      background:rgba(255,253,248,.88);
-      box-shadow:0 24px 60px rgba(70,50,22,.10);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      padding: 30px 34px;
+      border: 1px solid var(--line);
+      background: rgba(255,253,247,.92);
+      box-shadow: 0 22px 60px rgba(74, 54, 26, .10);
     }
-    h1 { margin:0 0 8px; font-size:32px; letter-spacing:-.04em; }
-    .meta { margin:0; color:var(--muted); font-size:14px; line-height:1.7; }
-    .badge {
-      display:inline-flex;
-      align-items:center;
-      border:1px solid var(--line);
-      border-radius:999px;
-      padding:8px 13px;
-      background:#fff6e8;
-      color:var(--muted);
-      font-size:13px;
-      white-space:nowrap;
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--amber);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
     }
-    .grid { display:grid; gap:22px; }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      letter-spacing: -.04em;
+      line-height: 1.16;
+    }
+
+    .meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .doc-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 160px;
+      min-height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff6e8;
+      color: #5f4b2b;
+      font-weight: 800;
+    }
+
+    .toc {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin: 18px 0 22px;
+    }
+
+    .toc a {
+      display: block;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      background: rgba(255,253,247,.8);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
     .diagram-card {
-      border:1px solid var(--line);
-      background:rgba(255,253,248,.95);
-      box-shadow:0 16px 42px rgba(70,50,22,.08);
-      padding:22px;
-      page-break-inside:avoid;
+      margin-top: 22px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      background: rgba(255,253,247,.96);
+      box-shadow: 0 16px 42px rgba(74, 54, 26, .08);
+      page-break-inside: avoid;
     }
+
     .diagram-head {
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 16px;
     }
-    h2 { margin:0; font-size:22px; letter-spacing:-.03em; }
-    .note { margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.6; }
-    svg { width:100%; height:auto; display:block; background:#fffaf1; border:1px solid #eadcc4; }
-    .svg-bg { fill:#fffaf1; }
-    .lane { fill:#fbf1df; stroke:#dfcfb2; stroke-width:1; }
-    .node { fill:#fffdf8; stroke:#20312a; stroke-width:1.4; }
-    .node-green { fill:var(--green-2); stroke:var(--green); }
-    .node-red { fill:var(--red-2); stroke:var(--red); }
-    .node-amber { fill:var(--amber-2); stroke:var(--amber); }
-    .node-blue { fill:var(--blue-2); stroke:var(--blue); }
-    .node-dark { fill:var(--dark); stroke:var(--dark); }
-    .db { fill:#fffdf8; stroke:#20312a; stroke-width:1.4; }
-    .txt { fill:var(--ink); font-size:15px; font-weight:700; }
-    .txt-sm { fill:var(--muted); font-size:12px; font-weight:500; }
-    .txt-xs { fill:var(--muted); font-size:10.8px; font-weight:500; }
-    .txt-white { fill:#fffdf8; font-size:15px; font-weight:800; }
-    .txt-white-sm { fill:#fffdf8; font-size:12px; font-weight:600; }
-    .arrow { stroke:#20312a; stroke-width:1.8; fill:none; marker-end:url(#arrow); }
-    .arrow-green { stroke:var(--green); stroke-width:2; fill:none; marker-end:url(#arrowGreen); }
-    .arrow-red { stroke:var(--red); stroke-width:2; fill:none; marker-end:url(#arrowRed); }
-    .arrow-blue { stroke:var(--blue); stroke-width:2; fill:none; marker-end:url(#arrowBlue); }
-    .dash { stroke-dasharray:6 5; }
-    .tag { fill:#fff6e8; stroke:#d8c8aa; }
-    .legend text { font-size:12px; fill:var(--muted); }
+
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -.03em;
+    }
+
+    .note {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .standard {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: #fff6e8;
+      color: #6b5430;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid var(--line);
+      background: var(--card);
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid #eadfcf;
+      background: #fffaf1;
+    }
+
+    .bg { fill: #fffaf1; }
+    .boundary { fill: rgba(251,241,223,.72); stroke: var(--line); stroke-width: 1.2; }
+    .box { fill: var(--card); stroke: var(--dark); stroke-width: 1.4; }
+    .box-blue { fill: var(--blue-soft); stroke: var(--blue); }
+    .box-green { fill: var(--green-soft); stroke: var(--green); }
+    .box-amber { fill: var(--amber-soft); stroke: var(--amber); }
+    .box-red { fill: var(--red-soft); stroke: var(--red); }
+    .box-violet { fill: var(--violet-soft); stroke: var(--violet); }
+    .box-dark { fill: var(--dark); stroke: var(--dark); }
+    .db { fill: var(--card); stroke: var(--dark); stroke-width: 1.4; }
+    .txt { fill: var(--ink); font-size: 15px; font-weight: 800; }
+    .txt-mid { fill: var(--ink); font-size: 13px; font-weight: 700; }
+    .txt-sm { fill: var(--muted); font-size: 12px; font-weight: 600; }
+    .txt-xs { fill: var(--muted); font-size: 10.8px; font-weight: 600; }
+    .txt-white { fill: #fffdf7; font-size: 15px; font-weight: 900; }
+    .txt-white-sm { fill: #fffdf7; font-size: 12px; font-weight: 700; }
+    .line { stroke: var(--dark); stroke-width: 1.7; fill: none; marker-end: url(#arrow); }
+    .line-green { stroke: var(--green); stroke-width: 2; fill: none; marker-end: url(#arrowGreen); }
+    .line-blue { stroke: var(--blue); stroke-width: 2; fill: none; marker-end: url(#arrowBlue); }
+    .line-red { stroke: var(--red); stroke-width: 2; fill: none; marker-end: url(#arrowRed); }
+    .dash { stroke-dasharray: 7 5; }
+    .table-head { fill: var(--dark); }
+    .table-row { fill: rgba(255,253,247,.86); stroke: var(--line); stroke-width: 1; }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .field-table {
+      border: 1px solid var(--line);
+      background: #fffaf1;
+    }
+
+    .field-title {
+      padding: 10px 12px;
+      background: var(--dark);
+      color: #fffdf7;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 132px minmax(0, 1fr);
+      gap: 10px;
+      padding: 8px 12px;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .field-row code {
+      color: var(--blue);
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-weight: 800;
+    }
+
+    @media (max-width: 760px) {
+      main { padding: 14px; }
+      header, .diagram-head { grid-template-columns: 1fr; }
+      h1 { font-size: 26px; }
+      .diagram-card { padding: 14px; overflow-x: auto; }
+      svg { min-width: 980px; }
+    }
+
     @media print {
-      body { background:#fff; }
-      main { padding:0; max-width:none; }
-      header, .diagram-card { box-shadow:none; }
-      .diagram-card { margin-bottom:14px; }
+      body { background: #fff; }
+      main { max-width: none; padding: 0; }
+      header, .diagram-card { box-shadow: none; }
+      .toc { display: none; }
+      .diagram-card { margin-top: 12px; }
     }
   </style>
 </head>
@@ -107,459 +261,635 @@
 <main>
   <header>
     <div>
-      <h1>flash-linear-attention-npu-io 设计图集</h1>
-      <p class="meta">面向软件工程沟通：部署结构、数据流、用户流程、自动同步、数据模型、刷新机制。所有图均为可视化 SVG，不包含 Mermaid 源码。</p>
+      <p class="eyebrow">Software Architecture Design Pack</p>
+      <h1>flash-linear-attention-npu-io 软件设计图集</h1>
+      <p class="meta">
+        本页采用软件工程常用图法组织：C4 上下文图、容器图、组件图、DFD 数据流图、ERD 数据模型图、时序图、权限活动图、部署与备份恢复图。
+        所有图均为内嵌 SVG，可直接截图、打印或放入 PPT。
+      </p>
     </div>
-    <span class="badge">适合截图 / PPT / 设计评审</span>
+    <div class="doc-tag">设计评审版</div>
   </header>
 
-  <section class="grid">
-    <article class="diagram-card">
-      <div class="diagram-head">
-        <div>
-          <h2>1. 总体部署结构图</h2>
-          <p class="note">展示浏览器、GitHub Pages、Cloudflare Worker、D1、GitHub Actions 和上游仓库之间的职责边界。</p>
-        </div>
+  <nav class="toc" aria-label="图目录">
+    <a href="#context">1. C4-L1 系统上下文图</a>
+    <a href="#container">2. C4-L2 容器图</a>
+    <a href="#component">3. Worker 组件图</a>
+    <a href="#dfd">4. DFD 数据流图</a>
+    <a href="#sequence">5. 字段级保存时序图</a>
+    <a href="#erd">6. D1 数据模型 ERD</a>
+    <a href="#dictionary">7. 数据库字段字典</a>
+    <a href="#rbac">8. 权限与用户流程图</a>
+    <a href="#deployment">9. 部署、同步与恢复图</a>
+  </nav>
+
+  <article class="diagram-card" id="context">
+    <div class="diagram-head">
+      <div>
+        <h2>1. C4-L1 系统上下文图</h2>
+        <p class="note">从系统边界外看整体关系：使用者、上游 PR 仓库、GitHub 托管与 Cloudflare 后端如何协作。</p>
       </div>
-      <svg viewBox="0 0 1280 650" role="img" aria-label="总体部署结构图">
-        <defs>
-          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#20312a"/></marker>
-          <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#26795f"/></marker>
-          <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f5f91"/></marker>
-          <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d63b31"/></marker>
-        </defs>
-        <rect class="svg-bg" width="1280" height="650"/>
-        <rect x="48" y="76" width="300" height="488" rx="22" class="lane"/>
-        <rect x="386" y="76" width="410" height="488" rx="22" class="lane"/>
-        <rect x="835" y="76" width="397" height="488" rx="22" class="lane"/>
-        <text x="72" y="112" class="txt">用户访问层</text>
-        <text x="410" y="112" class="txt">应用与数据服务层</text>
-        <text x="858" y="112" class="txt">代码与自动化层</text>
+      <span class="standard">C4 / System Context</span>
+    </div>
+    <svg viewBox="0 0 1280 660" role="img" aria-label="C4 系统上下文图">
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1f3028"/></marker>
+        <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#26795f"/></marker>
+        <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#315f91"/></marker>
+        <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#cf3d34"/></marker>
+      </defs>
+      <rect class="bg" width="1280" height="660"/>
+      <rect x="415" y="120" width="450" height="400" rx="34" class="boundary"/>
+      <text x="640" y="154" text-anchor="middle" class="txt">系统边界：flash-linear-attention-npu-io</text>
+      <rect x="500" y="238" width="280" height="138" rx="24" class="box-dark"/>
+      <text x="640" y="284" text-anchor="middle" class="txt-white">转测项目管理系统</text>
+      <text x="640" y="314" text-anchor="middle" class="txt-white-sm">维护任务、风险、负责人、PR、报告</text>
+      <text x="640" y="340" text-anchor="middle" class="txt-white-sm">提供甘特 / 人力 / 算子视图</text>
 
-        <rect x="83" y="174" width="230" height="92" rx="18" class="node node-blue"/>
-        <text x="198" y="207" text-anchor="middle" class="txt">浏览器用户</text>
-        <text x="198" y="232" text-anchor="middle" class="txt-sm">查看 / 筛选 / 登录编辑</text>
+      <rect x="70" y="86" width="250" height="96" rx="18" class="box-blue"/>
+      <text x="195" y="122" text-anchor="middle" class="txt">管理员</text>
+      <text x="195" y="148" text-anchor="middle" class="txt-sm">全量维护任务、人力、专项、排期</text>
 
-        <rect x="83" y="340" width="230" height="92" rx="18" class="node"/>
-        <text x="198" y="374" text-anchor="middle" class="txt">GitHub Pages</text>
-        <text x="198" y="399" text-anchor="middle" class="txt-sm">docs/index.html 等静态资源</text>
+      <rect x="70" y="282" width="250" height="96" rx="18" class="box-green"/>
+      <text x="195" y="318" text-anchor="middle" class="txt">开发同学</text>
+      <text x="195" y="344" text-anchor="middle" class="txt-sm">只更新自己任务的 PR / 转测报告</text>
 
-        <rect x="450" y="170" width="270" height="102" rx="20" class="node node-green"/>
-        <text x="585" y="205" text-anchor="middle" class="txt">Cloudflare Worker</text>
-        <text x="585" y="230" text-anchor="middle" class="txt-sm">API / 登录鉴权 / 权限校验</text>
-        <text x="585" y="251" text-anchor="middle" class="txt-sm">风险与状态规则同步</text>
+      <rect x="70" y="478" width="250" height="96" rx="18" class="box"/>
+      <text x="195" y="514" text-anchor="middle" class="txt">只读访客</text>
+      <text x="195" y="540" text-anchor="middle" class="txt-sm">查看项目进度、风险和人力占用</text>
 
-        <path d="M480 378 C480 345,690 345,690 378 L690 472 C690 506,480 506,480 472 Z" class="db"/>
-        <ellipse cx="585" cy="378" rx="105" ry="28" class="db"/>
-        <text x="585" y="416" text-anchor="middle" class="txt">Cloudflare D1</text>
-        <text x="585" y="441" text-anchor="middle" class="txt-sm">任务 / 人员 / 分组 / 专项</text>
-        <text x="585" y="462" text-anchor="middle" class="txt-sm">PR 候选池 / 审计日志 / 用户</text>
+      <rect x="960" y="96" width="250" height="104" rx="18" class="box-amber"/>
+      <text x="1085" y="132" text-anchor="middle" class="txt">GitHub Pages</text>
+      <text x="1085" y="158" text-anchor="middle" class="txt-sm">托管前端静态页面</text>
+      <text x="1085" y="180" text-anchor="middle" class="txt-sm">index.html / app.js / diagrams</text>
 
-        <rect x="880" y="142" width="300" height="90" rx="18" class="node"/>
-        <text x="1030" y="176" text-anchor="middle" class="txt">GitHub 仓库</text>
-        <text x="1030" y="201" text-anchor="middle" class="txt-sm">前端代码 / Worker 代码 / workflow</text>
+      <rect x="960" y="286" width="250" height="104" rx="18" class="box-red"/>
+      <text x="1085" y="322" text-anchor="middle" class="txt">上游代码仓</text>
+      <text x="1085" y="348" text-anchor="middle" class="txt-sm">flashserve/flash-linear-attention-npu</text>
+      <text x="1085" y="370" text-anchor="middle" class="txt-sm">PR 状态来源</text>
 
-        <rect x="880" y="285" width="300" height="94" rx="18" class="node node-amber"/>
-        <text x="1030" y="319" text-anchor="middle" class="txt">GitHub Actions</text>
-        <text x="1030" y="344" text-anchor="middle" class="txt-sm">部署 Worker / Pages</text>
-        <text x="1030" y="365" text-anchor="middle" class="txt-sm">08:00 与 14:00 扫描 PR</text>
+      <rect x="960" y="478" width="250" height="96" rx="18" class="box-violet"/>
+      <text x="1085" y="514" text-anchor="middle" class="txt">GitHub Actions</text>
+      <text x="1085" y="540" text-anchor="middle" class="txt-sm">部署、定时 PR 扫描、D1 备份</text>
 
-        <rect x="880" y="438" width="300" height="90" rx="18" class="node node-red"/>
-        <text x="1030" y="471" text-anchor="middle" class="txt">上游 FLA NPU 仓库</text>
-        <text x="1030" y="496" text-anchor="middle" class="txt-sm">flashserve/flash-linear-attention-npu</text>
+      <path d="M320 134 C388 138,430 246,500 276" class="line-blue"/>
+      <text x="355" y="183" class="txt-xs">登录 / 管理</text>
+      <path d="M320 330 L500 320" class="line-green"/>
+      <text x="360" y="314" class="txt-xs">提交交付件链接</text>
+      <path d="M320 526 C395 510,430 370,500 346" class="line"/>
+      <text x="362" y="470" class="txt-xs">只读查看</text>
+      <path d="M780 260 C842 232,885 164,960 148" class="line"/>
+      <text x="830" y="199" class="txt-xs">加载页面资源</text>
+      <path d="M960 338 C885 330,850 320,780 318" class="line-red"/>
+      <text x="815" y="358" class="txt-xs">同步 PR 候选池</text>
+      <path d="M960 526 C875 508,836 402,780 354" class="line"/>
+      <text x="825" y="467" class="txt-xs">发布与备份自动化</text>
+    </svg>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--blue-soft)"></i>用户角色</span>
+      <span><i class="dot" style="background:var(--amber-soft)"></i>托管/自动化</span>
+      <span><i class="dot" style="background:var(--red-soft)"></i>外部代码仓</span>
+      <span><i class="dot" style="background:var(--dark)"></i>本系统</span>
+    </div>
+  </article>
 
-        <path d="M198 266 L198 340" class="arrow-blue"/>
-        <text x="213" y="307" class="txt-xs">加载静态页面</text>
-        <path d="M313 386 C360 386,393 230,450 222" class="arrow-green"/>
-        <text x="337" y="312" class="txt-xs">API 读写</text>
-        <path d="M585 272 L585 350" class="arrow-green"/>
-        <path d="M585 378 L585 272" class="arrow-green"/>
-        <text x="604" y="324" class="txt-xs">SQL</text>
-        <path d="M880 188 C785 188,785 386,690 386" class="arrow"/>
-        <text x="760" y="279" class="txt-xs">迁移与部署配置</text>
-        <path d="M1030 232 L1030 285" class="arrow"/>
-        <path d="M1030 379 L1030 438" class="arrow-red"/>
-        <text x="1043" y="413" class="txt-xs">GitHub API</text>
-        <path d="M880 332 C806 332,790 210,720 210" class="arrow-green"/>
-        <text x="766" y="247" class="txt-xs">同步 PR 候选池</text>
-        <path d="M1030 285 L1030 232" class="arrow"/>
-        <text x="1042" y="263" class="txt-xs">push 更新快照</text>
-      </svg>
-    </article>
-
-    <article class="diagram-card">
-      <div class="diagram-head">
-        <div>
-          <h2>2. 数据流图</h2>
-          <p class="note">以数据对象为中心，说明页面加载、人工保存、PR 自动同步三条主数据流。</p>
-        </div>
+  <article class="diagram-card" id="container">
+    <div class="diagram-head">
+      <div>
+        <h2>2. C4-L2 容器图</h2>
+        <p class="note">展开系统内部容器：前端、Worker API、D1 数据库、Actions 自动化任务及其责任边界。</p>
       </div>
-      <svg viewBox="0 0 1280 700" role="img" aria-label="数据流图">
-        <defs>
-          <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#20312a"/></marker>
-          <marker id="arrow2g" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#26795f"/></marker>
-          <marker id="arrow2b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2f5f91"/></marker>
-        </defs>
-        <rect class="svg-bg" width="1280" height="700"/>
-        <circle cx="148" cy="154" r="68" class="node node-blue"/>
-        <text x="148" y="150" text-anchor="middle" class="txt">用户</text>
-        <text x="148" y="174" text-anchor="middle" class="txt-sm">浏览器页面</text>
+      <span class="standard">C4 / Container</span>
+    </div>
+    <svg viewBox="0 0 1280 700" role="img" aria-label="C4 容器图">
+      <rect class="bg" width="1280" height="700"/>
+      <rect x="52" y="72" width="1176" height="520" rx="28" class="boundary"/>
+      <text x="82" y="112" class="txt">系统容器边界</text>
 
-        <rect x="320" y="100" width="230" height="108" rx="18" class="node node-green"/>
-        <text x="435" y="134" text-anchor="middle" class="txt">P1 页面加载</text>
-        <text x="435" y="159" text-anchor="middle" class="txt-sm">load()</text>
-        <text x="435" y="181" text-anchor="middle" class="txt-sm">渲染甘特/人力/算子视图</text>
+      <rect x="100" y="166" width="260" height="122" rx="20" class="box-blue"/>
+      <text x="230" y="204" text-anchor="middle" class="txt">Web 前端</text>
+      <text x="230" y="232" text-anchor="middle" class="txt-sm">GitHub Pages / Vanilla JS</text>
+      <text x="230" y="254" text-anchor="middle" class="txt-sm">视图渲染、筛选、拖拽交互</text>
 
-        <rect x="320" y="290" width="230" height="108" rx="18" class="node node-amber"/>
-        <text x="435" y="324" text-anchor="middle" class="txt">P2 人工保存</text>
-        <text x="435" y="349" text-anchor="middle" class="txt-sm">saveRepository()</text>
-        <text x="435" y="371" text-anchor="middle" class="txt-sm">完整 state 快照</text>
+      <rect x="485" y="162" width="310" height="132" rx="20" class="box-green"/>
+      <text x="640" y="200" text-anchor="middle" class="txt">Cloudflare Worker API</text>
+      <text x="640" y="228" text-anchor="middle" class="txt-sm">认证、RBAC、字段级 PATCH</text>
+      <text x="640" y="250" text-anchor="middle" class="txt-sm">PR 候选池同步、风险/状态规则</text>
 
-        <rect x="320" y="498" width="230" height="108" rx="18" class="node node-red"/>
-        <text x="435" y="532" text-anchor="middle" class="txt">P3 PR 自动同步</text>
-        <text x="435" y="557" text-anchor="middle" class="txt-sm">sync_pr_catalog.py</text>
-        <text x="435" y="579" text-anchor="middle" class="txt-sm">候选池 + 风险状态</text>
+      <path d="M505 422 C505 386,775 386,775 422 L775 520 C775 556,505 556,505 520 Z" class="db"/>
+      <ellipse cx="640" cy="422" rx="135" ry="28" class="db"/>
+      <text x="640" y="466" text-anchor="middle" class="txt">Cloudflare D1</text>
+      <text x="640" y="494" text-anchor="middle" class="txt-sm">业务表、用户表、审计表、元数据</text>
 
-        <rect x="670" y="255" width="230" height="150" rx="22" class="node-dark"/>
-        <text x="785" y="292" text-anchor="middle" class="txt-white">Cloudflare Worker</text>
-        <text x="785" y="321" text-anchor="middle" class="txt-white-sm">/api/export</text>
-        <text x="785" y="344" text-anchor="middle" class="txt-white-sm">/api/save</text>
-        <text x="785" y="367" text-anchor="middle" class="txt-white-sm">/api/pr-catalog/sync</text>
+      <rect x="920" y="150" width="250" height="112" rx="20" class="box-amber"/>
+      <text x="1045" y="188" text-anchor="middle" class="txt">GitHub Actions</text>
+      <text x="1045" y="216" text-anchor="middle" class="txt-sm">Deploy Worker / Pages</text>
+      <text x="1045" y="238" text-anchor="middle" class="txt-sm">PR sync / D1 backup / init users</text>
 
-        <path d="M1010 222 C1010 180,1170 180,1170 222 L1170 518 C1170 560,1010 560,1010 518 Z" class="db"/>
-        <ellipse cx="1090" cy="222" rx="80" ry="24" class="db"/>
-        <text x="1090" y="270" text-anchor="middle" class="txt">D1 数据库</text>
-        <text x="1090" y="301" text-anchor="middle" class="txt-sm">tasks</text>
-        <text x="1090" y="324" text-anchor="middle" class="txt-sm">task_segments</text>
-        <text x="1090" y="347" text-anchor="middle" class="txt-sm">groups / specials / people</text>
-        <text x="1090" y="370" text-anchor="middle" class="txt-sm">project_meta.prCatalog</text>
-        <text x="1090" y="393" text-anchor="middle" class="txt-sm">audit_entries</text>
-        <text x="1090" y="416" text-anchor="middle" class="txt-sm">users</text>
+      <rect x="920" y="392" width="250" height="112" rx="20" class="box-red"/>
+      <text x="1045" y="430" text-anchor="middle" class="txt">外部 PR 源</text>
+      <text x="1045" y="458" text-anchor="middle" class="txt-sm">GitHub REST API</text>
+      <text x="1045" y="480" text-anchor="middle" class="txt-sm">open / merged PR 候选列表</text>
 
-        <rect x="660" y="520" width="250" height="76" rx="18" class="node"/>
-        <text x="785" y="551" text-anchor="middle" class="txt">GitHub 静态快照</text>
-        <text x="785" y="576" text-anchor="middle" class="txt-sm">docs/pr-catalog.json 等兜底</text>
+      <path d="M360 226 L485 226" class="line-green"/>
+      <text x="390" y="210" class="txt-xs">HTTPS API</text>
+      <path d="M640 294 L640 394" class="line-green"/>
+      <text x="660" y="350" class="txt-xs">SQL prepared statements</text>
+      <path d="M920 206 L795 216" class="line"/>
+      <text x="828" y="190" class="txt-xs">部署 Worker</text>
+      <path d="M1045 262 C1045 320,800 382,720 418" class="line"/>
+      <text x="868" y="346" class="txt-xs">备份 / 初始化账号</text>
+      <path d="M1045 392 L1045 262" class="line-red"/>
+      <text x="1062" y="335" class="txt-xs">定时扫描 PR</text>
+      <path d="M920 448 C865 448,855 265,795 252" class="line-red"/>
+      <text x="830" y="420" class="txt-xs">同步 PR catalog</text>
+    </svg>
+  </article>
 
-        <path d="M216 154 L320 154" class="arrow-blue" marker-end="url(#arrow2b)"/>
-        <text x="246" y="138" class="txt-xs">刷新/打开页面</text>
-        <path d="M550 154 C610 154,615 278,670 292" class="arrow-green" marker-end="url(#arrow2g)"/>
-        <text x="576" y="213" class="txt-xs">GET export/audit/pr</text>
-        <path d="M900 302 C945 302,960 282,1010 270" class="arrow-green" marker-end="url(#arrow2g)"/>
-        <path d="M1010 318 C960 318,945 330,900 330" class="arrow-green" marker-end="url(#arrow2g)"/>
-        <text x="938" y="248" class="txt-xs">读取完整状态</text>
-
-        <path d="M216 190 C275 210,285 323,320 344" class="arrow" marker-end="url(#arrow2)"/>
-        <text x="238" y="286" class="txt-xs">编辑任务</text>
-        <path d="M550 344 L670 344" class="arrow" marker-end="url(#arrow2)"/>
-        <text x="574" y="328" class="txt-xs">POST save</text>
-        <path d="M900 348 L1010 348" class="arrow" marker-end="url(#arrow2)"/>
-        <text x="926" y="369" class="txt-xs">拆表写入</text>
-
-        <path d="M550 552 L660 552" class="arrow" marker-end="url(#arrow2)"/>
-        <text x="574" y="536" class="txt-xs">commit 静态文件</text>
-        <path d="M550 526 C628 478,605 368,670 360" class="arrow-green" marker-end="url(#arrow2g)"/>
-        <text x="574" y="456" class="txt-xs">POST pr-catalog/sync</text>
-        <path d="M900 372 C956 392,960 402,1010 392" class="arrow-green" marker-end="url(#arrow2g)"/>
-        <text x="910" y="415" class="txt-xs">只更新候选池 + 风险/状态</text>
-      </svg>
-    </article>
-
-    <article class="diagram-card">
-      <div class="diagram-head">
-        <div>
-          <h2>3. 管理员使用流程图</h2>
-          <p class="note">管理员拥有全量维护权限，可以改任务、人员、分组、专项和计划日期。</p>
-        </div>
+  <article class="diagram-card" id="component">
+    <div class="diagram-head">
+      <div>
+        <h2>3. Worker 组件图</h2>
+        <p class="note">从服务端实现角度拆分 Worker 内部组件，明确 API、权限、规则引擎和持久化仓储的协作。</p>
       </div>
-      <svg viewBox="0 0 1280 500" role="img" aria-label="管理员使用流程图">
-        <defs><marker id="arrow3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#20312a"/></marker></defs>
-        <rect class="svg-bg" width="1280" height="500"/>
-        <rect x="50" y="206" width="120" height="70" rx="35" class="node-dark"/>
-        <text x="110" y="247" text-anchor="middle" class="txt-white">开始</text>
-        <rect x="225" y="188" width="170" height="106" rx="18" class="node node-blue"/>
-        <text x="310" y="226" text-anchor="middle" class="txt">登录</text>
-        <text x="310" y="253" text-anchor="middle" class="txt-sm">管理员账号/密码</text>
-        <rect x="455" y="188" width="185" height="106" rx="18" class="node node-green"/>
-        <text x="547" y="226" text-anchor="middle" class="txt">查看项目看板</text>
-        <text x="547" y="253" text-anchor="middle" class="txt-sm">筛风险/责任人/状态</text>
-        <rect x="700" y="90" width="205" height="112" rx="18" class="node node-amber"/>
-        <text x="802" y="125" text-anchor="middle" class="txt">维护任务</text>
-        <text x="802" y="152" text-anchor="middle" class="txt-sm">风险/优先级/PR/报告</text>
-        <text x="802" y="174" text-anchor="middle" class="txt-sm">日期/备注/甘特分段</text>
-        <rect x="700" y="278" width="205" height="112" rx="18" class="node node-amber"/>
-        <text x="802" y="313" text-anchor="middle" class="txt">维护基础数据</text>
-        <text x="802" y="340" text-anchor="middle" class="txt-sm">人员/分组/专项</text>
-        <text x="802" y="362" text-anchor="middle" class="txt-sm">新增/编辑/删除</text>
-        <rect x="970" y="188" width="180" height="106" rx="18" class="node node-green"/>
-        <text x="1060" y="226" text-anchor="middle" class="txt">保存全部</text>
-        <text x="1060" y="253" text-anchor="middle" class="txt-sm">写入 D1 + 审计日志</text>
-        <rect x="1088" y="370" width="135" height="64" rx="32" class="node-dark"/>
-        <text x="1156" y="407" text-anchor="middle" class="txt-white">完成</text>
-        <path d="M170 241 L225 241" class="arrow" marker-end="url(#arrow3)"/>
-        <path d="M395 241 L455 241" class="arrow" marker-end="url(#arrow3)"/>
-        <path d="M640 216 C665 190,675 160,700 146" class="arrow" marker-end="url(#arrow3)"/>
-        <path d="M640 266 C665 294,675 318,700 334" class="arrow" marker-end="url(#arrow3)"/>
-        <path d="M905 146 C935 165,945 205,970 224" class="arrow" marker-end="url(#arrow3)"/>
-        <path d="M905 334 C938 312,946 272,970 252" class="arrow" marker-end="url(#arrow3)"/>
-        <path d="M1060 294 L1135 370" class="arrow" marker-end="url(#arrow3)"/>
-        <rect x="940" y="54" width="250" height="72" rx="14" class="node node-red"/>
-        <text x="1065" y="83" text-anchor="middle" class="txt">校验失败</text>
-        <text x="1065" y="106" text-anchor="middle" class="txt-sm">权限/字段/网络错误，返回修改</text>
-        <path d="M1060 188 C1060 146,1060 126,1065 126" class="arrow dash" marker-end="url(#arrow3)"/>
-        <path d="M940 90 C835 60,720 62,640 188" class="arrow dash" marker-end="url(#arrow3)"/>
-      </svg>
-    </article>
+      <span class="standard">Component Diagram</span>
+    </div>
+    <svg viewBox="0 0 1280 720" role="img" aria-label="Worker 组件图">
+      <rect class="bg" width="1280" height="720"/>
+      <rect x="70" y="70" width="1140" height="540" rx="28" class="boundary"/>
+      <text x="100" y="110" class="txt">Cloudflare Worker 内部组件</text>
 
-    <article class="diagram-card">
-      <div class="diagram-head">
-        <div>
-          <h2>4. 开发同学使用流程图</h2>
-          <p class="note">开发账号可以查看全局，但写入时只能修改责任人包含自己的既有任务。</p>
-        </div>
+      <rect x="115" y="158" width="210" height="94" rx="16" class="box-blue"/>
+      <text x="220" y="194" text-anchor="middle" class="txt">HTTP Router</text>
+      <text x="220" y="220" text-anchor="middle" class="txt-sm">按路径分发 API</text>
+
+      <rect x="390" y="128" width="220" height="94" rx="16" class="box-green"/>
+      <text x="500" y="164" text-anchor="middle" class="txt">Auth Service</text>
+      <text x="500" y="190" text-anchor="middle" class="txt-sm">登录、JWT、改密</text>
+
+      <rect x="390" y="252" width="220" height="94" rx="16" class="box-green"/>
+      <text x="500" y="288" text-anchor="middle" class="txt">RBAC Guard</text>
+      <text x="500" y="314" text-anchor="middle" class="txt-sm">admin / developer 权限校验</text>
+
+      <rect x="675" y="118" width="220" height="94" rx="16" class="box-amber"/>
+      <text x="785" y="154" text-anchor="middle" class="txt">Task API</text>
+      <text x="785" y="180" text-anchor="middle" class="txt-sm">PATCH / POST / DELETE</text>
+
+      <rect x="675" y="242" width="220" height="94" rx="16" class="box-amber"/>
+      <text x="785" y="278" text-anchor="middle" class="txt">Catalog API</text>
+      <text x="785" y="304" text-anchor="middle" class="txt-sm">PR 候选池同步</text>
+
+      <rect x="675" y="366" width="220" height="94" rx="16" class="box-amber"/>
+      <text x="785" y="402" text-anchor="middle" class="txt">Admin API</text>
+      <text x="785" y="428" text-anchor="middle" class="txt-sm">人员 / 分组 / 专项</text>
+
+      <rect x="960" y="190" width="205" height="112" rx="16" class="box-violet"/>
+      <text x="1062" y="228" text-anchor="middle" class="txt">Rule Engine</text>
+      <text x="1062" y="256" text-anchor="middle" class="txt-sm">风险、状态、延期</text>
+      <text x="1062" y="278" text-anchor="middle" class="txt-sm">PR / 报告 / DDL 判定</text>
+
+      <rect x="960" y="390" width="205" height="112" rx="16" class="box-red"/>
+      <text x="1062" y="428" text-anchor="middle" class="txt">Audit Service</text>
+      <text x="1062" y="456" text-anchor="middle" class="txt-sm">写入操作日志</text>
+      <text x="1062" y="478" text-anchor="middle" class="txt-sm">支持后续检索</text>
+
+      <path d="M485 590 C485 552,795 552,795 590 L795 646 C795 684,485 684,485 646 Z" class="db"/>
+      <ellipse cx="640" cy="590" rx="155" ry="26" class="db"/>
+      <text x="640" y="630" text-anchor="middle" class="txt">D1 Repository Layer</text>
+      <text x="640" y="656" text-anchor="middle" class="txt-sm">prepared statements + batch writes</text>
+
+      <path d="M325 205 L390 175" class="line"/>
+      <path d="M325 215 L390 300" class="line"/>
+      <path d="M610 300 L675 165" class="line"/>
+      <path d="M610 300 L675 289" class="line"/>
+      <path d="M610 300 L675 413" class="line"/>
+      <path d="M895 165 C932 172,940 210,960 236" class="line"/>
+      <path d="M895 289 L960 248" class="line"/>
+      <path d="M895 413 C940 410,945 440,960 446" class="line"/>
+      <path d="M1062 302 L1062 390" class="line"/>
+      <path d="M785 460 C785 515,710 545,670 590" class="line"/>
+      <path d="M1062 502 C1000 560,820 590,795 610" class="line"/>
+      <path d="M500 346 C510 468,562 538,605 590" class="line"/>
+    </svg>
+  </article>
+
+  <article class="diagram-card" id="dfd">
+    <div class="diagram-head">
+      <div>
+        <h2>4. DFD 数据流图</h2>
+        <p class="note">按数据处理过程描述：页面加载、字段级保存、PR 自动同步、审计与版本通知的主数据流。</p>
       </div>
-      <svg viewBox="0 0 1280 520" role="img" aria-label="开发同学使用流程图">
-        <defs><marker id="arrow4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#20312a"/></marker></defs>
-        <rect class="svg-bg" width="1280" height="520"/>
-        <rect x="48" y="225" width="120" height="70" rx="35" class="node-dark"/>
-        <text x="108" y="266" text-anchor="middle" class="txt-white">开始</text>
-        <rect x="220" y="206" width="172" height="108" rx="18" class="node node-blue"/>
-        <text x="306" y="243" text-anchor="middle" class="txt">登录开发账号</text>
-        <text x="306" y="270" text-anchor="middle" class="txt-sm">账号绑定 ownerName</text>
-        <rect x="448" y="206" width="180" height="108" rx="18" class="node node-green"/>
-        <text x="538" y="243" text-anchor="middle" class="txt">筛自己的任务</text>
-        <text x="538" y="270" text-anchor="middle" class="txt-sm">责任人多选筛选</text>
-        <rect x="690" y="206" width="190" height="108" rx="18" class="node node-amber"/>
-        <text x="785" y="243" text-anchor="middle" class="txt">补充交付信息</text>
-        <text x="785" y="270" text-anchor="middle" class="txt-sm">PR 链接 / 转测报告</text>
-        <polygon points="970,168 1125,260 970,352 815,260" class="node node-blue"/>
-        <text x="970" y="250" text-anchor="middle" class="txt">是否属于自己？</text>
-        <text x="970" y="276" text-anchor="middle" class="txt-sm">ownerName 命中责任人</text>
-        <rect x="1048" y="48" width="178" height="90" rx="18" class="node node-red"/>
-        <text x="1137" y="84" text-anchor="middle" class="txt">拒绝保存</text>
-        <text x="1137" y="110" text-anchor="middle" class="txt-sm">403 权限不足</text>
-        <rect x="1048" y="382" width="178" height="90" rx="18" class="node node-green"/>
-        <text x="1137" y="418" text-anchor="middle" class="txt">保存成功</text>
-        <text x="1137" y="444" text-anchor="middle" class="txt-sm">D1 + 审计日志</text>
-        <path d="M168 260 L220 260" class="arrow" marker-end="url(#arrow4)"/>
-        <path d="M392 260 L448 260" class="arrow" marker-end="url(#arrow4)"/>
-        <path d="M628 260 L690 260" class="arrow" marker-end="url(#arrow4)"/>
-        <path d="M880 260 L815 260" class="arrow" marker-end="url(#arrow4)"/>
-        <path d="M1032 223 C1072 176,1090 138,1115 138" class="arrow" marker-end="url(#arrow4)"/>
-        <text x="1066" y="185" class="txt-xs">否</text>
-        <path d="M1033 296 C1070 340,1088 380,1118 382" class="arrow" marker-end="url(#arrow4)"/>
-        <text x="1062" y="346" class="txt-xs">是</text>
-        <rect x="700" y="365" width="260" height="78" rx="16" class="tag"/>
-        <text x="830" y="397" text-anchor="middle" class="txt-sm">开发账号不能新增/删除任务</text>
-        <text x="830" y="421" text-anchor="middle" class="txt-sm">不能维护人员、分组、专项</text>
-      </svg>
-    </article>
+      <span class="standard">DFD / Level 1</span>
+    </div>
+    <svg viewBox="0 0 1280 720" role="img" aria-label="DFD 数据流图">
+      <rect class="bg" width="1280" height="720"/>
+      <circle cx="135" cy="160" r="64" class="box-blue"/>
+      <text x="135" y="156" text-anchor="middle" class="txt">用户页面</text>
+      <text x="135" y="180" text-anchor="middle" class="txt-sm">Browser</text>
 
-    <article class="diagram-card">
-      <div class="diagram-head">
-        <div>
-          <h2>5. 只读用户使用流程图</h2>
-          <p class="note">未登录用户用于查看项目态势，不产生写操作。</p>
-        </div>
+      <rect x="320" y="92" width="210" height="105" rx="18" class="box-green"/>
+      <text x="425" y="132" text-anchor="middle" class="txt">P1 加载项目状态</text>
+      <text x="425" y="158" text-anchor="middle" class="txt-sm">GET export/audit/catalog</text>
+
+      <rect x="320" y="270" width="210" height="105" rx="18" class="box-amber"/>
+      <text x="425" y="310" text-anchor="middle" class="txt">P2 字段级保存</text>
+      <text x="425" y="336" text-anchor="middle" class="txt-sm">PATCH task / entity</text>
+
+      <rect x="320" y="492" width="210" height="105" rx="18" class="box-red"/>
+      <text x="425" y="532" text-anchor="middle" class="txt">P3 PR 自动同步</text>
+      <text x="425" y="558" text-anchor="middle" class="txt-sm">08:00 / 14:00</text>
+
+      <path d="M690 216 C690 178,910 178,910 216 L910 516 C910 554,690 554,690 516 Z" class="db"/>
+      <ellipse cx="800" cy="216" rx="110" ry="26" class="db"/>
+      <text x="800" y="268" text-anchor="middle" class="txt">D1 数据存储</text>
+      <text x="800" y="300" text-anchor="middle" class="txt-sm">tasks / segments</text>
+      <text x="800" y="324" text-anchor="middle" class="txt-sm">people / groups / specials</text>
+      <text x="800" y="348" text-anchor="middle" class="txt-sm">users / audit_entries</text>
+      <text x="800" y="372" text-anchor="middle" class="txt-sm">project_meta.stateVersion</text>
+      <text x="800" y="396" text-anchor="middle" class="txt-sm">project_meta.prCatalog</text>
+
+      <rect x="995" y="120" width="210" height="96" rx="18" class="box"/>
+      <text x="1100" y="156" text-anchor="middle" class="txt">前端视图状态</text>
+      <text x="1100" y="182" text-anchor="middle" class="txt-sm">甘特 / 人力 / 算子 / 表格</text>
+
+      <rect x="995" y="338" width="210" height="96" rx="18" class="box-violet"/>
+      <text x="1100" y="374" text-anchor="middle" class="txt">版本轮询</text>
+      <text x="1100" y="400" text-anchor="middle" class="txt-sm">GET /api/version 每 3 秒</text>
+
+      <rect x="995" y="540" width="210" height="90" rx="18" class="box-red"/>
+      <text x="1100" y="576" text-anchor="middle" class="txt">上游 PR 仓库</text>
+      <text x="1100" y="602" text-anchor="middle" class="txt-sm">open / merged PR</text>
+
+      <path d="M199 160 L320 145" class="line-blue"/>
+      <text x="230" y="137" class="txt-xs">刷新页面</text>
+      <path d="M530 145 C590 142,620 235,690 252" class="line-green"/>
+      <path d="M690 284 C610 274,586 162,530 158" class="line-green"/>
+      <text x="560" y="220" class="txt-xs">项目快照</text>
+      <path d="M910 252 L995 168" class="line"/>
+      <text x="938" y="202" class="txt-xs">render()</text>
+      <path d="M199 200 C260 236,275 300,320 322" class="line"/>
+      <text x="230" y="284" class="txt-xs">编辑字段</text>
+      <path d="M530 322 L690 322" class="line"/>
+      <text x="575" y="306" class="txt-xs">变更字段</text>
+      <path d="M910 386 L995 386" class="line-green"/>
+      <text x="928" y="370" class="txt-xs">stateVersion</text>
+      <path d="M1100 338 C1100 270,1085 218,1100 216" class="line dash"/>
+      <text x="1118" y="282" class="txt-xs">版本变化后 reload</text>
+      <path d="M1100 540 C1100 506,1080 468,1036 434" class="line-red"/>
+      <path d="M995 585 C830 620,650 558,530 545" class="line-red"/>
+      <text x="660" y="600" class="txt-xs">PR catalog</text>
+      <path d="M530 545 C604 520,625 430,690 396" class="line-red"/>
+      <text x="575" y="478" class="txt-xs">同步候选池 / 风险状态</text>
+    </svg>
+  </article>
+
+  <article class="diagram-card" id="sequence">
+    <div class="diagram-head">
+      <div>
+        <h2>5. 字段级 PATCH 保存与实时刷新时序图</h2>
+        <p class="note">描述多人同时使用时，一人保存后其他页面如何通过版本轮询刷新；有未保存编辑时不会被自动覆盖。</p>
       </div>
-      <svg viewBox="0 0 1280 420" role="img" aria-label="只读用户使用流程图">
-        <defs><marker id="arrow5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#20312a"/></marker></defs>
-        <rect class="svg-bg" width="1280" height="420"/>
-        <rect x="64" y="176" width="120" height="70" rx="35" class="node-dark"/>
-        <text x="124" y="217" text-anchor="middle" class="txt-white">打开页面</text>
-        <rect x="248" y="158" width="190" height="106" rx="18" class="node node-blue"/>
-        <text x="343" y="195" text-anchor="middle" class="txt">加载 D1 数据</text>
-        <text x="343" y="222" text-anchor="middle" class="txt-sm">任务 / PR / 日志</text>
-        <rect x="505" y="72" width="188" height="94" rx="18" class="node node-green"/>
-        <text x="599" y="108" text-anchor="middle" class="txt">甘特计划</text>
-        <text x="599" y="134" text-anchor="middle" class="txt-sm">看 DDL 与风险</text>
-        <rect x="505" y="190" width="188" height="94" rx="18" class="node node-green"/>
-        <text x="599" y="226" text-anchor="middle" class="txt">人力视图</text>
-        <text x="599" y="252" text-anchor="middle" class="txt-sm">看每天谁在做什么</text>
-        <rect x="505" y="308" width="188" height="94" rx="18" class="node node-green"/>
-        <text x="599" y="344" text-anchor="middle" class="txt">算子视图</text>
-        <text x="599" y="370" text-anchor="middle" class="txt-sm">看算子特性交付</text>
-        <rect x="760" y="158" width="190" height="106" rx="18" class="node node-amber"/>
-        <text x="855" y="195" text-anchor="middle" class="txt">筛选任务</text>
-        <text x="855" y="222" text-anchor="middle" class="txt-sm">风险/优先级/责任人</text>
-        <rect x="1012" y="158" width="190" height="106" rx="18" class="node"/>
-        <text x="1107" y="195" text-anchor="middle" class="txt">刷新查看</text>
-        <text x="1107" y="222" text-anchor="middle" class="txt-sm">重新 GET /api/export</text>
-        <path d="M184 211 L248 211" class="arrow" marker-end="url(#arrow5)"/>
-        <path d="M438 211 C468 164,480 126,505 119" class="arrow" marker-end="url(#arrow5)"/>
-        <path d="M438 211 L505 237" class="arrow" marker-end="url(#arrow5)"/>
-        <path d="M438 211 C468 284,480 342,505 355" class="arrow" marker-end="url(#arrow5)"/>
-        <path d="M693 237 L760 211" class="arrow" marker-end="url(#arrow5)"/>
-        <path d="M950 211 L1012 211" class="arrow" marker-end="url(#arrow5)"/>
-        <path d="M1107 264 C1060 338,310 340,306 264" class="arrow dash" marker-end="url(#arrow5)"/>
-      </svg>
-    </article>
+      <span class="standard">Sequence Diagram</span>
+    </div>
+    <svg viewBox="0 0 1280 680" role="img" aria-label="字段级保存时序图">
+      <rect class="bg" width="1280" height="680"/>
+      <rect x="85" y="58" width="170" height="58" rx="14" class="box-blue"/>
+      <text x="170" y="94" text-anchor="middle" class="txt">用户 A 页面</text>
+      <rect x="365" y="58" width="170" height="58" rx="14" class="box-green"/>
+      <text x="450" y="94" text-anchor="middle" class="txt">Worker API</text>
+      <rect x="645" y="58" width="170" height="58" rx="14" class="box-amber"/>
+      <text x="730" y="94" text-anchor="middle" class="txt">D1 数据库</text>
+      <rect x="925" y="58" width="170" height="58" rx="14" class="box-blue"/>
+      <text x="1010" y="94" text-anchor="middle" class="txt">用户 B 页面</text>
 
-    <article class="diagram-card">
-      <div class="diagram-head">
-        <div>
-          <h2>6. 自动 PR 同步流程图</h2>
-          <p class="note">这张图对应已落地的 08:00 / 14:00 定时扫描链路。</p>
-        </div>
+      <line x1="170" y1="116" x2="170" y2="620" stroke="#b9ad9a" stroke-width="1.2" stroke-dasharray="6 6"/>
+      <line x1="450" y1="116" x2="450" y2="620" stroke="#b9ad9a" stroke-width="1.2" stroke-dasharray="6 6"/>
+      <line x1="730" y1="116" x2="730" y2="620" stroke="#b9ad9a" stroke-width="1.2" stroke-dasharray="6 6"/>
+      <line x1="1010" y1="116" x2="1010" y2="620" stroke="#b9ad9a" stroke-width="1.2" stroke-dasharray="6 6"/>
+
+      <path d="M170 170 L450 170" class="line-blue"/>
+      <text x="230" y="154" class="txt-xs">PATCH /api/tasks/:id {fields}</text>
+      <path d="M450 212 L730 212" class="line-green"/>
+      <text x="505" y="196" class="txt-xs">权限校验后只更新变更字段</text>
+      <path d="M730 254 L450 254" class="line-green"/>
+      <text x="500" y="238" class="txt-xs">返回 task + new stateVersion</text>
+      <path d="M450 296 L170 296" class="line-blue"/>
+      <text x="250" y="280" class="txt-xs">合并本地 task，清空 dirty</text>
+
+      <path d="M1010 180 L450 180" class="line dash"/>
+      <text x="785" y="164" class="txt-xs">每 3 秒 GET /api/version</text>
+      <path d="M450 338 L1010 338" class="line dash"/>
+      <text x="620" y="322" class="txt-xs">发现版本变化</text>
+
+      <polygon points="1010,392 1130,454 1010,516 890,454" class="box-violet"/>
+      <text x="1010" y="448" text-anchor="middle" class="txt-mid">本页是否有</text>
+      <text x="1010" y="472" text-anchor="middle" class="txt-mid">未保存编辑？</text>
+
+      <path d="M950 414 C825 380,570 370,450 370" class="line"/>
+      <text x="655" y="360" class="txt-xs">否：GET /api/export</text>
+      <path d="M450 412 L730 412" class="line-green"/>
+      <text x="515" y="396" class="txt-xs">读取最新状态</text>
+      <path d="M730 454 C850 470,925 510,1010 538" class="line-green"/>
+      <text x="808" y="520" class="txt-xs">reload + render</text>
+
+      <rect x="905" y="560" width="210" height="58" rx="14" class="box-red"/>
+      <text x="1010" y="583" text-anchor="middle" class="txt-mid">是：只提示后台有新数据</text>
+      <text x="1010" y="604" text-anchor="middle" class="txt-sm">不自动覆盖本地编辑</text>
+      <path d="M1010 516 L1010 560" class="line-red"/>
+    </svg>
+  </article>
+
+  <article class="diagram-card" id="erd">
+    <div class="diagram-head">
+      <div>
+        <h2>6. D1 数据模型 ERD</h2>
+        <p class="note">展示核心数据表和关系。字段采用数据库真实英文名，括号内给出中文业务语义。</p>
       </div>
-      <svg viewBox="0 0 1280 560" role="img" aria-label="自动 PR 同步流程图">
-        <defs><marker id="arrow6" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#20312a"/></marker></defs>
-        <rect class="svg-bg" width="1280" height="560"/>
-        <rect x="50" y="230" width="150" height="76" rx="38" class="node-dark"/>
-        <text x="125" y="260" text-anchor="middle" class="txt-white">定时触发</text>
-        <text x="125" y="284" text-anchor="middle" class="txt-white-sm">08:00 / 14:00</text>
-        <rect x="260" y="218" width="180" height="100" rx="18" class="node node-blue"/>
-        <text x="350" y="255" text-anchor="middle" class="txt">拉取上游 PR</text>
-        <text x="350" y="282" text-anchor="middle" class="txt-sm">GitHub API state=all</text>
-        <rect x="500" y="218" width="190" height="100" rx="18" class="node node-amber"/>
-        <text x="595" y="255" text-anchor="middle" class="txt">构建候选池</text>
-        <text x="595" y="282" text-anchor="middle" class="txt-sm">只保留 open / merged</text>
-        <rect x="750" y="94" width="200" height="100" rx="18" class="node"/>
-        <text x="850" y="131" text-anchor="middle" class="txt">提交静态快照</text>
-        <text x="850" y="158" text-anchor="middle" class="txt-sm">data/docs pr-catalog</text>
-        <rect x="750" y="344" width="200" height="100" rx="18" class="node node-green"/>
-        <text x="850" y="381" text-anchor="middle" class="txt">同步到 Worker</text>
-        <text x="850" y="408" text-anchor="middle" class="txt-sm">POST pr-catalog/sync</text>
-        <rect x="1010" y="344" width="205" height="100" rx="18" class="node node-green"/>
-        <text x="1112" y="381" text-anchor="middle" class="txt">更新 D1</text>
-        <text x="1112" y="408" text-anchor="middle" class="txt-sm">候选池 + 风险/状态</text>
-        <rect x="1010" y="94" width="205" height="100" rx="18" class="node node-red"/>
-        <text x="1112" y="131" text-anchor="middle" class="txt">异常处理</text>
-        <text x="1112" y="158" text-anchor="middle" class="txt-sm">Actions 失败可重跑</text>
-        <path d="M200 268 L260 268" class="arrow" marker-end="url(#arrow6)"/>
-        <path d="M440 268 L500 268" class="arrow" marker-end="url(#arrow6)"/>
-        <path d="M690 252 C720 218,728 168,750 144" class="arrow" marker-end="url(#arrow6)"/>
-        <path d="M690 284 C720 318,728 368,750 394" class="arrow" marker-end="url(#arrow6)"/>
-        <path d="M950 394 L1010 394" class="arrow" marker-end="url(#arrow6)"/>
-        <path d="M950 144 L1010 144" class="arrow dash" marker-end="url(#arrow6)"/>
-        <rect x="470" y="420" width="200" height="72" rx="14" class="tag"/>
-        <text x="570" y="450" text-anchor="middle" class="txt-sm">不会全量覆盖 D1</text>
-        <text x="570" y="474" text-anchor="middle" class="txt-sm">只同步 PR 与风险状态</text>
-      </svg>
-    </article>
+      <span class="standard">ERD / Logical Model</span>
+    </div>
+    <svg viewBox="0 0 1280 780" role="img" aria-label="D1 数据模型 ERD">
+      <rect class="bg" width="1280" height="780"/>
 
-    <article class="diagram-card">
-      <div class="diagram-head">
-        <div>
-          <h2>7. 数据模型图</h2>
-          <p class="note">D1 当前核心表与关系，适合讨论扩展字段、权限或审计检索。</p>
-        </div>
+      <rect x="80" y="70" width="260" height="160" rx="12" class="box-blue"/>
+      <rect x="80" y="70" width="260" height="36" rx="12" class="table-head"/>
+      <text x="210" y="94" text-anchor="middle" class="txt-white">groups</text>
+      <text x="105" y="132" class="txt-sm">PK id（分组 ID）</text>
+      <text x="105" y="156" class="txt-sm">title（分组名称）</text>
+      <text x="105" y="180" class="txt-sm">start_date / end_date（计划窗口）</text>
+      <text x="105" y="204" class="txt-sm">due_date / position（DDL / 排序）</text>
+
+      <rect x="80" y="300" width="260" height="160" rx="12" class="box-blue"/>
+      <rect x="80" y="300" width="260" height="36" rx="12" class="table-head"/>
+      <text x="210" y="324" text-anchor="middle" class="txt-white">specials</text>
+      <text x="105" y="362" class="txt-sm">PK id（专项 ID）</text>
+      <text x="105" y="386" class="txt-sm">title（专项名称）</text>
+      <text x="105" y="410" class="txt-sm">FK group_id（所属转测分组）</text>
+      <text x="105" y="434" class="txt-sm">collapsed / position（折叠状态 / 排序）</text>
+
+      <rect x="430" y="145" width="330" height="300" rx="12" class="box-green"/>
+      <rect x="430" y="145" width="330" height="36" rx="12" class="table-head"/>
+      <text x="595" y="169" text-anchor="middle" class="txt-white">tasks</text>
+      <text x="458" y="207" class="txt-sm">PK id（任务 ID）</text>
+      <text x="458" y="231" class="txt-sm">title / scope / target（事项 / 范围 / 目标）</text>
+      <text x="458" y="255" class="txt-sm">owner / status / risk / priority（负责人 / 状态 / 风险 / 优先级）</text>
+      <text x="458" y="279" class="txt-sm">FK group_id / FK special_id（分组 / 专项）</text>
+      <text x="458" y="303" class="txt-sm">start_date / end_date（计划起止时间）</text>
+      <text x="458" y="327" class="txt-sm">pr_link / test_report / notes（PR / 报告 / 备注）</text>
+      <text x="458" y="351" class="txt-sm">evidence / dependencies（证据 / 依赖，JSON）</text>
+      <text x="458" y="375" class="txt-sm">position / created_at / updated_at（排序 / 创建 / 更新）</text>
+
+      <rect x="870" y="74" width="300" height="170" rx="12" class="box-amber"/>
+      <rect x="870" y="74" width="300" height="36" rx="12" class="table-head"/>
+      <text x="1020" y="98" text-anchor="middle" class="txt-white">task_segments</text>
+      <text x="900" y="136" class="txt-sm">PK id（分段 ID）</text>
+      <text x="900" y="160" class="txt-sm">FK task_id（所属任务）</text>
+      <text x="900" y="184" class="txt-sm">start_date / end_date（分段起止时间）</text>
+      <text x="900" y="208" class="txt-sm">reason / position（中断原因 / 排序）</text>
+
+      <rect x="870" y="310" width="300" height="150" rx="12" class="box"/>
+      <rect x="870" y="310" width="300" height="36" rx="12" class="table-head"/>
+      <text x="1020" y="334" text-anchor="middle" class="txt-white">people</text>
+      <text x="900" y="372" class="txt-sm">PK id（人员 ID）</text>
+      <text x="900" y="396" class="txt-sm">name UNIQUE（人员姓名，唯一）</text>
+      <text x="900" y="420" class="txt-sm">position / placeholder（排序 / 占位人员）</text>
+
+      <rect x="80" y="560" width="260" height="150" rx="12" class="box-violet"/>
+      <rect x="80" y="560" width="260" height="36" rx="12" class="table-head"/>
+      <text x="210" y="584" text-anchor="middle" class="txt-white">users</text>
+      <text x="105" y="622" class="txt-sm">PK id / username（用户 ID / 登录名）</text>
+      <text x="105" y="646" class="txt-sm">display_name / owner_name / role（显示名 / 绑定人员 / 角色）</text>
+      <text x="105" y="670" class="txt-sm">password_hash / salt / active（密码哈希 / 盐 / 启用）</text>
+
+      <rect x="430" y="550" width="330" height="160" rx="12" class="box-red"/>
+      <rect x="430" y="550" width="330" height="36" rx="12" class="table-head"/>
+      <text x="595" y="574" text-anchor="middle" class="txt-white">audit_entries</text>
+      <text x="458" y="612" class="txt-sm">PK id（日志 ID）</text>
+      <text x="458" y="636" class="txt-sm">ts / action / entity / entity_id（时间 / 动作 / 对象 / 对象 ID）</text>
+      <text x="458" y="660" class="txt-sm">summary / detail / source（摘要 / 明细 JSON / 来源）</text>
+
+      <rect x="870" y="555" width="300" height="150" rx="12" class="box-amber"/>
+      <rect x="870" y="555" width="300" height="36" rx="12" class="table-head"/>
+      <text x="1020" y="579" text-anchor="middle" class="txt-white">project_meta</text>
+      <text x="900" y="617" class="txt-sm">PK key（元数据键）</text>
+      <text x="900" y="641" class="txt-sm">value JSON（元数据内容）</text>
+      <text x="900" y="665" class="txt-sm">project / repoScan / prCatalog / stateVersion（项目 / 扫仓 / PR 池 / 版本）</text>
+
+      <path d="M340 151 L430 251" class="line"/>
+      <text x="360" y="186" class="txt-xs">1:N group_id</text>
+      <path d="M340 380 L430 302" class="line"/>
+      <text x="356" y="356" class="txt-xs">1:N special_id</text>
+      <path d="M760 230 L870 160" class="line"/>
+      <text x="788" y="170" class="txt-xs">1:N task_id</text>
+      <path d="M760 302 C810 318,820 370,870 390" class="line dash"/>
+      <text x="785" y="356" class="txt-xs">owner name 逻辑关联</text>
+      <path d="M340 635 L430 630" class="line dash"/>
+      <text x="355" y="615" class="txt-xs">用户操作写审计</text>
+      <path d="M870 632 L760 632" class="line dash"/>
+      <text x="780" y="617" class="txt-xs">同步操作写审计</text>
+    </svg>
+  </article>
+
+  <article class="diagram-card" id="dictionary">
+    <div class="diagram-head">
+      <div>
+        <h2>7. 数据库字段字典</h2>
+        <p class="note">字段名保持英文，与 D1 表结构一致；中文列说明字段的业务语义，便于研发和管理者共同评审。</p>
       </div>
-      <svg viewBox="0 0 1280 720" role="img" aria-label="数据模型图">
-        <defs><marker id="arrow7" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#20312a"/></marker></defs>
-        <rect class="svg-bg" width="1280" height="720"/>
-        <rect x="80" y="70" width="250" height="154" rx="14" class="node node-blue"/>
-        <text x="205" y="103" text-anchor="middle" class="txt">groups</text>
-        <text x="105" y="133" class="txt-sm">id PK</text>
-        <text x="105" y="156" class="txt-sm">title</text>
-        <text x="105" y="179" class="txt-sm">start_date / end_date / due_date</text>
-        <text x="105" y="202" class="txt-sm">position</text>
-        <rect x="80" y="300" width="250" height="154" rx="14" class="node node-blue"/>
-        <text x="205" y="333" text-anchor="middle" class="txt">specials</text>
-        <text x="105" y="363" class="txt-sm">id PK</text>
-        <text x="105" y="386" class="txt-sm">title</text>
-        <text x="105" y="409" class="txt-sm">group_id FK</text>
-        <text x="105" y="432" class="txt-sm">collapsed / position</text>
-        <rect x="430" y="150" width="310" height="250" rx="16" class="node node-green"/>
-        <text x="585" y="183" text-anchor="middle" class="txt">tasks</text>
-        <text x="460" y="215" class="txt-sm">id PK</text>
-        <text x="460" y="238" class="txt-sm">title / owner / status / risk / priority</text>
-        <text x="460" y="261" class="txt-sm">group_id FK / special_id FK</text>
-        <text x="460" y="284" class="txt-sm">start_date / end_date</text>
-        <text x="460" y="307" class="txt-sm">pr_link / test_report / notes</text>
-        <text x="460" y="330" class="txt-sm">evidence JSON / dependencies JSON</text>
-        <text x="460" y="353" class="txt-sm">created_at / updated_at / position</text>
-        <rect x="820" y="70" width="280" height="156" rx="14" class="node node-amber"/>
-        <text x="960" y="103" text-anchor="middle" class="txt">task_segments</text>
-        <text x="850" y="133" class="txt-sm">id PK</text>
-        <text x="850" y="156" class="txt-sm">task_id FK</text>
-        <text x="850" y="179" class="txt-sm">start_date / end_date</text>
-        <text x="850" y="202" class="txt-sm">reason / position</text>
-        <rect x="820" y="285" width="280" height="146" rx="14" class="node"/>
-        <text x="960" y="318" text-anchor="middle" class="txt">people</text>
-        <text x="850" y="348" class="txt-sm">id PK</text>
-        <text x="850" y="371" class="txt-sm">name UNIQUE</text>
-        <text x="850" y="394" class="txt-sm">position / placeholder</text>
-        <rect x="80" y="535" width="250" height="120" rx="14" class="node"/>
-        <text x="205" y="568" text-anchor="middle" class="txt">users</text>
-        <text x="105" y="598" class="txt-sm">username / role / owner_name</text>
-        <text x="105" y="621" class="txt-sm">password_hash / salt</text>
-        <rect x="430" y="500" width="310" height="142" rx="14" class="node node-red"/>
-        <text x="585" y="533" text-anchor="middle" class="txt">audit_entries</text>
-        <text x="460" y="563" class="txt-sm">ts / action / entity / entity_id</text>
-        <text x="460" y="586" class="txt-sm">summary</text>
-        <text x="460" y="609" class="txt-sm">detail JSON / source</text>
-        <rect x="820" y="520" width="280" height="136" rx="14" class="node node-amber"/>
-        <text x="960" y="553" text-anchor="middle" class="txt">project_meta</text>
-        <text x="850" y="583" class="txt-sm">key PK</text>
-        <text x="850" y="606" class="txt-sm">value JSON</text>
-        <text x="850" y="629" class="txt-sm">project / repoScan / prCatalog</text>
-        <path d="M330 147 L430 245" class="arrow" marker-end="url(#arrow7)"/>
-        <text x="347" y="179" class="txt-xs">group_id</text>
-        <path d="M330 377 L430 293" class="arrow" marker-end="url(#arrow7)"/>
-        <text x="347" y="350" class="txt-xs">special_id</text>
-        <path d="M740 209 L820 148" class="arrow" marker-end="url(#arrow7)"/>
-        <text x="760" y="164" class="txt-xs">task_id</text>
-        <path d="M740 302 C790 312,790 348,820 358" class="arrow dash" marker-end="url(#arrow7)"/>
-        <text x="752" y="337" class="txt-xs">owner name 对应</text>
-        <path d="M330 595 C372 560,392 540,430 540" class="arrow dash" marker-end="url(#arrow7)"/>
-        <text x="350" y="555" class="txt-xs">用户操作写日志</text>
-        <path d="M820 590 C780 610,775 590,740 585" class="arrow dash" marker-end="url(#arrow7)"/>
-        <text x="763" y="630" class="txt-xs">PR 同步写日志</text>
-      </svg>
-    </article>
+      <span class="standard">Data Dictionary</span>
+    </div>
+    <div class="field-grid">
+      <section class="field-table">
+        <div class="field-title">tasks 任务主表</div>
+        <div class="field-row"><code>id</code><span>任务唯一标识。</span></div>
+        <div class="field-row"><code>title</code><span>事项名称，通常包含算子名和特性名。</span></div>
+        <div class="field-row"><code>owner</code><span>责任人，可包含多个人名。</span></div>
+        <div class="field-row"><code>status</code><span>任务状态：todo、doing、blocked、delayed、done。</span></div>
+        <div class="field-row"><code>risk</code><span>风险等级：高、中、低，由 PR、报告、DDL、待排人力规则联动。</span></div>
+        <div class="field-row"><code>priority</code><span>优先级：P0、P1、P2。</span></div>
+        <div class="field-row"><code>group_id</code><span>所属转测批次或时间节点。</span></div>
+        <div class="field-row"><code>special_id</code><span>所属专项，可为空。</span></div>
+        <div class="field-row"><code>start_date</code><span>任务计划开始日期。</span></div>
+        <div class="field-row"><code>end_date</code><span>任务计划完成日期，作为 DDL 判定基础。</span></div>
+        <div class="field-row"><code>pr_link</code><span>关联 PR 链接，允许一个特性关联多个 PR。</span></div>
+        <div class="field-row"><code>test_report</code><span>转测报告或交付件链接。</span></div>
+      </section>
 
-    <article class="diagram-card">
-      <div class="diagram-head">
-        <div>
-          <h2>8. 页面刷新与后端数据刷新机制图</h2>
-          <p class="note">区分“前端代码发布刷新”和“后端业务数据刷新”，避免排查时混淆。</p>
-        </div>
+      <section class="field-table">
+        <div class="field-title">task_segments 甘特分段表</div>
+        <div class="field-row"><code>id</code><span>分段唯一标识。</span></div>
+        <div class="field-row"><code>task_id</code><span>关联任务 ID。</span></div>
+        <div class="field-row"><code>start_date</code><span>该分段计划开始日期。</span></div>
+        <div class="field-row"><code>end_date</code><span>该分段计划结束日期。</span></div>
+        <div class="field-row"><code>reason</code><span>任务被中断、切分或计划调整的原因。</span></div>
+        <div class="field-row"><code>position</code><span>同一任务内分段排序。</span></div>
+      </section>
+
+      <section class="field-table">
+        <div class="field-title">groups / specials 分组与专项</div>
+        <div class="field-row"><code>groups.id</code><span>转测批次或里程碑 ID。</span></div>
+        <div class="field-row"><code>groups.title</code><span>转测批次名称，例如 06-25 转测。</span></div>
+        <div class="field-row"><code>groups.due_date</code><span>该批次对外承诺交付日期。</span></div>
+        <div class="field-row"><code>specials.id</code><span>专项 ID。</span></div>
+        <div class="field-row"><code>specials.title</code><span>专项名称，例如文档更新或调用示例。</span></div>
+        <div class="field-row"><code>specials.collapsed</code><span>页面上该专项是否默认折叠。</span></div>
+      </section>
+
+      <section class="field-table">
+        <div class="field-title">people / users 人员与登录账号</div>
+        <div class="field-row"><code>people.name</code><span>项目人员姓名，用于任务责任人、筛选、人力视图。</span></div>
+        <div class="field-row"><code>people.placeholder</code><span>是否为系统占位人员，例如待排人力。</span></div>
+        <div class="field-row"><code>users.username</code><span>登录账号名，初始化时默认等于人员姓名。</span></div>
+        <div class="field-row"><code>users.owner_name</code><span>开发账号绑定的人员姓名，用于权限判定。</span></div>
+        <div class="field-row"><code>users.role</code><span>账号角色：admin 或 developer。</span></div>
+        <div class="field-row"><code>users.password_hash</code><span>加盐密码哈希，不保存明文密码。</span></div>
+      </section>
+
+      <section class="field-table">
+        <div class="field-title">audit_entries 审计日志</div>
+        <div class="field-row"><code>ts</code><span>操作发生时间。</span></div>
+        <div class="field-row"><code>action</code><span>动作类型，例如 task.patch、person.create。</span></div>
+        <div class="field-row"><code>entity</code><span>被操作对象类型。</span></div>
+        <div class="field-row"><code>entity_id</code><span>被操作对象 ID。</span></div>
+        <div class="field-row"><code>summary</code><span>给页面展示和人工检索用的中文摘要。</span></div>
+        <div class="field-row"><code>detail</code><span>结构化变更明细，JSON 格式。</span></div>
+      </section>
+
+      <section class="field-table">
+        <div class="field-title">project_meta 项目元数据</div>
+        <div class="field-row"><code>project</code><span>项目名称、仓库、负责人等基础配置。</span></div>
+        <div class="field-row"><code>repoScan</code><span>仓库扫描结果快照。</span></div>
+        <div class="field-row"><code>prCatalog</code><span>PR 候选池，用于页面选择和风险联动。</span></div>
+        <div class="field-row"><code>stateVersion</code><span>后端数据版本号，前端每 3 秒轮询用于实时刷新。</span></div>
+      </section>
+    </div>
+  </article>
+
+  <article class="diagram-card" id="rbac">
+    <div class="diagram-head">
+      <div>
+        <h2>8. 权限与用户流程图</h2>
+        <p class="note">将管理员、开发账号和只读访问分开，明确“能看什么”和“能改什么”。</p>
       </div>
-      <svg viewBox="0 0 1280 560" role="img" aria-label="页面刷新与后端数据刷新机制图">
-        <defs><marker id="arrow8" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#20312a"/></marker></defs>
-        <rect class="svg-bg" width="1280" height="560"/>
-        <rect x="52" y="70" width="1176" height="190" rx="22" class="lane"/>
-        <rect x="52" y="310" width="1176" height="190" rx="22" class="lane"/>
-        <text x="84" y="105" class="txt">A. 前端代码刷新</text>
-        <text x="84" y="345" class="txt">B. 业务数据刷新</text>
+      <span class="standard">Activity / RBAC</span>
+    </div>
+    <svg viewBox="0 0 1280 640" role="img" aria-label="权限与用户流程图">
+      <rect class="bg" width="1280" height="640"/>
+      <rect x="70" y="70" width="1140" height="470" rx="28" class="boundary"/>
+      <text x="100" y="108" class="txt">登录态与权限分支</text>
 
-        <rect x="110" y="135" width="180" height="80" rx="16" class="node"/>
-        <text x="200" y="168" text-anchor="middle" class="txt">修改 docs/**</text>
-        <text x="200" y="192" text-anchor="middle" class="txt-sm">HTML / CSS / JS</text>
-        <rect x="370" y="135" width="180" height="80" rx="16" class="node node-blue"/>
-        <text x="460" y="168" text-anchor="middle" class="txt">git push</text>
-        <text x="460" y="192" text-anchor="middle" class="txt-sm">main 分支</text>
-        <rect x="630" y="135" width="210" height="80" rx="16" class="node node-amber"/>
-        <text x="735" y="168" text-anchor="middle" class="txt">GitHub Pages 发布</text>
-        <text x="735" y="192" text-anchor="middle" class="txt-sm">静态文件更新</text>
-        <rect x="930" y="135" width="210" height="80" rx="16" class="node node-green"/>
-        <text x="1035" y="168" text-anchor="middle" class="txt">浏览器加载新版</text>
-        <text x="1035" y="192" text-anchor="middle" class="txt-sm">依靠 ?v= 版本号破缓存</text>
+      <rect x="110" y="270" width="140" height="70" rx="35" class="box-dark"/>
+      <text x="180" y="312" text-anchor="middle" class="txt-white">打开页面</text>
 
-        <rect x="110" y="375" width="180" height="80" rx="16" class="node"/>
-        <text x="200" y="408" text-anchor="middle" class="txt">点击刷新/重新打开</text>
-        <text x="200" y="432" text-anchor="middle" class="txt-sm">前端 load()</text>
-        <rect x="370" y="375" width="180" height="80" rx="16" class="node node-green"/>
-        <text x="460" y="408" text-anchor="middle" class="txt">调用 Worker</text>
-        <text x="460" y="432" text-anchor="middle" class="txt-sm">GET /api/export</text>
-        <rect x="630" y="375" width="210" height="80" rx="16" class="node node-green"/>
-        <text x="735" y="408" text-anchor="middle" class="txt">读取 D1 当前状态</text>
-        <text x="735" y="432" text-anchor="middle" class="txt-sm">最新任务/PR/日志</text>
-        <rect x="930" y="375" width="210" height="80" rx="16" class="node node-blue"/>
-        <text x="1035" y="408" text-anchor="middle" class="txt">重新 render()</text>
-        <text x="1035" y="432" text-anchor="middle" class="txt-sm">页面立即反映数据</text>
+      <polygon points="390,220 520,305 390,390 260,305" class="box-blue"/>
+      <text x="390" y="299" text-anchor="middle" class="txt">是否登录？</text>
+      <text x="390" y="326" text-anchor="middle" class="txt-sm">token / session</text>
 
-        <path d="M290 175 L370 175" class="arrow" marker-end="url(#arrow8)"/>
-        <path d="M550 175 L630 175" class="arrow" marker-end="url(#arrow8)"/>
-        <path d="M840 175 L930 175" class="arrow" marker-end="url(#arrow8)"/>
-        <path d="M290 415 L370 415" class="arrow" marker-end="url(#arrow8)"/>
-        <path d="M550 415 L630 415" class="arrow" marker-end="url(#arrow8)"/>
-        <path d="M840 415 L930 415" class="arrow" marker-end="url(#arrow8)"/>
-        <rect x="430" y="268" width="430" height="52" rx="12" class="tag"/>
-        <text x="645" y="300" text-anchor="middle" class="txt-sm">代码刷新和数据刷新彼此独立：页面新版不等于数据被改，数据更新也不需要重新部署前端。</text>
-      </svg>
-    </article>
-  </section>
+      <rect x="570" y="110" width="200" height="96" rx="18" class="box"/>
+      <text x="670" y="148" text-anchor="middle" class="txt">只读模式</text>
+      <text x="670" y="176" text-anchor="middle" class="txt-sm">可查看所有视图和筛选</text>
+
+      <polygon points="670,252 810,335 670,418 530,335" class="box-green"/>
+      <text x="670" y="328" text-anchor="middle" class="txt">账号角色？</text>
+      <text x="670" y="356" text-anchor="middle" class="txt-sm">admin / developer</text>
+
+      <rect x="880" y="110" width="240" height="116" rx="18" class="box-amber"/>
+      <text x="1000" y="148" text-anchor="middle" class="txt">管理员</text>
+      <text x="1000" y="176" text-anchor="middle" class="txt-sm">维护任务、人、分组、专项</text>
+      <text x="1000" y="198" text-anchor="middle" class="txt-sm">可拖拽/拉伸排期</text>
+
+      <rect x="880" y="310" width="240" height="132" rx="18" class="box-green"/>
+      <text x="1000" y="348" text-anchor="middle" class="txt">开发同学</text>
+      <text x="1000" y="376" text-anchor="middle" class="txt-sm">只显示自己任务</text>
+      <text x="1000" y="398" text-anchor="middle" class="txt-sm">以及当前窗口内自己任务同算子关联项</text>
+      <text x="1000" y="420" text-anchor="middle" class="txt-sm">仅可提交自己任务 PR / 报告</text>
+
+      <rect x="580" y="470" width="250" height="70" rx="18" class="box-red"/>
+      <text x="705" y="500" text-anchor="middle" class="txt">越权修改</text>
+      <text x="705" y="524" text-anchor="middle" class="txt-sm">返回 403，不写入 D1</text>
+
+      <path d="M250 305 L260 305" class="line"/>
+      <path d="M390 220 C430 150,500 150,570 158" class="line"/>
+      <text x="480" y="139" class="txt-xs">否</text>
+      <path d="M520 305 L530 335" class="line"/>
+      <text x="520" y="301" class="txt-xs">是</text>
+      <path d="M810 318 C840 250,865 190,880 168" class="line"/>
+      <text x="838" y="245" class="txt-xs">admin</text>
+      <path d="M810 356 C850 358,862 374,880 376" class="line"/>
+      <text x="835" y="389" class="txt-xs">developer</text>
+      <path d="M880 420 C820 470,780 488,830 505" class="line-red"/>
+      <text x="825" y="468" class="txt-xs">非交付字段</text>
+    </svg>
+  </article>
+
+  <article class="diagram-card" id="deployment">
+    <div class="diagram-head">
+      <div>
+        <h2>9. 部署、同步与恢复图</h2>
+        <p class="note">说明从 GitHub 仓到 Cloudflare 服务的发布链路，以及 D1 发生故障时的恢复入口。</p>
+      </div>
+      <span class="standard">Deployment / Operations</span>
+    </div>
+    <svg viewBox="0 0 1280 720" role="img" aria-label="部署同步与恢复图">
+      <rect class="bg" width="1280" height="720"/>
+      <rect x="55" y="70" width="350" height="540" rx="24" class="boundary"/>
+      <text x="82" y="110" class="txt">GitHub</text>
+
+      <rect x="100" y="150" width="250" height="92" rx="18" class="box"/>
+      <text x="225" y="186" text-anchor="middle" class="txt">私有仓库</text>
+      <text x="225" y="212" text-anchor="middle" class="txt-sm">docs / cloudflare / migrations</text>
+
+      <rect x="100" y="292" width="250" height="92" rx="18" class="box-amber"/>
+      <text x="225" y="328" text-anchor="middle" class="txt">Actions</text>
+      <text x="225" y="354" text-anchor="middle" class="txt-sm">deploy / sync-pr / backup</text>
+
+      <rect x="100" y="440" width="250" height="92" rx="18" class="box-violet"/>
+      <text x="225" y="476" text-anchor="middle" class="txt">Artifacts / Snapshots</text>
+      <text x="225" y="502" text-anchor="middle" class="txt-sm">SQL 备份 / JSON 快照 / 审计日志</text>
+
+      <rect x="475" y="70" width="360" height="540" rx="24" class="boundary"/>
+      <text x="502" y="110" class="txt">Cloudflare</text>
+
+      <rect x="530" y="150" width="250" height="92" rx="18" class="box-green"/>
+      <text x="655" y="186" text-anchor="middle" class="txt">Worker</text>
+      <text x="655" y="212" text-anchor="middle" class="txt-sm">API / RBAC / 规则引擎</text>
+
+      <path d="M548 372 C548 340,762 340,762 372 L762 468 C762 500,548 500,548 468 Z" class="db"/>
+      <ellipse cx="655" cy="372" rx="107" ry="25" class="db"/>
+      <text x="655" y="414" text-anchor="middle" class="txt">D1</text>
+      <text x="655" y="440" text-anchor="middle" class="txt-sm">业务主数据</text>
+
+      <rect x="905" y="70" width="320" height="540" rx="24" class="boundary"/>
+      <text x="932" y="110" class="txt">用户访问</text>
+
+      <rect x="945" y="150" width="240" height="92" rx="18" class="box-blue"/>
+      <text x="1065" y="186" text-anchor="middle" class="txt">GitHub Pages</text>
+      <text x="1065" y="212" text-anchor="middle" class="txt-sm">静态前端发布</text>
+
+      <rect x="945" y="320" width="240" height="92" rx="18" class="box-blue"/>
+      <text x="1065" y="356" text-anchor="middle" class="txt">浏览器</text>
+      <text x="1065" y="382" text-anchor="middle" class="txt-sm">读取 Pages + 调 Worker API</text>
+
+      <rect x="945" y="490" width="240" height="92" rx="18" class="box-red"/>
+      <text x="1065" y="526" text-anchor="middle" class="txt">恢复路径</text>
+      <text x="1065" y="552" text-anchor="middle" class="txt-sm">Time Travel / SQL / JSON import</text>
+
+      <path d="M225 242 L225 292" class="line"/>
+      <path d="M350 196 L530 196" class="line-green"/>
+      <text x="395" y="176" class="txt-xs">部署 Worker</text>
+      <path d="M350 338 C500 338,505 410,548 416" class="line"/>
+      <text x="405" y="390" class="txt-xs">执行迁移 / 同步 PR / 备份</text>
+      <path d="M225 384 L225 440" class="line"/>
+      <path d="M350 486 C480 520,540 480,548 456" class="line-red"/>
+      <text x="380" y="535" class="txt-xs">必要时恢复 D1</text>
+      <path d="M350 196 C545 110,825 120,945 180" class="line"/>
+      <text x="580" y="132" class="txt-xs">发布 docs 到 Pages</text>
+      <path d="M1065 242 L1065 320" class="line-blue"/>
+      <path d="M945 366 C850 348,820 210,780 196" class="line-green"/>
+      <text x="830" y="307" class="txt-xs">HTTPS API</text>
+      <path d="M655 468 C710 580,900 548,945 536" class="line-red"/>
+      <text x="730" y="585" class="txt-xs">故障恢复</text>
+    </svg>
+  </article>
 </main>
 </body>
 </html>
