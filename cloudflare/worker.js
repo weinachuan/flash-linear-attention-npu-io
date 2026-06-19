@@ -27,6 +27,11 @@ export default {
       if (url.pathname === "/api/pr-catalog") {
         return jsonResponse(request, env, await getJsonMeta(env, "prCatalog", emptyPrCatalog()));
       }
+      if (url.pathname === "/api/pr-catalog/sync" && request.method === "POST") {
+        await requireAdminLike(request, env);
+        const payload = await readJson(request);
+        return jsonResponse(request, env, await syncPrCatalog(env, payload.catalog || payload));
+      }
       if (url.pathname === "/api/login" && request.method === "POST") {
         return jsonResponse(request, env, await login(request, env));
       }
@@ -213,6 +218,206 @@ async function replaceState(env, state) {
   });
 
   await env.DB.batch(statements);
+}
+
+async function syncPrCatalog(env, catalog) {
+  const normalized = normalizePrCatalog(catalog);
+  const previous = await getJsonMeta(env, "prCatalog", emptyPrCatalog());
+  const catalogChanged = catalogComparable(previous) !== catalogComparable(normalized);
+  await setJsonMeta(env, "prCatalog", normalized);
+  const changed = await syncTaskDeliveryRulesFromCatalog(env, normalized.items);
+  if (catalogChanged || changed.length) {
+    await insertAudit(env, {
+      ts: nowIso(),
+      action: "pr_catalog.sync",
+      entity: "project",
+      id: "pr-catalog-sync",
+      summary: `同步上游 PR 候选池到 D1：${normalized.items.length} 个候选，风险/状态更新 ${changed.length} 项`,
+      detail: {
+        sourceRepo: normalized.sourceRepo || "",
+        generatedAt: normalized.generatedAt || "",
+        changed,
+      },
+      source: "github-actions",
+    });
+  }
+  return {
+    ok: true,
+    catalogTotal: normalized.items.length,
+    catalogChanged,
+    changedCount: changed.length,
+    changed,
+  };
+}
+
+async function syncTaskDeliveryRulesFromCatalog(env, catalogItems) {
+  const tasks = await selectAll(env, "SELECT id, title, owner, status, risk, start_date, end_date, pr_link, test_report FROM tasks ORDER BY position, start_date, title");
+  const changed = [];
+  const statements = [];
+  const now = nowIso();
+  for (const task of tasks) {
+    const next = evaluateTaskDelivery(task, catalogItems);
+    const diff = {};
+    if (task.risk !== next.risk) {
+      diff.risk = { from: task.risk, to: next.risk };
+    }
+    if (task.status !== next.status) {
+      diff.status = { from: task.status, to: next.status };
+    }
+    if (!Object.keys(diff).length) continue;
+    changed.push({ id: task.id, title: task.title, changes: diff });
+    statements.push(env.DB.prepare(
+      "UPDATE tasks SET risk = ?, status = ?, updated_at = ? WHERE id = ?"
+    ).bind(next.risk, next.status, now, task.id));
+  }
+  if (statements.length) await env.DB.batch(statements);
+  return changed;
+}
+
+function evaluateTaskDelivery(task, catalogItems) {
+  return {
+    risk: evaluateTaskRisk(task, catalogItems),
+    status: evaluateTaskStatus(task, catalogItems),
+  };
+}
+
+function evaluateTaskRisk(task, catalogItems) {
+  const pr = prLinkSummary(task.pr_link, catalogItems);
+  const daysUntilDdl = daysBetween(todayBjYmd(), taskDdl(task));
+  if (taskHasWaitingOwner(task)) return "高";
+  if (pr.allMerged) return "低";
+  if (pr.hasOpen) return daysUntilDdl <= 5 ? "中" : "低";
+  return daysUntilDdl <= 10 ? "高" : "中";
+}
+
+function evaluateTaskStatus(task, catalogItems) {
+  const pr = prLinkSummary(task.pr_link, catalogItems);
+  const completed = taskIsCompletionOverride(task) || (pr.allMerged && taskHasReport(task));
+  if (completed) return "done";
+  if (todayBjYmd() > taskDdl(task)) return "delayed";
+  if (task.status === "blocked") return "blocked";
+  if (taskHasWaitingOwner(task) || !taskHasClosedSchedule(task)) return "todo";
+  return "doing";
+}
+
+function prLinkSummary(value, catalogItems) {
+  const refs = parsePrRefs(value);
+  const matches = refs.map((ref) => findPrCandidate(ref, catalogItems));
+  const missing = !refs.length || matches.some((item) => !item);
+  return {
+    refs,
+    matches: matches.filter(Boolean),
+    missing,
+    allMerged: refs.length > 0 && !missing && matches.every((item) => item.status === "merged"),
+    hasOpen: refs.length > 0 && !missing && matches.some((item) => item.status === "open"),
+  };
+}
+
+function parsePrRefs(value) {
+  return String(value || "").split(/[\s,，;；]+/)
+    .map((item) => item.trim())
+    .filter((item) => item && (/^https?:\/\//i.test(item) || /^#?\d+$/.test(item)));
+}
+
+function findPrCandidate(query, catalogItems) {
+  const value = String(query || "").trim();
+  if (!value) return null;
+  const normalized = value.toLowerCase();
+  const number = normalized.match(/^#?(\d+)$/)?.[1]
+    || normalized.match(/\/pull\/(\d+)/)?.[1]
+    || normalized.match(/^#?(\d+)\b/)?.[1];
+  if (number) {
+    const byNumber = catalogItems.find((pr) => String(pr.number) === number);
+    if (byNumber) return byNumber;
+  }
+  return catalogItems.find((pr) => [
+    pr.url,
+    prOptionLabel(pr),
+    pr.title,
+    pr.headRef,
+  ].some((field) => String(field || "").toLowerCase().includes(normalized))) || null;
+}
+
+function prOptionLabel(pr) {
+  const status = pr.statusText || (pr.status === "merged" ? "已合入" : "未合入");
+  return `#${pr.number} ${status} ${pr.title || ""}`.trim();
+}
+
+function taskHasReport(task) {
+  return Boolean(String(task.test_report || "").trim());
+}
+
+function taskIsCompletionOverride(task) {
+  return /ops\s*目录整改/i.test(String(task.title || ""));
+}
+
+function taskHasWaitingOwner(task) {
+  return ownerNames(task).includes("待排人力");
+}
+
+function taskHasClosedSchedule(task) {
+  return isYmd(task.start_date) && isYmd(task.end_date);
+}
+
+function ownerNames(task) {
+  return normalizeOwnerName(task.owner).split(/[、/,，;；&\s]+/)
+    .map(normalizeOwnerName)
+    .filter(Boolean);
+}
+
+function normalizeOwnerName(name) {
+  const value = String(name || "").trim();
+  return !value || value === "待填写" || value === "待排人力" ? "待排人力" : value;
+}
+
+function taskDdl(task) {
+  return isYmd(task.end_date) ? task.end_date : (isYmd(task.start_date) ? task.start_date : todayBjYmd());
+}
+
+function todayBjYmd() {
+  return new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+function daysBetween(a, b) {
+  return Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+}
+
+function isYmd(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(value || "")) && !Number.isNaN(Date.parse(value));
+}
+
+function normalizePrCatalog(catalog) {
+  if (!catalog || !Array.isArray(catalog.items)) throw withStatus(400, "catalog.items is required");
+  const items = catalog.items
+    .filter((item) => item && (item.status === "open" || item.status === "merged"))
+    .map((item) => ({
+      number: Number(item.number),
+      title: String(item.title || ""),
+      url: String(item.url || ""),
+      status: item.status === "merged" ? "merged" : "open",
+      statusText: item.statusText || (item.status === "merged" ? "已合入" : "未合入"),
+      mergedAt: item.mergedAt || null,
+      updatedAt: item.updatedAt || null,
+      createdAt: item.createdAt || null,
+      headRef: String(item.headRef || ""),
+      labels: Array.isArray(item.labels) ? item.labels.map((label) => String(label)) : [],
+    }))
+    .filter((item) => Number.isFinite(item.number) && item.url);
+  return {
+    generatedAt: catalog.generatedAt || nowIso(),
+    sourceRepo: catalog.sourceRepo || "flashserve/flash-linear-attention-npu",
+    rule: catalog.rule || "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
+    total: items.length,
+    items,
+  };
+}
+
+function catalogComparable(catalog) {
+  return JSON.stringify({
+    sourceRepo: catalog?.sourceRepo || "",
+    total: Number(catalog?.total) || 0,
+    items: catalog?.items || [],
+  });
 }
 
 async function listAudit(env, url) {

@@ -132,6 +132,7 @@ GitHub 仓库需要配置以下 Actions Secrets：
 
 - `CLOUDFLARE_ACCOUNT_ID`：Cloudflare 账号 ID。
 - `CLOUDFLARE_API_TOKEN`：Cloudflare API Token，不要写入仓库。
+- `FLASH_IO_ADMIN_TOKEN`：Worker 的 `ADMIN_TOKEN` 值，仅用于定时 PR 候选池同步到 D1，不要写入仓库。
 
 日常修改路径：
 
