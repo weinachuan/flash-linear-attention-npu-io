@@ -1853,23 +1853,23 @@ function renderAdmin() {
     </div>
   `).join("");
   ensurePeopleCatalog();
-  $("#personAdmin").innerHTML = state.data.people.map((person) => {
+  const editablePeople = state.data.people.filter((person) => !person.placeholder && !isPlaceholderOwner(person.name));
+  $("#personAdmin").innerHTML = editablePeople.length ? editablePeople.map((person) => {
     const assignmentCount = tasksForPerson(person).length;
     const idle = personIsIdleInView(person, filteredTasks().filter(taskIntersectsView));
-    const locked = person.placeholder;
     return `
       <div class="admin-item" data-person-id="${escapeAttr(person.id)}">
         <div>
           <strong>${personChipHtml(person)}</strong>
-          <small>${locked ? "系统占位" : `${assignmentCount} 项关联任务 · ${idle ? "当前窗口空闲" : "当前窗口有排期"}`}</small>
+          <small>${assignmentCount} 项关联任务 · ${idle ? "当前窗口空闲" : "当前窗口有排期"}</small>
         </div>
         <span class="ops">
-          <button data-admin="edit-person" ${locked ? "disabled" : ""}>编辑</button>
-          <button class="danger" data-admin="delete-person" ${locked ? "disabled" : ""}>删除</button>
+          <button data-admin="edit-person">编辑</button>
+          <button class="danger" data-admin="delete-person">删除</button>
         </span>
       </div>
     `;
-  }).join("");
+  }).join("") : `<p class="empty">暂无真实人员。系统占位人力不会在这里展示。</p>`;
   document.querySelectorAll("[data-admin]").forEach((button) => button.addEventListener("click", () => handleAdminAction(button).catch(showError)));
 }
 
