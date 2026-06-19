@@ -60,7 +60,9 @@ export default {
         if (!payload.state) return errorResponse(request, env, 400, "state is required");
         await authorizeStateChange(env, user, payload.state);
         await replaceState(env, payload.state);
-        if (payload.prCatalog) await setJsonMeta(env, "prCatalog", payload.prCatalog);
+        if (payload.prCatalog && user.role === "admin") await setJsonMeta(env, "prCatalog", payload.prCatalog);
+        const catalog = await getJsonMeta(env, "prCatalog", emptyPrCatalog());
+        await syncTaskDeliveryRulesFromCatalog(env, catalog.items || []);
         const entry = payload.auditEntry || {
           ts: nowIso(),
           action: "state.save",
@@ -574,25 +576,46 @@ async function authorizeStateChange(env, user, nextState) {
   const current = await exportState(env);
   const currentTasks = new Map((current.tasks || []).map((task) => [task.id, task]));
   const nextTasks = new Map((nextState.tasks || []).map((task) => [task.id, task]));
-  if ((current.groups || []).length !== (nextState.groups || []).length
-    || (current.specials || []).length !== (nextState.specials || []).length
-    || (current.people || []).length !== (nextState.people || []).length
-    || currentTasks.size !== nextTasks.size) {
+  assertSameDeveloperReadonlyCollection("project", current.project || DEFAULT_PROJECT, nextState.project || DEFAULT_PROJECT);
+  assertSameDeveloperReadonlyCollection("repoScan", current.repoScan || {}, nextState.repoScan || {});
+  assertSameDeveloperReadonlyCollection("groups", current.groups || [], nextState.groups || []);
+  assertSameDeveloperReadonlyCollection("specials", current.specials || [], nextState.specials || []);
+  assertSameDeveloperReadonlyCollection("people", current.people || [], nextState.people || []);
+  if (currentTasks.size !== nextTasks.size) {
     throw withStatus(403, "developer can only update existing own tasks");
   }
   for (const [id, nextTask] of nextTasks.entries()) {
     const oldTask = currentTasks.get(id);
     if (!oldTask) throw withStatus(403, "developer can only update existing own tasks");
-    if (JSON.stringify(normalizeTaskForCompare(oldTask)) === JSON.stringify(normalizeTaskForCompare(nextTask))) continue;
+    const changedFields = developerChangedTaskFields(oldTask, nextTask);
+    if (!changedFields.length) continue;
     if (!taskBelongsToUser(oldTask, user) && !taskBelongsToUser(nextTask, user)) {
       throw withStatus(403, `no permission to update task: ${nextTask.title || id}`);
+    }
+    const forbiddenFields = changedFields.filter((field) => !DEVELOPER_DELIVERY_FIELDS.has(field));
+    if (forbiddenFields.length) {
+      throw withStatus(403, `developer can only update PR/test report fields: ${forbiddenFields.join(", ")}`);
     }
   }
 }
 
-function normalizeTaskForCompare(task) {
-  const { updated_at, ...rest } = task;
-  return rest;
+const DEVELOPER_DELIVERY_FIELDS = new Set(["pr_link", "test_report"]);
+const DEVELOPER_DERIVED_FIELDS = new Set(["risk", "status", "updated_at"]);
+
+function assertSameDeveloperReadonlyCollection(name, current, next) {
+  if (!sameJson(current, next)) throw withStatus(403, `developer cannot update ${name}`);
+}
+
+function developerChangedTaskFields(oldTask, nextTask) {
+  const fields = new Set([...Object.keys(oldTask || {}), ...Object.keys(nextTask || {})]);
+  return [...fields].filter((field) => {
+    if (DEVELOPER_DERIVED_FIELDS.has(field)) return false;
+    return !sameJson(oldTask?.[field], nextTask?.[field]);
+  });
+}
+
+function sameJson(a, b) {
+  return JSON.stringify(a === undefined ? null : a) === JSON.stringify(b === undefined ? null : b);
 }
 
 function taskBelongsToUser(task, user) {

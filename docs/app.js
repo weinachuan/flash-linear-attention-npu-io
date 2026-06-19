@@ -280,6 +280,10 @@ function canEditTask(task) {
   return Boolean(ownerName && taskOwnerNames(task).includes(ownerName));
 }
 
+function canScheduleTask(task) {
+  return Boolean(task && isAdminEditMode());
+}
+
 function developerOwnedOperatorIds() {
   const ownedTasks = (state.data?.tasks || []).filter((task) => {
     const ownerName = currentDeveloperOwnerName();
@@ -936,7 +940,7 @@ function renderGantt(tasks) {
   document.querySelectorAll(".bar").forEach((bar) => {
     bar.addEventListener("dblclick", () => {
       const task = state.data.tasks.find((item) => item.id === bar.dataset.taskId);
-      if (state.token && task && canEditTask(task)) splitTask(bar.dataset.taskId);
+      if (canScheduleTask(task)) splitTask(bar.dataset.taskId);
     });
     attachGanttDrag(bar);
   });
@@ -1588,8 +1592,29 @@ function readOnlyTaskRowHtml(task, className = "") {
 }
 
 function taskActionButtonsHtml() {
+  if (isDeveloperEditMode()) {
+    return `<span class="ops"><button data-action="save">保存</button></span>`;
+  }
   const deleteButton = isAdminEditMode() ? `<button class="danger" data-action="delete">删除</button>` : "";
   return `<span class="ops"><button data-action="save">保存</button><button data-action="split">切分</button>${deleteButton}</span>`;
+}
+
+function developerTaskRowHtml(task) {
+  return `
+    <tr data-task-id="${escapeAttr(task.id)}" class="${state.dirtyTaskIds.has(task.id) ? "dirty" : ""}">
+      <td><span class="tag ${riskClass(task.risk)}">${escapeHtml(task.risk)}</span></td>
+      <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
+      <td>${escapeHtml(displayTaskTitle(task))}</td>
+      <td>${ownerChipsHtml(task)}</td>
+      <td>${escapeHtml(groupTitle(task.group_id))}</td>
+      <td>${escapeHtml(specialTitle(task.special_id))}</td>
+      <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
+      <td>${prLinkEditorHtml(task)}</td>
+      <td><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
+      <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
+      <td class="edit-only">${taskActionButtonsHtml(task)}</td>
+    </tr>
+  `;
 }
 
 function renderRows(tasks) {
@@ -1600,6 +1625,9 @@ function renderRows(tasks) {
     }
     if (!canEditTask(task)) {
       return readOnlyTaskRowHtml(task, "readonly-related");
+    }
+    if (isDeveloperEditMode()) {
+      return developerTaskRowHtml(task);
     }
     return `
       <tr data-task-id="${escapeAttr(task.id)}" class="${state.dirtyTaskIds.has(task.id) ? "dirty" : ""}">
@@ -1633,14 +1661,13 @@ function attachGanttDrag(bar) {
   if (bar.dataset.autoExtended === "true") return;
   bar.addEventListener("mousemove", (event) => {
     const task = state.data.tasks.find((item) => item.id === bar.dataset.taskId);
-    if (!state.token || !task || !canEditTask(task) || bar.classList.contains("dragging")) return;
+    if (!canScheduleTask(task) || bar.classList.contains("dragging")) return;
     bar.style.cursor = event.offsetX <= 8 || bar.offsetWidth - event.offsetX <= 8 ? "ew-resize" : "grab";
   });
   bar.addEventListener("pointerdown", (event) => {
-    if (!state.token) return;
-    event.preventDefault();
     const task = state.data.tasks.find((item) => item.id === bar.dataset.taskId);
-    if (!task || !canEditTask(task)) return;
+    if (!canScheduleTask(task)) return;
+    event.preventDefault();
     rememberTaskBaseline(task.id);
     const segments = task.segments?.length ? task.segments : [{ id: `seg-${crypto.randomUUID().slice(0, 10)}`, start_date: task.start_date, end_date: task.end_date, reason: "", position: 0 }];
     task.segments = segments;
@@ -1763,13 +1790,17 @@ async function handleTaskAction(button) {
   if (!task) return;
   const action = button.dataset.action;
   if (!canEditTask(task)) {
-    alert("当前账号只能编辑自己负责的任务；同算子关联任务仅供查看。");
+    alert("当前账号只能给自己负责的任务提交 PR/转测报告链接；同算子关联任务仅供查看。");
     return;
   }
   if (action === "save") {
     await saveTaskRows([row]);
   }
   if (action === "split") {
+    if (!canScheduleTask(task)) {
+      alert("普通开发账号不能调整排期。");
+      return;
+    }
     await splitTask(task.id);
   }
   if (action === "delete") {
@@ -2039,11 +2070,12 @@ async function saveRepository(summary, action, entity, id, detail = {}) {
   const entry = { ts: nowIso(), action, entity, id, summary, detail, source: WORKER_API_BASE ? "cloudflare-d1" : "github-pages" };
   if (WORKER_API_BASE) {
     $("#editStatus").textContent = "正在写入 Cloudflare D1...";
-    await workerPost("/api/save", {
+    const result = await workerPost("/api/save", {
       state: state.data,
       auditEntry: entry,
       prCatalog: state.prCatalog,
     });
+    if (result.state) state.data = result.state;
     state.audit.push(entry);
     state.dirtyTaskIds.clear();
     state.taskBaselines.clear();
@@ -2075,7 +2107,7 @@ function updateEditStatus() {
   const dirtyCount = state.dirtyTaskIds.size;
   const target = WORKER_API_BASE ? "Cloudflare D1" : "GitHub 仓库";
   const user = WORKER_API_BASE && state.authUser ? `（${state.authUser.displayName || state.authUser.username} / ${state.authUser.role}）` : "";
-  const scope = isDeveloperEditMode() ? "仅显示自己任务及同算子关联任务；关联任务只读" : "甘特条可拖动，边缘可拉伸";
+  const scope = isDeveloperEditMode() ? "仅显示自己任务及同算子关联任务；只能提交自己任务的 PR/转测报告链接" : "甘特条可拖动，边缘可拉伸";
   $("#editStatus").textContent = dirtyCount ? `编辑模式${user}：${dirtyCount} 项待保存` : `编辑模式${user}：${scope}；保存会写入 ${target}`;
 }
 
@@ -2164,7 +2196,7 @@ async function loginWorker() {
   state.authUser = data.user;
   sessionStorage.setItem("flashWorkerAuthToken", data.token);
   $("#loginPassword").value = "";
-  render();
+  await load();
 }
 
 function logout() {
