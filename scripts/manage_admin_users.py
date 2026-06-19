@@ -68,7 +68,7 @@ def initial_password() -> str:
 def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["username", "password", "role", "status", "note"])
+        writer = csv.DictWriter(handle, fieldnames=["username", "password", "display_name", "owner_name", "role", "status"])
         writer.writeheader()
         writer.writerows(rows)
 
@@ -120,7 +120,7 @@ def main() -> int:
     parser.add_argument("--token", default=os.environ.get("FLASH_IO_ADMIN_TOKEN") or os.environ.get("ADMIN_TOKEN"))
     parser.add_argument("--admin", action="append", default=[], help="账号不存在则创建为管理员；存在则只升级角色。")
     parser.add_argument("--promote", action="append", default=[], help="仅升级已有账号为管理员，不重置密码。")
-    parser.add_argument("--out", default=str(ROOT / "generated" / "admin-account-updates.csv"))
+    parser.add_argument("--out", default=str(ROOT / "generated" / "initial-accounts.csv"))
     args = parser.parse_args()
 
     if not args.api:
@@ -140,23 +140,51 @@ def main() -> int:
         user = find_user(users, name)
         if user:
             promote_user(args.api, args.token, user, name)
-            rows.append({"username": name, "password": "", "role": "admin", "status": "promoted-existing", "note": "密码未重置"})
+            rows.append({
+                "username": name,
+                "password": "",
+                "display_name": user.get("displayName") or user.get("display_name") or name,
+                "owner_name": user.get("ownerName") or user.get("owner_name") or name,
+                "role": "admin",
+                "status": "promoted-existing",
+            })
             promoted += 1
         else:
             password = initial_password()
             create_admin(args.api, args.token, name, password)
-            rows.append({"username": name, "password": password, "role": "admin", "status": "created", "note": "初始密码仅在本文件可见"})
+            rows.append({
+                "username": name,
+                "password": password,
+                "display_name": name,
+                "owner_name": name,
+                "role": "admin",
+                "status": "created",
+            })
             created += 1
 
     users = request_json(args.api, "/api/users", args.token)
     for name in [normalize_name(item) for item in args.promote if normalize_name(item)]:
         user = find_user(users, name)
         if not user:
-            rows.append({"username": name, "password": "", "role": "admin", "status": "missing", "note": "未找到账号，未创建"})
+            rows.append({
+                "username": name,
+                "password": "",
+                "display_name": name,
+                "owner_name": name,
+                "role": "admin",
+                "status": "missing",
+            })
             missing += 1
             continue
         promote_user(args.api, args.token, user, name)
-        rows.append({"username": name, "password": "", "role": "admin", "status": "promoted-existing", "note": "密码未重置"})
+        rows.append({
+            "username": name,
+            "password": "",
+            "display_name": user.get("displayName") or user.get("display_name") or name,
+            "owner_name": user.get("ownerName") or user.get("owner_name") or name,
+            "role": "admin",
+            "status": "promoted-existing",
+        })
         promoted += 1
 
     out_path = Path(args.out)

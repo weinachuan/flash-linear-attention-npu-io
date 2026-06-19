@@ -37,7 +37,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p generated
-          args=(--out generated/admin-account-updates.csv)
+          args=(--out generated/initial-accounts.csv)
           IFS=',' read -ra admin_names <<< "$ADMINS"
           for name in "${admin_names[@]}"; do
             trimmed="$(echo "$name" | xargs)"
@@ -54,9 +54,9 @@ jobs:
           done
           python scripts/manage_admin_users.py "${args[@]}"
 
-      - name: Upload generated admin credentials
+      - name: Upload generated initial accounts
         uses: actions/upload-artifact@v4
         with:
-          name: admin-account-updates
-          path: generated/admin-account-updates.csv
+          name: initial-accounts
+          path: generated/initial-accounts.csv
           retention-days: 7
