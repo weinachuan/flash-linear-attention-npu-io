@@ -233,7 +233,7 @@ function formatAuditSegments(value) {
 }
 
 function filteredTasks() {
-  const tasks = state.data?.tasks || [];
+  const tasks = visibleTasksForCurrentUser();
   return tasks.filter((task) => {
     const q = state.filters.q.toLowerCase();
     const ownerNames = taskOwnerNames(task);
@@ -254,8 +254,43 @@ function ownerFilterValues() {
   return owner ? [owner] : [];
 }
 
+function visibleTasksForCurrentUser() {
+  const tasks = state.data?.tasks || [];
+  if (!isDeveloperEditMode()) return tasks;
+  const relatedOperatorIds = developerOwnedOperatorIds();
+  return tasks.filter((task) => canEditTask(task) || taskOperators(task).some((operator) => relatedOperatorIds.has(operator.id)));
+}
+
+function isDeveloperEditMode() {
+  return Boolean(WORKER_API_BASE && state.token && state.authUser?.role === "developer");
+}
+
+function isAdminEditMode() {
+  return Boolean(state.token && (!WORKER_API_BASE || state.authUser?.role === "admin"));
+}
+
+function currentDeveloperOwnerName() {
+  if (!state.authUser) return "";
+  return normalizeOwnerName(state.authUser.ownerName || state.authUser.displayName || state.authUser.username);
+}
+
+function canEditTask(task) {
+  if (!isDeveloperEditMode()) return Boolean(state.token);
+  const ownerName = currentDeveloperOwnerName();
+  return Boolean(ownerName && taskOwnerNames(task).includes(ownerName));
+}
+
+function developerOwnedOperatorIds() {
+  const ownedTasks = (state.data?.tasks || []).filter((task) => {
+    const ownerName = currentDeveloperOwnerName();
+    return ownerName && taskOwnerNames(task).includes(ownerName);
+  });
+  return new Set(ownedTasks.flatMap((task) => taskOperators(task).map((operator) => operator.id)));
+}
+
 function render(options = {}) {
   const includeTableFilters = options.includeTableFilters !== false;
+  const scoped = visibleTasksForCurrentUser();
   const filtered = filteredTasks();
   const all = state.data.tasks || [];
   ensureDefaultTimelineView();
@@ -265,7 +300,10 @@ function render(options = {}) {
   const high = tasks.filter((task) => task.risk === "高").length;
   const medium = tasks.filter((task) => task.risk === "中").length;
   const done = tasks.filter((task) => task.status === "done").length;
-  $("#meta").textContent = `仓库数据更新时间：${state.data.generatedAt || "未知"} · 窗口 ${state.view.start} ~ ${state.view.end} · 当前显示 ${tasks.length}/${filtered.length}/${all.length} 项`;
+  const scopeText = scoped.length === all.length
+    ? `${tasks.length}/${filtered.length}/${all.length}`
+    : `${tasks.length}/${filtered.length}/${scoped.length}（权限范围，全量 ${all.length}）`;
+  $("#meta").textContent = `仓库数据更新时间：${state.data.generatedAt || "未知"} · 窗口 ${state.view.start} ~ ${state.view.end} · 当前显示 ${scopeText} 项`;
   $("#summary").innerHTML = [
     ["总任务", tasks.length],
     ["高风险", high],
@@ -274,6 +312,8 @@ function render(options = {}) {
   ].map(([label, value]) => `<div class="metric"><small>${label}</small><strong>${value}</strong></div>`).join("");
   const workerMode = Boolean(WORKER_API_BASE);
   document.body.classList.toggle("editing", Boolean(state.token));
+  document.body.classList.toggle("developer-editing", isDeveloperEditMode());
+  document.body.classList.toggle("admin-editing", isAdminEditMode());
   document.body.classList.toggle("worker-mode", workerMode);
   $("#token").value = state.token ? "********" : "";
   $(".token-box").classList.toggle("hidden", workerMode);
@@ -309,13 +349,18 @@ function renderPlanTabs() {
 }
 
 function renderTableFilters() {
+  const scopedTasks = visibleTasksForCurrentUser();
+  const visibleGroupIds = new Set(scopedTasks.map((task) => task.group_id).filter(Boolean));
+  const visibleSpecialIds = new Set(scopedTasks.map((task) => task.special_id).filter(Boolean));
+  const groups = isDeveloperEditMode() ? state.data.groups.filter((group) => visibleGroupIds.has(group.id)) : state.data.groups;
+  const specials = isDeveloperEditMode() ? state.data.specials.filter((special) => visibleSpecialIds.has(special.id)) : state.data.specials;
   const columns = [
     tableFilterSelect("risk", [["", "全部"], ["高", "高"], ["中", "中"], ["低", "低"]]),
     tableFilterSelect("priority", [["", "全部"], ["P0", "P0"], ["P1", "P1"], ["P2", "P2"]]),
     `<th><input data-table-filter="q" type="search" placeholder="筛事项" value="${escapeAttr(state.filters.q)}"></th>`,
     ownerFilterDropdown(),
-    tableFilterSelect("group_id", [["", "全部"], ...state.data.groups.map((group) => [group.id, group.title])]),
-    tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...state.data.specials.map((special) => [special.id, special.title])]),
+    tableFilterSelect("group_id", [["", "全部"], ...groups.map((group) => [group.id, group.title])]),
+    tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...specials.map((special) => [special.id, special.title])]),
     `<th></th>`,
     `<th></th>`,
     `<th></th>`,
@@ -425,10 +470,14 @@ function uniqueTaskValues(field) {
 }
 
 function ownerFilterOptions() {
+  const tasks = visibleTasksForCurrentUser();
+  const visiblePeople = isDeveloperEditMode()
+    ? (state.data.people || []).filter((person) => tasks.some((task) => taskOwnerNames(task).includes(person.name)))
+    : (state.data.people || []);
   return uniqueStrings([
-    ...(state.data.people || []).map((person) => person.name),
-    ...(state.data.tasks || []).flatMap((task) => taskOwnerNames(task)),
-    ...operatorOwnerRuleNames(),
+    ...visiblePeople.map((person) => person.name),
+    ...tasks.flatMap((task) => taskOwnerNames(task)),
+    ...(isDeveloperEditMode() ? [] : operatorOwnerRuleNames()),
   ])
     .filter(isSelectableOwnerName)
     .sort((a, b) => a.localeCompare(b, "zh-CN"))
@@ -886,7 +935,8 @@ function renderGantt(tasks) {
   }).join("");
   document.querySelectorAll(".bar").forEach((bar) => {
     bar.addEventListener("dblclick", () => {
-      if (state.token) splitTask(bar.dataset.taskId);
+      const task = state.data.tasks.find((item) => item.id === bar.dataset.taskId);
+      if (state.token && task && canEditTask(task)) splitTask(bar.dataset.taskId);
     });
     attachGanttDrag(bar);
   });
@@ -1181,8 +1231,9 @@ function peopleForTasks(tasks) {
       .filter((person) => selected.has(person.name))
       .sort(comparePeople);
   }
+  const basePeople = isDeveloperEditMode() ? [] : (state.data.people || []);
   const people = uniqueBy([
-    ...(state.data.people || []),
+    ...basePeople,
     ...tasks.flatMap(taskPeople),
   ], "id");
   return people.sort((a, b) => comparePeopleForView(a, b, tasks));
@@ -1518,25 +1569,37 @@ function appendPrFromSearch(control) {
   markTaskDirty(input);
 }
 
+function readOnlyTaskRowHtml(task, className = "") {
+  return `
+    <tr class="${escapeAttr(className)}">
+      <td><span class="tag ${riskClass(task.risk)}">${escapeHtml(task.risk)}</span></td>
+      <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
+      <td>${escapeHtml(displayTaskTitle(task))}</td>
+      <td>${ownerChipsHtml(task)}</td>
+      <td>${escapeHtml(groupTitle(task.group_id))}</td>
+      <td>${escapeHtml(specialTitle(task.special_id))}</td>
+      <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
+      <td>${linkListHtml(task.pr_link, "PR")}</td>
+      <td>${linkListHtml(task.test_report, "报告")}</td>
+      <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
+      <td class="edit-only"></td>
+    </tr>
+  `;
+}
+
+function taskActionButtonsHtml() {
+  const deleteButton = isAdminEditMode() ? `<button class="danger" data-action="delete">删除</button>` : "";
+  return `<span class="ops"><button data-action="save">保存</button><button data-action="split">切分</button>${deleteButton}</span>`;
+}
+
 function renderRows(tasks) {
   renderPrCatalogDatalist();
   $("#rows").innerHTML = tasks.map((task) => {
     if (!state.token) {
-      return `
-        <tr>
-          <td><span class="tag ${riskClass(task.risk)}">${escapeHtml(task.risk)}</span></td>
-          <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
-          <td>${escapeHtml(displayTaskTitle(task))}</td>
-          <td>${ownerChipsHtml(task)}</td>
-          <td>${escapeHtml(groupTitle(task.group_id))}</td>
-          <td>${escapeHtml(specialTitle(task.special_id))}</td>
-          <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
-          <td>${linkListHtml(task.pr_link, "PR")}</td>
-          <td>${linkListHtml(task.test_report, "报告")}</td>
-          <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
-          <td class="edit-only"></td>
-        </tr>
-      `;
+      return readOnlyTaskRowHtml(task);
+    }
+    if (!canEditTask(task)) {
+      return readOnlyTaskRowHtml(task, "readonly-related");
     }
     return `
       <tr data-task-id="${escapeAttr(task.id)}" class="${state.dirtyTaskIds.has(task.id) ? "dirty" : ""}">
@@ -1550,7 +1613,7 @@ function renderRows(tasks) {
         <td>${prLinkEditorHtml(task)}</td>
         <td><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
         <td>${selectHtml("status", STATUS_OPTIONS, task.status)}</td>
-        <td class="edit-only"><span class="ops"><button data-action="save">保存</button><button data-action="split">切分</button><button class="danger" data-action="delete">删除</button></span></td>
+        <td class="edit-only">${taskActionButtonsHtml(task)}</td>
       </tr>
     `;
   }).join("");
@@ -1569,14 +1632,15 @@ function renderRows(tasks) {
 function attachGanttDrag(bar) {
   if (bar.dataset.autoExtended === "true") return;
   bar.addEventListener("mousemove", (event) => {
-    if (!state.token || bar.classList.contains("dragging")) return;
+    const task = state.data.tasks.find((item) => item.id === bar.dataset.taskId);
+    if (!state.token || !task || !canEditTask(task) || bar.classList.contains("dragging")) return;
     bar.style.cursor = event.offsetX <= 8 || bar.offsetWidth - event.offsetX <= 8 ? "ew-resize" : "grab";
   });
   bar.addEventListener("pointerdown", (event) => {
     if (!state.token) return;
     event.preventDefault();
     const task = state.data.tasks.find((item) => item.id === bar.dataset.taskId);
-    if (!task) return;
+    if (!task || !canEditTask(task)) return;
     rememberTaskBaseline(task.id);
     const segments = task.segments?.length ? task.segments : [{ id: `seg-${crypto.randomUUID().slice(0, 10)}`, start_date: task.start_date, end_date: task.end_date, reason: "", position: 0 }];
     task.segments = segments;
@@ -1643,7 +1707,7 @@ function paintBar(bar, startOffset, endOffset) {
 }
 
 function renderAdmin() {
-  if (!state.token) return;
+  if (!isAdminEditMode()) return;
   $("#groupAdmin").innerHTML = state.data.groups.map((group) => `
     <div class="admin-item" data-group-id="${escapeAttr(group.id)}">
       <div><strong>${escapeHtml(group.title)}</strong><small>${escapeHtml(group.start_date)} ~ ${escapeHtml(group.end_date)}</small></div>
@@ -1698,6 +1762,10 @@ async function handleTaskAction(button) {
   const task = state.data.tasks.find((item) => item.id === taskId);
   if (!task) return;
   const action = button.dataset.action;
+  if (!canEditTask(task)) {
+    alert("当前账号只能编辑自己负责的任务；同算子关联任务仅供查看。");
+    return;
+  }
   if (action === "save") {
     await saveTaskRows([row]);
   }
@@ -1705,6 +1773,10 @@ async function handleTaskAction(button) {
     await splitTask(task.id);
   }
   if (action === "delete") {
+    if (!isAdminEditMode()) {
+      alert("普通开发账号不能删除任务。");
+      return;
+    }
     if (!confirm(`确认删除任务：${task.title}？`)) return;
     state.data.tasks = state.data.tasks.filter((item) => item.id !== task.id);
     await saveRepository(`删除任务：${task.title}`, "task.delete", "task", task.id, { title: task.title });
@@ -2003,7 +2075,8 @@ function updateEditStatus() {
   const dirtyCount = state.dirtyTaskIds.size;
   const target = WORKER_API_BASE ? "Cloudflare D1" : "GitHub 仓库";
   const user = WORKER_API_BASE && state.authUser ? `（${state.authUser.displayName || state.authUser.username} / ${state.authUser.role}）` : "";
-  $("#editStatus").textContent = dirtyCount ? `编辑模式${user}：${dirtyCount} 项待保存` : `编辑模式${user}：甘特条可拖动，边缘可拉伸；保存会写入 ${target}`;
+  const scope = isDeveloperEditMode() ? "仅显示自己任务及同算子关联任务；关联任务只读" : "甘特条可拖动，边缘可拉伸";
+  $("#editStatus").textContent = dirtyCount ? `编辑模式${user}：${dirtyCount} 项待保存` : `编辑模式${user}：${scope}；保存会写入 ${target}`;
 }
 
 async function commitFiles(files, message) {

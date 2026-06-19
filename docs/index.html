@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>flash-linear-attention-npu 项目看板</title>
-  <link rel="stylesheet" href="./styles.css?v=20260619-task-header-mask">
+  <link rel="stylesheet" href="./styles.css?v=20260619-developer-scope">
 </head>
 <body>
   <main class="shell">
@@ -32,11 +32,11 @@
       <label>状态 <select id="status"><option value="">全部</option><option value="todo">todo</option><option value="doing">doing</option><option value="blocked">Pending</option><option value="delayed">delay</option><option value="done">done</option></select></label>
       <button id="refresh" type="button">刷新仓库数据</button>
       <button id="clearFilters" type="button">清空筛选</button>
-      <button id="addTask" type="button" class="edit-only">新增任务</button>
+      <button id="addTask" type="button" class="edit-only admin-only">新增任务</button>
       <button id="saveAll" type="button" class="edit-only primary">保存全部</button>
-      <button id="addGroup" type="button" class="edit-only">新增分组</button>
-      <button id="addSpecial" type="button" class="edit-only">新增专项</button>
-      <button id="addPerson" type="button" class="edit-only">新增人员</button>
+      <button id="addGroup" type="button" class="edit-only admin-only">新增分组</button>
+      <button id="addSpecial" type="button" class="edit-only admin-only">新增专项</button>
+      <button id="addPerson" type="button" class="edit-only admin-only">新增人员</button>
       <span id="editStatus" class="edit-status">只读模式</span>
     </section>
 
@@ -120,7 +120,7 @@
       </div>
     </section>
 
-    <section class="panel edit-only">
+    <section class="panel edit-only admin-only">
       <h2>分组 / 专项管理</h2>
       <div class="admin-grid">
         <div>
@@ -143,7 +143,7 @@
       <div id="audit" class="audit"></div>
     </section>
   </main>
-  <script src="./config.js?v=20260619-task-header-mask"></script>
-  <script src="./app.js?v=20260619-task-header-mask"></script>
+  <script src="./config.js?v=20260619-developer-scope"></script>
+  <script src="./app.js?v=20260619-developer-scope"></script>
 </body>
 </html>
