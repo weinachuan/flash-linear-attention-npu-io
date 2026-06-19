@@ -48,7 +48,7 @@ https://weinachuan.github.io/flash-linear-attention-npu-io/
 Cloudflare 方案用于把 GitHub Pages 前端接到公网后端数据库。部署后：
 
 - 前端仍可放在 GitHub Pages。
-- Worker 提供 `/api/export`、`/api/save`、`/api/audit`、`/api/pr-catalog`。
+- Worker 提供 `/api/export`、`/api/version`、`/api/tasks/:id`、`/api/groups/:id`、`/api/specials/:id`、`/api/people/:id`、`/api/save`、`/api/audit`、`/api/pr-catalog`。
 - D1 存任务、人员、分组、专项、甘特分段和审计日志。
 - `docs/config.js` 配置 Worker URL 后，页面读写都会走 Cloudflare D1。
 
@@ -118,7 +118,7 @@ python .\scripts\create_cloudflare_user.py --api https://你的-worker-url --adm
 window.FLASH_IO_API_BASE = "https://你的-worker-url";
 ```
 
-提交并推送 `docs/config.js` 后，公开页面会从 Cloudflare D1 读取数据。编辑模式下使用账号密码登录，不再输入 GitHub token。
+提交并推送 `docs/config.js` 后，公开页面会从 Cloudflare D1 读取数据。编辑模式下使用账号密码登录，不再输入 GitHub token。日常编辑走字段级接口：任务变更走 `PATCH /api/tasks/:id`，新增/删除任务走 `POST/DELETE /api/tasks`，分组、专项、人员分别走自己的 `POST/PATCH/DELETE` 接口。`POST /api/save` 仅保留为导入、兼容和应急兜底入口。
 
 ### GitHub 到 Cloudflare 的快速部署链路
 
@@ -133,6 +133,31 @@ GitHub 仓库需要配置以下 Actions Secrets：
 - `CLOUDFLARE_ACCOUNT_ID`：Cloudflare 账号 ID。
 - `CLOUDFLARE_API_TOKEN`：Cloudflare API Token，不要写入仓库。
 - `FLASH_IO_ADMIN_TOKEN`：Worker 的 `ADMIN_TOKEN` 值，仅用于定时 PR 候选池同步和 D1 快照备份，不要写入仓库。
+
+### 人员账号初始化与改密
+
+可在 GitHub Actions 页面手动运行 `Initialize Cloudflare Users`，为 D1 人员表中的每个人生成开发账号：
+
+- 登录账号默认使用人员姓名。
+- 跳过 `待填写`、`待排人力`、`对应算子责任人` 等占位人员。
+- 初始密码写入 artifact `initial-person-accounts`，保留 7 天，不提交到仓库。
+- `reset_existing=false` 时只补齐缺失账号；`reset_existing=true` 时会重置已有人员账号密码。
+
+本地也可以直接运行：
+
+```powershell
+python .\scripts\bootstrap_cloudflare_users.py --api https://你的-worker-url --token 你的-ADMIN_TOKEN --out .\generated\initial-accounts.csv --reset-existing
+```
+
+用户登录后可以点击“修改密码”。页面会要求输入旧密码、新密码、再次确认新密码，并在最终确认弹窗确认后才提交到后端生效。
+
+### 页面实时同步
+
+前端会每 3 秒查询 `/api/version`：
+
+- 如果后台数据版本变化，且当前页面没有未保存修改，会自动重新加载 D1 数据。
+- 如果当前页面有未保存修改，不会自动覆盖本地编辑，只会提示“后台已有新数据”。
+- 这个同步是近实时轮询，不需要额外部署 WebSocket 或 Durable Objects。
 
 日常修改路径：
 
@@ -235,8 +260,25 @@ Cloudflare Worker API：
 - `GET /api/health`
 - `GET /api/export`
 - `GET /api/state`
+- `GET /api/version`
 - `GET /api/audit`
+- `GET /api/audit/export`
 - `GET /api/pr-catalog`
+- `POST /api/tasks`
+- `PATCH /api/tasks/{id}`
+- `DELETE /api/tasks/{id}`
+- `POST /api/groups`
+- `PATCH /api/groups/{id}`
+- `DELETE /api/groups/{id}`
+- `POST /api/specials`
+- `PATCH /api/specials/{id}`
+- `DELETE /api/specials/{id}`
+- `POST /api/people`
+- `PATCH /api/people/{id}`
+- `DELETE /api/people/{id}`
+- `POST /api/me/password`
+- `GET /api/users`
+- `POST /api/users`
 - `POST /api/save`
 - `POST /api/import`
 

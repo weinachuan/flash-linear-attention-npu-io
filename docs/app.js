@@ -77,6 +77,10 @@ const state = {
   audit: [],
   token: sessionStorage.getItem(WORKER_API_BASE ? "flashWorkerAuthToken" : "flashPagesToken") || "",
   authUser: null,
+  serverVersion: "",
+  pendingRemoteVersion: "",
+  realtimeTimer: null,
+  loading: false,
   dirtyTaskIds: new Set(),
   taskBaselines: new Map(),
   axis: { start: "", end: "", total: 1 },
@@ -93,41 +97,49 @@ const state = {
 const $ = (selector) => document.querySelector(selector);
 
 async function load() {
+  if (state.loading) return;
+  state.loading = true;
   const stamp = Date.now();
-  if (WORKER_API_BASE) {
-    const [data, audit, prCatalog, me] = await Promise.all([
-      workerGet("/api/export"),
-      workerGet("/api/audit?limit=10").catch(() => []),
-      workerGet("/api/pr-catalog").catch(() => ({ generatedAt: "", sourceRepo: "", total: 0, items: [] })),
-      state.token ? workerGet("/api/me").catch(() => null) : Promise.resolve(null),
-    ]);
-    if (state.token && !me) {
-      state.token = "";
-      state.authUser = null;
-      sessionStorage.removeItem("flashWorkerAuthToken");
-    } else if (me?.user) {
-      state.authUser = me.user;
+  try {
+    if (WORKER_API_BASE) {
+      const [data, audit, prCatalog, me] = await Promise.all([
+        workerGet("/api/export"),
+        workerGet("/api/audit?limit=10").catch(() => []),
+        workerGet("/api/pr-catalog").catch(() => ({ generatedAt: "", sourceRepo: "", total: 0, items: [] })),
+        state.token ? workerGet("/api/me").catch(() => null) : Promise.resolve(null),
+      ]);
+      if (state.token && !me) {
+        state.token = "";
+        state.authUser = null;
+        sessionStorage.removeItem("flashWorkerAuthToken");
+      } else if (me?.user) {
+        state.authUser = me.user;
+      }
+      state.data = data;
+      state.serverVersion = data.version || data.generatedAt || "";
+      state.pendingRemoteVersion = "";
+      state.audit = audit;
+      state.prCatalog = prCatalog || { generatedAt: "", sourceRepo: "", total: 0, items: [] };
+      ensurePeopleCatalog();
+      syncAllTaskDeliveryRules();
+      render();
+      return;
     }
-    state.data = data;
-    state.audit = audit;
-    state.prCatalog = prCatalog || { generatedAt: "", sourceRepo: "", total: 0, items: [] };
+    const [dataRes, auditRes, prCatalogRes] = await Promise.all([
+      fetch(`./project-state.json?v=${stamp}`),
+      fetch(`./audit-log.jsonl?v=${stamp}`).catch(() => null),
+      fetch(`./pr-catalog.json?v=${stamp}`).catch(() => null),
+    ]);
+    if (!dataRes.ok) throw new Error("未读取到 project-state.json");
+    state.data = await dataRes.json();
+    state.audit = auditRes && auditRes.ok ? parseAudit(await auditRes.text()) : [];
+    state.prCatalog = prCatalogRes && prCatalogRes.ok ? await prCatalogRes.json() : { generatedAt: "", sourceRepo: "", total: 0, items: [] };
     ensurePeopleCatalog();
     syncAllTaskDeliveryRules();
     render();
-    return;
+  } finally {
+    state.loading = false;
   }
-  const [dataRes, auditRes, prCatalogRes] = await Promise.all([
-    fetch(`./project-state.json?v=${stamp}`),
-    fetch(`./audit-log.jsonl?v=${stamp}`).catch(() => null),
-    fetch(`./pr-catalog.json?v=${stamp}`).catch(() => null),
-  ]);
-  if (!dataRes.ok) throw new Error("未读取到 project-state.json");
-  state.data = await dataRes.json();
-  state.audit = auditRes && auditRes.ok ? parseAudit(await auditRes.text()) : [];
-  state.prCatalog = prCatalogRes && prCatalogRes.ok ? await prCatalogRes.json() : { generatedAt: "", sourceRepo: "", total: 0, items: [] };
-  ensurePeopleCatalog();
-  syncAllTaskDeliveryRules();
-  render();
 }
 
 function parseAudit(text) {
@@ -323,6 +335,7 @@ function render(options = {}) {
   $(".token-box").classList.toggle("hidden", workerMode);
   $("#workerLogin").classList.toggle("hidden", !workerMode || Boolean(state.token));
   $("#logout").classList.toggle("hidden", !state.token);
+  $("#changePassword").classList.toggle("hidden", !workerMode || !state.token || !state.authUser || state.authUser.id === "admin-token");
   $("#editMode").classList.toggle("hidden", Boolean(state.token) || workerMode);
   updateEditStatus();
   renderPlanTabs();
@@ -1810,6 +1823,14 @@ async function handleTaskAction(button) {
     }
     if (!confirm(`确认删除任务：${task.title}？`)) return;
     state.data.tasks = state.data.tasks.filter((item) => item.id !== task.id);
+    if (WORKER_API_BASE) {
+      const entry = cloudflareAuditEntry("task.delete", "task", task.id, `删除任务：${task.title}`, { title: task.title });
+      const result = await workerDelete(`/api/tasks/${encodeURIComponent(task.id)}`, { auditEntry: entry });
+      applyCloudflareMutationResult(result);
+      if (result.entry) state.audit.push(result.entry);
+      render();
+      return;
+    }
     await saveRepository(`删除任务：${task.title}`, "task.delete", "task", task.id, { title: task.title });
   }
 }
@@ -1896,7 +1917,41 @@ async function saveTaskRows(extraRows = []) {
   const summary = changes.length === 1 ? `更新任务：${changes[0].title}` : `批量更新任务：${changes.length}项`;
   const action = changes.length === 1 ? "task.update" : "task.batch_update";
   const id = changes.length === 1 ? changes[0].id : "batch";
+  if (WORKER_API_BASE) {
+    $("#editStatus").textContent = "正在按字段写入 Cloudflare D1...";
+    for (const change of changes) {
+      const task = state.data.tasks.find((item) => item.id === change.id);
+      if (!task) continue;
+      const entry = {
+        ts: nowIso(),
+        action: "task.patch",
+        entity: "task",
+        id: task.id,
+        summary: `更新任务：${change.title}`,
+        detail: { ids: [task.id], changes: [change] },
+        source: "cloudflare-d1",
+      };
+      const fields = taskPatchFieldsFromChange(task, change);
+      if (!Object.keys(fields).length) continue;
+      const result = await patchTask(task, fields, entry);
+      if (result.entry) state.audit.push(result.entry);
+    }
+    state.dirtyTaskIds.clear();
+    state.taskBaselines.clear();
+    $("#editStatus").textContent = "已按字段写入 Cloudflare D1";
+    render();
+    return;
+  }
   await saveRepository(summary, action, "task", id, { ids: changes.map((change) => change.id), changes });
+}
+
+function taskPatchFieldsFromChange(task, change) {
+  const fields = {};
+  Object.keys(change.changes || {}).forEach((field) => {
+    if (isDeveloperEditMode() && (field === "risk" || field === "status")) return;
+    fields[field] = field === "segments" ? (task.segments || []) : task[field];
+  });
+  return fields;
 }
 
 async function addTask() {
@@ -1928,12 +1983,22 @@ async function addTask() {
   };
   normalizeTaskSegments(task);
   state.data.tasks.push(task);
+  if (WORKER_API_BASE) {
+    const entry = cloudflareAuditEntry("task.create", "task", task.id, `新增任务：${title}`, { title });
+    const result = await workerPost("/api/tasks", { task, auditEntry: entry });
+    if (result.task) mergeTask(result.task);
+    applyCloudflareMutationResult(result);
+    if (result.entry) state.audit.push(result.entry);
+    render();
+    return;
+  }
   await saveRepository(`新增任务：${title}`, "task.create", "task", task.id, { title });
 }
 
 async function splitTask(taskId) {
   const task = state.data.tasks.find((item) => item.id === taskId);
   if (!task) return;
+  rememberTaskBaseline(task.id);
   const breakStart = prompt("中断开始日期 YYYY-MM-DD：", task.start_date);
   if (!breakStart) return;
   const breakEnd = prompt("中断结束日期 YYYY-MM-DD：", breakStart);
@@ -1957,6 +2022,26 @@ async function splitTask(taskId) {
   task.segments = next.map((segment, index) => ({ ...segment, reason: segment.reason || reason, position: index }));
   task.notes = reason;
   task.updated_at = nowIso();
+  syncTaskDatesFromSegments(task);
+  if (WORKER_API_BASE) {
+    const change = taskAuditChange(task);
+    const entry = {
+      ts: nowIso(),
+      action: "task.split",
+      entity: "task",
+      id: task.id,
+      summary: `切分任务：${task.title}`,
+      detail: { break_start: breakStart, break_end: breakEnd, reason, changes: change ? [change] : [] },
+      source: "cloudflare-d1",
+    };
+    const fields = change ? taskPatchFieldsFromChange(task, change) : { segments: task.segments, start_date: task.start_date, end_date: task.end_date, notes: task.notes };
+    const result = await patchTask(task, fields, entry);
+    if (result.entry) state.audit.push(result.entry);
+    state.dirtyTaskIds.delete(task.id);
+    state.taskBaselines.delete(task.id);
+    render();
+    return;
+  }
   await saveRepository(`切分任务：${task.title}`, "task.split", "task", task.id, { break_start: breakStart, break_end: breakEnd, reason });
 }
 
@@ -1967,6 +2052,15 @@ async function addGroup() {
   if (!due) return;
   const group = { id: `group-${crypto.randomUUID().slice(0, 10)}`, title, due_date: due, start_date: due, end_date: due, position: state.data.groups.length };
   state.data.groups.push(group);
+  if (WORKER_API_BASE) {
+    const entry = cloudflareAuditEntry("group.create", "group", group.id, `新增分组：${title}`, { title });
+    const result = await workerPost("/api/groups", { group, auditEntry: entry });
+    if (result.group) mergeEntityItem("groups", result.group);
+    applyCloudflareMutationResult(result);
+    if (result.entry) state.audit.push(result.entry);
+    render();
+    return;
+  }
   await saveRepository(`新增分组：${title}`, "group.create", "group", group.id, { title });
 }
 
@@ -1975,6 +2069,15 @@ async function addSpecial() {
   if (!title) return;
   const special = { id: `special-${crypto.randomUUID().slice(0, 10)}`, title, group_id: state.data.groups[0]?.id || "", position: state.data.specials.length, collapsed: 0 };
   state.data.specials.push(special);
+  if (WORKER_API_BASE) {
+    const entry = cloudflareAuditEntry("special.create", "special", special.id, `新增专项：${title}`, { title });
+    const result = await workerPost("/api/specials", { special, auditEntry: entry });
+    if (result.special) mergeEntityItem("specials", result.special);
+    applyCloudflareMutationResult(result);
+    if (result.entry) state.audit.push(result.entry);
+    render();
+    return;
+  }
   await saveRepository(`新增专项：${title}`, "special.create", "special", special.id, { title });
 }
 
@@ -1986,6 +2089,15 @@ async function addPerson() {
   const maxPosition = Math.max(-1, ...(state.data.people || []).map((person) => Number(person.position) || 0));
   const person = { id: `person-${crypto.randomUUID().slice(0, 10)}`, name, position: maxPosition + 1, placeholder: false };
   state.data.people.push(person);
+  if (WORKER_API_BASE) {
+    const entry = cloudflareAuditEntry("person.create", "person", person.id, `新增人员：${name}`, { name });
+    const result = await workerPost("/api/people", { person, auditEntry: entry });
+    if (result.person) mergeEntityItem("people", result.person);
+    applyCloudflareMutationResult(result);
+    if (result.entry) state.audit.push(result.entry);
+    render();
+    return;
+  }
   await saveRepository(`新增人员：${name}`, "person.create", "person", person.id, { name });
 }
 
@@ -2001,6 +2113,18 @@ async function handleAdminAction(button) {
     const due = prompt("截止日期 YYYY-MM-DD：", group.due_date);
     if (!due) return;
     Object.assign(group, { title, due_date: due, end_date: due });
+    if (WORKER_API_BASE) {
+      const entry = cloudflareAuditEntry("group.patch", "group", group.id, `更新分组：${title}`, { title, due_date: due });
+      const result = await workerPatch(`/api/groups/${encodeURIComponent(group.id)}`, {
+        fields: { title, due_date: due, end_date: due },
+        auditEntry: entry,
+      });
+      if (result.group) mergeEntityItem("groups", result.group);
+      applyCloudflareMutationResult(result);
+      if (result.entry) state.audit.push(result.entry);
+      render();
+      return;
+    }
     await saveRepository(`更新分组：${title}`, "group.update", "group", group.id, { title });
   }
   if (action === "delete-group") {
@@ -2011,6 +2135,17 @@ async function handleAdminAction(button) {
     state.data.tasks.forEach((task) => { if (task.group_id === group.id) task.group_id = fallback.id; });
     state.data.specials.forEach((special) => { if (special.group_id === group.id) special.group_id = fallback.id; });
     state.data.groups = state.data.groups.filter((item) => item.id !== group.id);
+    if (WORKER_API_BASE) {
+      const entry = cloudflareAuditEntry("group.delete", "group", group.id, `删除分组：${group.title}`, { fallback_group_id: fallback.id });
+      const result = await workerDelete(`/api/groups/${encodeURIComponent(group.id)}`, {
+        fallback_group_id: fallback.id,
+        auditEntry: entry,
+      });
+      applyCloudflareMutationResult(result);
+      if (result.entry) state.audit.push(result.entry);
+      render();
+      return;
+    }
     await saveRepository(`删除分组：${group.title}`, "group.delete", "group", group.id, { fallback_group_id: fallback.id });
   }
   if (action === "edit-special") {
@@ -2018,6 +2153,18 @@ async function handleAdminAction(button) {
     const title = prompt("专项名称：", special.title);
     if (!title) return;
     special.title = title;
+    if (WORKER_API_BASE) {
+      const entry = cloudflareAuditEntry("special.patch", "special", special.id, `更新专项：${title}`, { title });
+      const result = await workerPatch(`/api/specials/${encodeURIComponent(special.id)}`, {
+        fields: { title },
+        auditEntry: entry,
+      });
+      if (result.special) mergeEntityItem("specials", result.special);
+      applyCloudflareMutationResult(result);
+      if (result.entry) state.audit.push(result.entry);
+      render();
+      return;
+    }
     await saveRepository(`更新专项：${title}`, "special.update", "special", special.id, { title });
   }
   if (action === "delete-special") {
@@ -2025,6 +2172,14 @@ async function handleAdminAction(button) {
     if (!special || !confirm(`确认删除专项：${special.title}？专项下任务会转为普通事项。`)) return;
     state.data.tasks.forEach((task) => { if (task.special_id === special.id) task.special_id = null; });
     state.data.specials = state.data.specials.filter((item) => item.id !== special.id);
+    if (WORKER_API_BASE) {
+      const entry = cloudflareAuditEntry("special.delete", "special", special.id, `删除专项：${special.title}`, { title: special.title });
+      const result = await workerDelete(`/api/specials/${encodeURIComponent(special.id)}`, { auditEntry: entry });
+      applyCloudflareMutationResult(result);
+      if (result.entry) state.audit.push(result.entry);
+      render();
+      return;
+    }
     await saveRepository(`删除专项：${special.title}`, "special.delete", "special", special.id, { title: special.title });
   }
   if (action === "edit-person") {
@@ -2037,6 +2192,18 @@ async function handleAdminAction(button) {
     person.name = name;
     person.placeholder = false;
     renameOwnerInTasks(oldName, name);
+    if (WORKER_API_BASE) {
+      const entry = cloudflareAuditEntry("person.patch", "person", person.id, `更新人员：${oldName} -> ${name}`, { old_name: oldName, name });
+      const result = await workerPatch(`/api/people/${encodeURIComponent(person.id)}`, {
+        fields: { name, placeholder: false },
+        auditEntry: entry,
+      });
+      if (result.person) mergeEntityItem("people", result.person);
+      applyCloudflareMutationResult(result);
+      if (result.entry) state.audit.push(result.entry);
+      render();
+      return;
+    }
     await saveRepository(`更新人员：${oldName} -> ${name}`, "person.update", "person", person.id, { old_name: oldName, name });
   }
   if (action === "delete-person") {
@@ -2046,6 +2213,14 @@ async function handleAdminAction(button) {
     if (assignments.length) return alert(`该人员仍关联 ${assignments.length} 项任务，请先调整任务责任人。`);
     if (!confirm(`确认删除人员：${person.name}？`)) return;
     state.data.people = state.data.people.filter((item) => item.id !== person.id);
+    if (WORKER_API_BASE) {
+      const entry = cloudflareAuditEntry("person.delete", "person", person.id, `删除人员：${person.name}`, { name: person.name });
+      const result = await workerDelete(`/api/people/${encodeURIComponent(person.id)}`, { auditEntry: entry });
+      applyCloudflareMutationResult(result);
+      if (result.entry) state.audit.push(result.entry);
+      render();
+      return;
+    }
     await saveRepository(`删除人员：${person.name}`, "person.delete", "person", person.id, { name: person.name });
   }
 }
@@ -2062,6 +2237,48 @@ function renameOwnerInTasks(oldName, newName) {
   });
 }
 
+async function patchTask(task, fields, auditEntry) {
+  requireToken();
+  const result = await workerPatch(`/api/tasks/${encodeURIComponent(task.id)}`, {
+    fields,
+    auditEntry,
+  });
+  if (result.task) mergeTask(result.task);
+  if (result.version) {
+    state.serverVersion = result.version;
+    state.pendingRemoteVersion = "";
+    if (state.data) state.data.version = result.version;
+  }
+  return result;
+}
+
+function mergeTask(nextTask) {
+  const index = (state.data.tasks || []).findIndex((task) => task.id === nextTask.id);
+  if (index >= 0) state.data.tasks[index] = nextTask;
+}
+
+function mergeEntityItem(collection, nextItem) {
+  const list = state.data[collection] || [];
+  const index = list.findIndex((item) => item.id === nextItem.id);
+  if (index >= 0) list[index] = nextItem;
+  else list.push(nextItem);
+  state.data[collection] = list;
+}
+
+function cloudflareAuditEntry(action, entity, id, summary, detail = {}) {
+  return { ts: nowIso(), action, entity, id, summary, detail, source: "cloudflare-d1" };
+}
+
+function applyCloudflareMutationResult(result) {
+  if (result.version) {
+    state.serverVersion = result.version;
+    state.pendingRemoteVersion = "";
+    if (state.data) state.data.version = result.version;
+  }
+  state.dirtyTaskIds.clear();
+  state.taskBaselines.clear();
+}
+
 async function saveRepository(summary, action, entity, id, detail = {}) {
   requireToken();
   ensurePeopleCatalog();
@@ -2076,6 +2293,8 @@ async function saveRepository(summary, action, entity, id, detail = {}) {
       prCatalog: state.prCatalog,
     });
     if (result.state) state.data = result.state;
+    if (result.version) state.serverVersion = result.version;
+    state.pendingRemoteVersion = "";
     state.audit.push(entry);
     state.dirtyTaskIds.clear();
     state.taskBaselines.clear();
@@ -2108,7 +2327,36 @@ function updateEditStatus() {
   const target = WORKER_API_BASE ? "Cloudflare D1" : "GitHub 仓库";
   const user = WORKER_API_BASE && state.authUser ? `（${state.authUser.displayName || state.authUser.username} / ${state.authUser.role}）` : "";
   const scope = isDeveloperEditMode() ? "仅显示自己任务及同算子关联任务；只能提交自己任务的 PR/转测报告链接" : "甘特条可拖动，边缘可拉伸";
+  if (dirtyCount && state.pendingRemoteVersion) {
+    $("#editStatus").textContent = `编辑模式${user}：${dirtyCount} 项待保存；后台已有新数据，保存后会同步刷新`;
+    return;
+  }
   $("#editStatus").textContent = dirtyCount ? `编辑模式${user}：${dirtyCount} 项待保存` : `编辑模式${user}：${scope}；保存会写入 ${target}`;
+}
+
+function startRealtimeSync() {
+  if (!WORKER_API_BASE || state.realtimeTimer) return;
+  state.realtimeTimer = window.setInterval(() => {
+    checkRemoteVersion().catch(() => {});
+  }, 3000);
+}
+
+async function checkRemoteVersion() {
+  if (!WORKER_API_BASE || !state.data || state.loading) return;
+  const result = await workerGet("/api/version");
+  const version = result.version || "";
+  if (!version || !state.serverVersion) {
+    state.serverVersion = version;
+    return;
+  }
+  if (version === state.serverVersion) return;
+  if (state.dirtyTaskIds.size) {
+    state.pendingRemoteVersion = version;
+    updateEditStatus();
+    return;
+  }
+  state.serverVersion = version;
+  await load();
 }
 
 async function commitFiles(files, message) {
@@ -2162,6 +2410,20 @@ async function workerPost(path, body) {
   });
 }
 
+async function workerPatch(path, body) {
+  return workerFetch(path, {
+    method: "PATCH",
+    body,
+  });
+}
+
+async function workerDelete(path, body = {}) {
+  return workerFetch(path, {
+    method: "DELETE",
+    body,
+  });
+}
+
 async function workerFetch(path, options = {}) {
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
@@ -2197,6 +2459,20 @@ async function loginWorker() {
   sessionStorage.setItem("flashWorkerAuthToken", data.token);
   $("#loginPassword").value = "";
   await load();
+}
+
+async function changePassword() {
+  if (!WORKER_API_BASE || !state.token) return alert("请先登录账号。");
+  const oldPassword = prompt("请输入当前密码：", "");
+  if (!oldPassword) return;
+  const newPassword = prompt("请输入新密码（至少 8 位）：", "");
+  if (!newPassword) return;
+  if (newPassword.length < 8) return alert("新密码至少 8 位。");
+  const repeatPassword = prompt("请再次输入新密码：", "");
+  if (newPassword !== repeatPassword) return alert("两次输入的新密码不一致。");
+  if (!confirm("确认修改当前账号密码？确认后新密码立即生效。")) return;
+  await workerPost("/api/me/password", { oldPassword, newPassword });
+  alert("密码已修改，请妥善保存新密码。");
 }
 
 function logout() {
@@ -2331,6 +2607,7 @@ $("#loginPassword").addEventListener("keydown", (event) => {
   loginWorker().catch(showError);
 });
 $("#logout").addEventListener("click", logout);
+$("#changePassword").addEventListener("click", () => changePassword().catch(showError));
 $("#addTask").addEventListener("click", () => addTask().catch(showError));
 $("#saveAll").addEventListener("click", () => saveAllTasks().catch(showError));
 $("#addGroup").addEventListener("click", () => addGroup().catch(showError));
@@ -2349,6 +2626,6 @@ function showError(error) {
   alert(error.message);
 }
 
-load().catch((error) => {
+load().then(startRealtimeSync).catch((error) => {
   $("#meta").textContent = `读取失败：${error.message}`;
 });

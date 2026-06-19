@@ -1,0 +1,44 @@
+name: Initialize Cloudflare Users
+
+on:
+  workflow_dispatch:
+    inputs:
+      reset_existing:
+        description: "Reset existing person account passwords"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  initialize-users:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Create or reset person accounts
+        env:
+          FLASH_IO_ADMIN_TOKEN: ${{ secrets.FLASH_IO_ADMIN_TOKEN }}
+        run: |
+          mkdir -p generated
+          if [ "${{ inputs.reset_existing }}" = "true" ]; then
+            python scripts/bootstrap_cloudflare_users.py --reset-existing --out generated/initial-accounts.csv
+          else
+            python scripts/bootstrap_cloudflare_users.py --out generated/initial-accounts.csv
+          fi
+
+      - name: Upload initial account file
+        uses: actions/upload-artifact@v4
+        with:
+          name: initial-person-accounts
+          path: generated/initial-accounts.csv
+          retention-days: 7

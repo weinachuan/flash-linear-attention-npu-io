@@ -21,6 +21,9 @@ export default {
       if (url.pathname === "/api/export" || url.pathname === "/api/state") {
         return jsonResponse(request, env, await exportState(env));
       }
+      if (url.pathname === "/api/version") {
+        return jsonResponse(request, env, { ok: true, version: await getStateVersion(env) });
+      }
       if (url.pathname === "/api/audit") {
         return jsonResponse(request, env, await listAudit(env, url));
       }
@@ -42,6 +45,9 @@ export default {
       if (url.pathname === "/api/me") {
         return jsonResponse(request, env, { ok: true, user: await requireUser(request, env) });
       }
+      if (url.pathname === "/api/me/password" && request.method === "POST") {
+        return jsonResponse(request, env, await changePassword(request, env));
+      }
       if (url.pathname === "/api/users" && request.method === "GET") {
         await requireAdminLike(request, env);
         return jsonResponse(request, env, await listUsers(env));
@@ -50,13 +56,35 @@ export default {
         await requireAdminLike(request, env);
         return jsonResponse(request, env, await createUser(request, env), 201);
       }
+      if (url.pathname === "/api/tasks" && request.method === "POST") {
+        return jsonResponse(request, env, await createTask(request, env), 201);
+      }
+      const taskPatchMatch = url.pathname.match(/^\/api\/tasks\/([^/]+)$/);
+      if (taskPatchMatch && request.method === "PATCH") {
+        return jsonResponse(request, env, await patchTask(request, env, decodeURIComponent(taskPatchMatch[1])));
+      }
+      if (taskPatchMatch && request.method === "DELETE") {
+        return jsonResponse(request, env, await deleteTask(request, env, decodeURIComponent(taskPatchMatch[1])));
+      }
+      const entityRootMatch = url.pathname.match(/^\/api\/(groups|specials|people)$/);
+      if (entityRootMatch && request.method === "POST") {
+        return jsonResponse(request, env, await createEntity(request, env, entityRootMatch[1]), 201);
+      }
+      const entityMatch = url.pathname.match(/^\/api\/(groups|specials|people)\/([^/]+)$/);
+      if (entityMatch && request.method === "PATCH") {
+        return jsonResponse(request, env, await patchEntity(request, env, entityMatch[1], decodeURIComponent(entityMatch[2])));
+      }
+      if (entityMatch && request.method === "DELETE") {
+        return jsonResponse(request, env, await deleteEntity(request, env, entityMatch[1], decodeURIComponent(entityMatch[2])));
+      }
       if (url.pathname === "/api/import" && request.method === "POST") {
         await requireAdminLike(request, env);
         const payload = await readJson(request);
         await replaceState(env, payload.state || payload);
         await replaceAudit(env, payload.audit || []);
         if (payload.prCatalog) await setJsonMeta(env, "prCatalog", payload.prCatalog);
-        return jsonResponse(request, env, { ok: true, state: await exportState(env) });
+        const version = await bumpStateVersion(env);
+        return jsonResponse(request, env, { ok: true, version, state: await exportState(env) });
       }
       if (url.pathname === "/api/save" && request.method === "POST") {
         const user = await requireUser(request, env);
@@ -67,6 +95,7 @@ export default {
         if (payload.prCatalog && user.role === "admin") await setJsonMeta(env, "prCatalog", payload.prCatalog);
         const catalog = await getJsonMeta(env, "prCatalog", emptyPrCatalog());
         await syncTaskDeliveryRulesFromCatalog(env, catalog.items || []);
+        const version = await bumpStateVersion(env);
         const entry = payload.auditEntry || {
           ts: nowIso(),
           action: "state.save",
@@ -80,6 +109,7 @@ export default {
         return jsonResponse(request, env, {
           ok: true,
           entry,
+          version,
           state: await exportState(env),
         });
       }
@@ -111,6 +141,7 @@ async function exportState(env) {
   return {
     storageVersion: 2,
     generatedAt: nowIso(),
+    version: await getStateVersion(env),
     project: parseJson(meta.project, DEFAULT_PROJECT),
     repoScan: parseJson(meta.repoScan, {}),
     groups: await selectAll(env, "SELECT * FROM groups ORDER BY position, due_date"),
@@ -233,6 +264,7 @@ async function syncPrCatalog(env, catalog) {
   await setJsonMeta(env, "prCatalog", normalized);
   const changed = await syncTaskDeliveryRulesFromCatalog(env, normalized.items);
   if (catalogChanged || changed.length) {
+    await bumpStateVersion(env);
     await insertAudit(env, {
       ts: nowIso(),
       action: "pr_catalog.sync",
@@ -278,6 +310,20 @@ async function syncTaskDeliveryRulesFromCatalog(env, catalogItems) {
   }
   if (statements.length) await env.DB.batch(statements);
   return changed;
+}
+
+async function syncTaskDeliveryRuleForTask(env, taskId, catalogItems) {
+  const task = await env.DB.prepare("SELECT id, title, owner, status, risk, start_date, end_date, pr_link, test_report FROM tasks WHERE id = ?").bind(taskId).first();
+  if (!task) return null;
+  const next = evaluateTaskDelivery(task, catalogItems);
+  const diff = {};
+  if (task.risk !== next.risk) diff.risk = { from: task.risk, to: next.risk };
+  if (task.status !== next.status) diff.status = { from: task.status, to: next.status };
+  if (!Object.keys(diff).length) return null;
+  await env.DB.prepare(
+    "UPDATE tasks SET risk = ?, status = ?, updated_at = ? WHERE id = ?"
+  ).bind(next.risk, next.status, nowIso(), task.id).run();
+  return { id: task.id, title: task.title, changes: diff };
 }
 
 function evaluateTaskDelivery(task, catalogItems) {
@@ -502,6 +548,17 @@ async function setJsonMeta(env, key, value) {
   await env.DB.prepare("INSERT OR REPLACE INTO project_meta(key, value) VALUES (?, ?)").bind(key, toJson(value)).run();
 }
 
+async function getStateVersion(env) {
+  const row = await env.DB.prepare("SELECT value FROM project_meta WHERE key = ?").bind("stateVersion").first();
+  return row?.value || "0";
+}
+
+async function bumpStateVersion(env) {
+  const version = nowIso();
+  await env.DB.prepare("INSERT OR REPLACE INTO project_meta(key, value) VALUES (?, ?)").bind("stateVersion", version).run();
+  return version;
+}
+
 async function login(request, env) {
   const payload = await readJson(request);
   const username = String(payload.username || "").trim();
@@ -559,6 +616,546 @@ async function createUser(request, env) {
   ).run();
   const row = await env.DB.prepare("SELECT * FROM users WHERE username = ?").bind(username).first();
   return { ok: true, user: publicUser(row) };
+}
+
+async function createTask(request, env) {
+  await requireAdminLike(request, env);
+  const payload = await readJson(request);
+  const task = normalizeTaskForInsert(payload.task || payload);
+  await insertTask(env, task);
+  const catalog = await getJsonMeta(env, "prCatalog", emptyPrCatalog());
+  await syncTaskDeliveryRuleForTask(env, task.id, catalog.items || []);
+  const version = await bumpStateVersion(env);
+  const entry = payload.auditEntry || {
+    ts: nowIso(),
+    action: "task.create",
+    entity: "task",
+    id: task.id,
+    summary: `新增任务：${task.title}`,
+    detail: { title: task.title },
+    source: "cloudflare-d1",
+  };
+  await insertAudit(env, { ...entry, source: "cloudflare-d1" });
+  return { ok: true, version, entry, task: await getTaskById(env, task.id) };
+}
+
+async function deleteTask(request, env, taskId) {
+  await requireAdminLike(request, env);
+  const payload = await readJson(request);
+  const task = await getTaskById(env, taskId);
+  if (!task) throw withStatus(404, "task not found");
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM task_segments WHERE task_id = ?").bind(taskId),
+    env.DB.prepare("DELETE FROM tasks WHERE id = ?").bind(taskId),
+  ]);
+  const version = await bumpStateVersion(env);
+  const entry = payload.auditEntry || {
+    ts: nowIso(),
+    action: "task.delete",
+    entity: "task",
+    id: taskId,
+    summary: `删除任务：${task.title || taskId}`,
+    detail: { title: task.title || "" },
+    source: "cloudflare-d1",
+  };
+  await insertAudit(env, { ...entry, source: "cloudflare-d1" });
+  return { ok: true, version, entry, deletedId: taskId };
+}
+
+async function createEntity(request, env, type) {
+  await requireAdminLike(request, env);
+  const payload = await readJson(request);
+  const singular = entitySingular(type);
+  const item = normalizeEntityForInsert(type, payload.item || payload.entity || payload[singular] || payload);
+  await insertEntity(env, type, item);
+  const version = await bumpStateVersion(env);
+  const entry = payload.auditEntry || {
+    ts: nowIso(),
+    action: `${entitySingular(type)}.create`,
+    entity: entitySingular(type),
+    id: item.id,
+    summary: `新增${entityLabel(type)}：${entityDisplayName(type, item)}`,
+    detail: { id: item.id },
+    source: "cloudflare-d1",
+  };
+  await insertAudit(env, { ...entry, source: "cloudflare-d1" });
+  return { ok: true, version, entry, [entitySingular(type)]: await getEntityById(env, type, item.id) };
+}
+
+async function patchEntity(request, env, type, id) {
+  await requireAdminLike(request, env);
+  const payload = await readJson(request);
+  const oldItem = await getEntityById(env, type, id);
+  if (!oldItem) throw withStatus(404, `${entitySingular(type)} not found`);
+  const fields = normalizeEntityPatchFields(type, payload.fields || {});
+  const changedFields = Object.keys(fields).filter((field) => !sameJson(oldItem[field], fields[field]));
+  if (!changedFields.length) {
+    return { ok: true, version: await getStateVersion(env), [entitySingular(type)]: oldItem, entry: null };
+  }
+  await applyEntityPatch(env, type, id, oldItem, fields, changedFields);
+  const version = await bumpStateVersion(env);
+  const nextItem = await getEntityById(env, type, id);
+  const entry = payload.auditEntry || {
+    ts: nowIso(),
+    action: `${entitySingular(type)}.patch`,
+    entity: entitySingular(type),
+    id,
+    summary: `更新${entityLabel(type)}：${entityDisplayName(type, nextItem || oldItem)}`,
+    detail: { fields: changedFields },
+    source: "cloudflare-d1",
+  };
+  await insertAudit(env, { ...entry, source: "cloudflare-d1" });
+  return { ok: true, version, entry, [entitySingular(type)]: nextItem };
+}
+
+async function deleteEntity(request, env, type, id) {
+  await requireAdminLike(request, env);
+  const payload = await readJson(request);
+  const item = await getEntityById(env, type, id);
+  if (!item) throw withStatus(404, `${entitySingular(type)} not found`);
+  const detail = await applyEntityDelete(env, type, id, payload);
+  const version = await bumpStateVersion(env);
+  const entry = payload.auditEntry || {
+    ts: nowIso(),
+    action: `${entitySingular(type)}.delete`,
+    entity: entitySingular(type),
+    id,
+    summary: `删除${entityLabel(type)}：${entityDisplayName(type, item)}`,
+    detail,
+    source: "cloudflare-d1",
+  };
+  await insertAudit(env, { ...entry, source: "cloudflare-d1" });
+  return { ok: true, version, entry, deletedId: id, detail };
+}
+
+async function changePassword(request, env) {
+  const user = await requireUser(request, env);
+  const payload = await readJson(request);
+  const oldPassword = String(payload.oldPassword || "");
+  const newPassword = String(payload.newPassword || "");
+  if (!oldPassword || !newPassword) throw withStatus(400, "oldPassword and newPassword are required");
+  if (newPassword.length < 8) throw withStatus(400, "new password must be at least 8 characters");
+  const row = await env.DB.prepare("SELECT * FROM users WHERE id = ? AND active = 1").bind(user.id).first();
+  if (!row || !(await verifyPassword(oldPassword, row.salt, row.password_hash))) {
+    throw withStatus(401, "old password is incorrect");
+  }
+  const salt = randomToken(18);
+  const passwordHash = await hashPassword(newPassword, salt);
+  await env.DB.prepare("UPDATE users SET password_hash = ?, salt = ?, updated_at = ? WHERE id = ?")
+    .bind(passwordHash, salt, nowIso(), user.id)
+    .run();
+  return { ok: true };
+}
+
+const TASK_PATCH_FIELDS = new Set([
+  "title", "scope", "target", "owner", "status", "risk", "priority", "group_id", "special_id",
+  "start_date", "end_date", "evidence", "dependencies", "pr_link", "test_report", "notes",
+  "position", "segments",
+]);
+const TASK_JSON_PATCH_FIELDS = new Set(["evidence", "dependencies"]);
+
+async function patchTask(request, env, taskId) {
+  const user = await requireUser(request, env);
+  const payload = await readJson(request);
+  const oldTask = await getTaskById(env, taskId);
+  if (!oldTask) throw withStatus(404, "task not found");
+  const fields = normalizeTaskPatchFields(payload.fields || {});
+  const changedFields = Object.keys(fields).filter((field) => {
+    if (field === "segments") return !sameJson(oldTask.segments || [], fields.segments || []);
+    return !sameJson(oldTask[field], fields[field]);
+  });
+  if (!changedFields.length) {
+    return { ok: true, version: await getStateVersion(env), task: oldTask, entry: null };
+  }
+  if (user.role !== "admin") {
+    if (!taskBelongsToUser(oldTask, user)) throw withStatus(403, `no permission to update task: ${oldTask.title || taskId}`);
+    const forbiddenFields = changedFields.filter((field) => !DEVELOPER_DELIVERY_FIELDS.has(field));
+    if (forbiddenFields.length) {
+      throw withStatus(403, `developer can only update PR/test report fields: ${forbiddenFields.join(", ")}`);
+    }
+  }
+
+  const now = nowIso();
+  const taskUpdates = {};
+  let nextSegments = null;
+  for (const field of changedFields) {
+    if (field === "segments") {
+      nextSegments = normalizePatchSegments(fields.segments, oldTask);
+      if (nextSegments.length) {
+        taskUpdates.start_date = nextSegments[0].start_date;
+        taskUpdates.end_date = nextSegments[nextSegments.length - 1].end_date;
+      }
+      continue;
+    }
+    taskUpdates[field] = normalizePatchValue(field, fields[field]);
+  }
+  if (Object.keys(taskUpdates).length) {
+    taskUpdates.updated_at = now;
+    await updateTaskColumns(env, taskId, taskUpdates);
+  }
+  if (nextSegments) await replaceTaskSegments(env, taskId, nextSegments);
+
+  const catalog = await getJsonMeta(env, "prCatalog", emptyPrCatalog());
+  await syncTaskDeliveryRuleForTask(env, taskId, catalog.items || []);
+  const version = await bumpStateVersion(env);
+  const entry = payload.auditEntry || {
+    ts: now,
+    action: "task.patch",
+    entity: "task",
+    id: taskId,
+    summary: `更新任务：${oldTask.title || taskId}`,
+    detail: { fields: changedFields },
+    source: "cloudflare-d1",
+  };
+  await insertAudit(env, { ...entry, source: "cloudflare-d1" });
+  return { ok: true, version, entry, task: await getTaskById(env, taskId) };
+}
+
+function normalizeTaskPatchFields(fields) {
+  const next = {};
+  for (const [field, value] of Object.entries(fields || {})) {
+    if (!TASK_PATCH_FIELDS.has(field)) throw withStatus(400, `unsupported task field: ${field}`);
+    next[field] = value;
+  }
+  return next;
+}
+
+function normalizePatchValue(field, value) {
+  if (TASK_JSON_PATCH_FIELDS.has(field)) return Array.isArray(value) ? value : [];
+  if (field === "special_id") return value || null;
+  if (field === "position") return numberOr(value, 0);
+  return String(value ?? "").trim();
+}
+
+function normalizePatchSegments(value, task) {
+  const raw = Array.isArray(value) && value.length
+    ? value
+    : [{ start_date: task.start_date, end_date: task.end_date, reason: task.notes || "", position: 0 }];
+  return raw
+    .map((segment, index) => {
+      const start = isYmd(segment.start_date) ? segment.start_date : task.start_date;
+      const end = isYmd(segment.end_date) ? segment.end_date : start;
+      return {
+        id: String(segment.id || `seg-${task.id}-${index}`),
+        start_date: start,
+        end_date: end < start ? start : end,
+        reason: String(segment.reason || ""),
+        position: numberOr(segment.position, index),
+      };
+    })
+    .sort((a, b) => a.start_date.localeCompare(b.start_date))
+    .map((segment, index) => ({ ...segment, position: index }));
+}
+
+async function updateTaskColumns(env, taskId, updates) {
+  const fields = Object.keys(updates);
+  if (!fields.length) return;
+  const assignments = fields.map((field) => `${field} = ?`).join(", ");
+  const values = fields.map((field) => TASK_JSON_PATCH_FIELDS.has(field) ? toJson(updates[field]) : updates[field]);
+  await env.DB.prepare(`UPDATE tasks SET ${assignments} WHERE id = ?`).bind(...values, taskId).run();
+}
+
+async function replaceTaskSegments(env, taskId, segments) {
+  const statements = [env.DB.prepare("DELETE FROM task_segments WHERE task_id = ?").bind(taskId)];
+  segments.forEach((segment, index) => {
+    statements.push(env.DB.prepare(
+      "INSERT INTO task_segments(id, task_id, start_date, end_date, reason, position) VALUES (?, ?, ?, ?, ?, ?)"
+    ).bind(
+      segment.id || `seg-${taskId}-${index}`,
+      taskId,
+      segment.start_date,
+      segment.end_date,
+      segment.reason || "",
+      numberOr(segment.position, index),
+    ));
+  });
+  await env.DB.batch(statements);
+}
+
+async function getTaskById(env, taskId) {
+  const task = await env.DB.prepare("SELECT * FROM tasks WHERE id = ?").bind(taskId).first();
+  if (!task) return null;
+  const segments = await selectAll(env, "SELECT id, task_id, start_date, end_date, reason, position FROM task_segments WHERE task_id = ? ORDER BY position, start_date", taskId);
+  return {
+    ...task,
+    evidence: parseJson(task.evidence, []),
+    dependencies: parseJson(task.dependencies, []),
+    segments: segments.map((segment) => ({
+      id: segment.id,
+      start_date: segment.start_date,
+      end_date: segment.end_date,
+      reason: segment.reason || "",
+      position: segment.position || 0,
+    })),
+  };
+}
+
+function normalizeTaskForInsert(task) {
+  const now = nowIso();
+  const startDate = isYmd(task.start_date) ? task.start_date : "2026-06-25";
+  const endDate = isYmd(task.end_date) ? task.end_date : startDate;
+  const next = {
+    id: String(task.id || `task-${crypto.randomUUID().slice(0, 10)}`),
+    title: String(task.title || "未命名任务").trim(),
+    scope: String(task.scope || ""),
+    target: String(task.target || ""),
+    owner: String(task.owner || "待排人力"),
+    status: String(task.status || "todo"),
+    risk: String(task.risk || "中"),
+    priority: String(task.priority || "P1"),
+    group_id: String(task.group_id || ""),
+    special_id: task.special_id || null,
+    start_date: startDate,
+    end_date: endDate < startDate ? startDate : endDate,
+    evidence: Array.isArray(task.evidence) ? task.evidence : [],
+    dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
+    pr_link: String(task.pr_link || ""),
+    test_report: String(task.test_report || ""),
+    notes: String(task.notes || ""),
+    position: numberOr(task.position, 0),
+    created_at: task.created_at || now,
+    updated_at: task.updated_at || now,
+  };
+  next.segments = normalizePatchSegments(task.segments, next);
+  return next;
+}
+
+async function insertTask(env, task) {
+  await env.DB.prepare(
+    `INSERT INTO tasks(
+      id, title, scope, target, owner, status, risk, priority, group_id, special_id,
+      start_date, end_date, evidence, dependencies, pr_link, test_report, notes,
+      position, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(
+    task.id,
+    task.title,
+    task.scope,
+    task.target,
+    task.owner,
+    task.status,
+    task.risk,
+    task.priority,
+    task.group_id,
+    task.special_id,
+    task.start_date,
+    task.end_date,
+    toJson(task.evidence),
+    toJson(task.dependencies),
+    task.pr_link,
+    task.test_report,
+    task.notes,
+    task.position,
+    task.created_at,
+    task.updated_at,
+  ).run();
+  await replaceTaskSegments(env, task.id, task.segments);
+}
+
+const ENTITY_CONFIG = {
+  groups: {
+    singular: "group",
+    table: "groups",
+    label: "分组",
+    fields: new Set(["title", "due_date", "start_date", "end_date", "position"]),
+    select: "SELECT id, title, due_date, start_date, end_date, position FROM groups WHERE id = ?",
+  },
+  specials: {
+    singular: "special",
+    table: "specials",
+    label: "专项",
+    fields: new Set(["title", "group_id", "position", "collapsed"]),
+    select: "SELECT id, title, group_id, position, collapsed FROM specials WHERE id = ?",
+  },
+  people: {
+    singular: "person",
+    table: "people",
+    label: "人员",
+    fields: new Set(["name", "position", "placeholder"]),
+    select: "SELECT id, name, position, placeholder FROM people WHERE id = ?",
+  },
+};
+
+function entityConfig(type) {
+  const config = ENTITY_CONFIG[type];
+  if (!config) throw withStatus(404, "unsupported entity");
+  return config;
+}
+
+function entitySingular(type) {
+  return entityConfig(type).singular;
+}
+
+function entityLabel(type) {
+  return entityConfig(type).label;
+}
+
+function entityDisplayName(type, item) {
+  if (!item) return "";
+  return type === "people" ? item.name : item.title;
+}
+
+function normalizeEntityForInsert(type, item) {
+  if (type === "groups") {
+    const due = isYmd(item.due_date) ? item.due_date : (isYmd(item.end_date) ? item.end_date : "2026-06-25");
+    return {
+      id: String(item.id || `group-${crypto.randomUUID().slice(0, 10)}`),
+      title: String(item.title || "未命名分组").trim(),
+      due_date: due,
+      start_date: isYmd(item.start_date) ? item.start_date : due,
+      end_date: isYmd(item.end_date) ? item.end_date : due,
+      position: numberOr(item.position, 0),
+    };
+  }
+  if (type === "specials") {
+    return {
+      id: String(item.id || `special-${crypto.randomUUID().slice(0, 10)}`),
+      title: String(item.title || "专项：未命名").trim(),
+      group_id: item.group_id || null,
+      position: numberOr(item.position, 0),
+      collapsed: item.collapsed ? 1 : 0,
+    };
+  }
+  if (type === "people") {
+    const name = String(item.name || "").trim();
+    if (!name) throw withStatus(400, "person name is required");
+    return {
+      id: String(item.id || `person-${crypto.randomUUID().slice(0, 10)}`),
+      name,
+      position: numberOr(item.position, 0),
+      placeholder: item.placeholder ? 1 : 0,
+    };
+  }
+  throw withStatus(404, "unsupported entity");
+}
+
+function normalizeEntityPatchFields(type, fields) {
+  const config = entityConfig(type);
+  const next = {};
+  for (const [field, value] of Object.entries(fields || {})) {
+    if (!config.fields.has(field)) throw withStatus(400, `unsupported ${config.singular} field: ${field}`);
+    next[field] = normalizeEntityValue(type, field, value);
+  }
+  return next;
+}
+
+function normalizeEntityValue(type, field, value) {
+  if (field === "position") return numberOr(value, 0);
+  if (field === "collapsed" || field === "placeholder") return value ? 1 : 0;
+  if (field === "group_id") return value || null;
+  if (field === "due_date" || field === "start_date" || field === "end_date") {
+    if (!isYmd(value)) throw withStatus(400, `${field} must be YYYY-MM-DD`);
+    return value;
+  }
+  return String(value ?? "").trim();
+}
+
+async function insertEntity(env, type, item) {
+  if (type === "groups") {
+    await env.DB.prepare("INSERT INTO groups(id, title, due_date, start_date, end_date, position) VALUES (?, ?, ?, ?, ?, ?)")
+      .bind(item.id, item.title, item.due_date, item.start_date, item.end_date, item.position)
+      .run();
+    return;
+  }
+  if (type === "specials") {
+    await env.DB.prepare("INSERT INTO specials(id, title, group_id, position, collapsed) VALUES (?, ?, ?, ?, ?)")
+      .bind(item.id, item.title, item.group_id, item.position, item.collapsed ? 1 : 0)
+      .run();
+    return;
+  }
+  if (type === "people") {
+    const duplicate = await env.DB.prepare("SELECT id FROM people WHERE name = ?").bind(item.name).first();
+    if (duplicate) throw withStatus(409, "person already exists");
+    await env.DB.prepare("INSERT INTO people(id, name, position, placeholder) VALUES (?, ?, ?, ?)")
+      .bind(item.id, item.name, item.position, item.placeholder ? 1 : 0)
+      .run();
+  }
+}
+
+async function getEntityById(env, type, id) {
+  const row = await env.DB.prepare(entityConfig(type).select).bind(id).first();
+  if (!row) return null;
+  if (type === "people") return { ...row, placeholder: Boolean(row.placeholder) };
+  if (type === "specials") return { ...row, collapsed: Boolean(row.collapsed) };
+  return row;
+}
+
+async function applyEntityPatch(env, type, id, oldItem, fields, changedFields) {
+  const updates = Object.fromEntries(changedFields.map((field) => [field, fields[field]]));
+  if (type === "people" && changedFields.includes("name")) {
+    const duplicate = await env.DB.prepare("SELECT id FROM people WHERE name = ? AND id <> ?").bind(fields.name, id).first();
+    if (duplicate) throw withStatus(409, "person already exists");
+    const statements = [entityUpdateStatement(env, type, id, updates)];
+    const rows = await selectAll(env, "SELECT id, owner FROM tasks WHERE owner LIKE ?", `%${oldItem.name}%`);
+    for (const row of rows) {
+      const nextOwner = replaceOwnerName(row.owner, oldItem.name, fields.name);
+      if (nextOwner !== row.owner) {
+        statements.push(env.DB.prepare("UPDATE tasks SET owner = ?, updated_at = ? WHERE id = ?").bind(nextOwner, nowIso(), row.id));
+      }
+    }
+    await env.DB.batch(statements);
+    return;
+  }
+  await updateEntityColumns(env, type, id, updates);
+}
+
+async function updateEntityColumns(env, type, id, updates) {
+  await entityUpdateStatement(env, type, id, updates).run();
+}
+
+function entityUpdateStatement(env, type, id, updates) {
+  const config = entityConfig(type);
+  const fields = Object.keys(updates);
+  if (!fields.length) throw withStatus(400, "no fields to update");
+  fields.forEach((field) => {
+    if (!config.fields.has(field)) throw withStatus(400, `unsupported ${config.singular} field: ${field}`);
+  });
+  const assignments = fields.map((field) => `${field} = ?`).join(", ");
+  const values = fields.map((field) => updates[field]);
+  return env.DB.prepare(`UPDATE ${config.table} SET ${assignments} WHERE id = ?`).bind(...values, id);
+}
+
+async function applyEntityDelete(env, type, id, payload) {
+  if (type === "groups") {
+    const groups = await selectAll(env, "SELECT id FROM groups ORDER BY position, due_date");
+    if (groups.length <= 1) throw withStatus(400, "at least one group is required");
+    const fallbackId = payload.fallback_group_id || payload.detail?.fallback_group_id || groups.find((group) => group.id !== id)?.id;
+    if (!fallbackId || fallbackId === id) throw withStatus(400, "fallback_group_id is required");
+    await env.DB.batch([
+      env.DB.prepare("UPDATE tasks SET group_id = ? WHERE group_id = ?").bind(fallbackId, id),
+      env.DB.prepare("UPDATE specials SET group_id = ? WHERE group_id = ?").bind(fallbackId, id),
+      env.DB.prepare("DELETE FROM groups WHERE id = ?").bind(id),
+    ]);
+    return { fallback_group_id: fallbackId };
+  }
+  if (type === "specials") {
+    await env.DB.batch([
+      env.DB.prepare("UPDATE tasks SET special_id = NULL WHERE special_id = ?").bind(id),
+      env.DB.prepare("DELETE FROM specials WHERE id = ?").bind(id),
+    ]);
+    return {};
+  }
+  if (type === "people") {
+    const person = await getEntityById(env, type, id);
+    const tasks = await selectAll(env, "SELECT id, title, owner FROM tasks WHERE owner LIKE ?", `%${person.name}%`);
+    const linkedTasks = tasks.filter((task) => ownerStringContainsName(task.owner, person.name));
+    if (linkedTasks.length) {
+      throw withStatus(409, `person still owns ${linkedTasks.length} task(s)`);
+    }
+    await env.DB.prepare("DELETE FROM people WHERE id = ?").bind(id).run();
+    return { name: person.name };
+  }
+  throw withStatus(404, "unsupported entity");
+}
+
+function replaceOwnerName(owner, oldName, newName) {
+  return String(owner || "").split(/([、/,，;；&]+)/)
+    .map((part) => part.trim() === oldName ? newName : part)
+    .join("");
+}
+
+function ownerStringContainsName(owner, name) {
+  return String(owner || "").split(/[、/,，;；&\s]+/).map((item) => item.trim()).includes(name);
 }
 
 async function requireAdminLike(request, env) {
@@ -648,8 +1245,9 @@ function publicUser(row) {
   };
 }
 
-async function selectAll(env, sql) {
-  const result = await env.DB.prepare(sql).all();
+async function selectAll(env, sql, ...params) {
+  const statement = env.DB.prepare(sql);
+  const result = params.length ? await statement.bind(...params).all() : await statement.all();
   return result.results || [];
 }
 
@@ -685,7 +1283,7 @@ function corsHeaders(request, env) {
   const allowOrigin = allowed.includes(origin) ? origin : (allowed.includes("*") ? "*" : allowed[0] || "*");
   return {
     "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Admin-Token",
     "Vary": "Origin",
   };

@@ -9,4 +9,6 @@ data/*.sqlite3-*
 *.log
 .env
 .local-secrets/
+generated/
+initial-accounts*.csv
 .DS_Store
