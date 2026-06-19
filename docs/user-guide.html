@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>flash-linear-attention-npu-io 网站使用说明</title>
+  <style>
+    :root {
+      --ink:#17231e;
+      --muted:#627067;
+      --paper:#fffaf1;
+      --card:#fffdf8;
+      --line:#d8ccb8;
+      --dark:#22332b;
+      --green:#277560;
+      --green-soft:#e8f3ee;
+      --red:#cf3d32;
+      --red-soft:#fff0ed;
+      --amber:#b87508;
+      --amber-soft:#fff1d7;
+      --blue:#2f638f;
+      --blue-soft:#e8f1fb;
+      --gray-soft:#f0ece3;
+    }
+
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(184,117,8,.16), transparent 32rem),
+        radial-gradient(circle at 100% 12%, rgba(39,117,96,.12), transparent 34rem),
+        linear-gradient(135deg,#fffaf1 0%,#f2e7d6 52%,#fffaf1 100%);
+      font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;
+      line-height:1.75;
+    }
+
+    main { max-width:1360px; margin:0 auto; padding:28px 24px 56px; }
+
+    header {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:22px;
+      align-items:end;
+      padding:30px 34px;
+      border:1px solid var(--line);
+      background:rgba(255,253,248,.94);
+      box-shadow:0 22px 60px rgba(74,54,26,.1);
+    }
+
+    .eyebrow {
+      margin:0 0 8px;
+      color:var(--amber);
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
+    h1 { margin:0 0 10px; font-size:34px; line-height:1.16; letter-spacing:-.03em; }
+    h2 { margin:0 0 12px; font-size:22px; }
+    h3 { margin:22px 0 8px; font-size:16px; }
+    p { margin:8px 0; }
+    a { color:#1c674f; font-weight:850; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    code { padding:2px 6px; border-radius:6px; background:#f2e8d8; color:#5c3b11; font-family:"Cascadia Mono","Consolas",monospace; font-size:.92em; }
+
+    .meta { margin:0; color:var(--muted); }
+    .top-actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+    .top-actions a {
+      display:inline-flex;
+      align-items:center;
+      min-height:38px;
+      padding:0 14px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:#fff6e8;
+      color:var(--ink);
+      font-size:13px;
+    }
+
+    .toc {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:10px;
+      margin:18px 0 22px;
+    }
+
+    .toc a {
+      display:block;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:rgba(255,253,248,.86);
+      color:var(--ink);
+      box-shadow:0 10px 26px rgba(74,54,26,.06);
+    }
+
+    .card {
+      margin-top:18px;
+      padding:24px;
+      border:1px solid var(--line);
+      background:rgba(255,253,248,.96);
+      box-shadow:0 16px 42px rgba(74,54,26,.08);
+    }
+
+    .grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+
+    .callout {
+      padding:14px 16px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff7e8;
+      color:#4f3c24;
+      font-weight:750;
+    }
+
+    .callout.admin { background:var(--red-soft); border-color:rgba(207,61,50,.28); }
+    .callout.dev { background:var(--green-soft); border-color:rgba(39,117,96,.28); }
+    .callout.safe { background:var(--blue-soft); border-color:rgba(47,99,143,.26); }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      margin:12px 0;
+      background:#fffdf8;
+      overflow:hidden;
+    }
+
+    th,td {
+      padding:10px 12px;
+      border:1px solid var(--line);
+      text-align:left;
+      vertical-align:top;
+      font-size:14px;
+    }
+
+    th { background:#29342e; color:#fffdf8; font-weight:900; }
+    tbody tr:nth-child(even) td { background:#fff6e8; }
+
+    ul,ol { margin:8px 0 0; padding-left:22px; }
+    li { margin:4px 0; }
+
+    .pill {
+      display:inline-flex;
+      align-items:center;
+      min-height:24px;
+      padding:0 9px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .high { background:var(--red); color:#fff; }
+    .medium { background:var(--amber); color:#fff; }
+    .low { background:var(--green); color:#fff; }
+    .p0 { background:#8c1e1d; color:#fff; }
+    .p1 { background:#a36808; color:#fff; }
+    .p2 { background:#39705f; color:#fff; }
+    .todo { background:var(--blue-soft); color:#285d88; border:1px solid rgba(47,99,143,.3); }
+    .doing { background:#fff8e4; color:#9a6108; border:1px solid rgba(184,117,8,.45); }
+    .pending { background:var(--gray-soft); color:#5b5b5b; border:1px solid #cac2b6; }
+    .delay { background:#fff; color:var(--red); border:2px solid var(--red); }
+    .done { background:var(--green-soft); color:var(--green); border:1px solid rgba(39,117,96,.3); }
+
+    .kbd {
+      display:inline-flex;
+      padding:0 7px;
+      border:1px solid var(--line);
+      border-bottom-width:2px;
+      border-radius:6px;
+      background:#fffdf8;
+      font-size:12px;
+      font-weight:900;
+    }
+
+    .steps {
+      counter-reset:step;
+      display:grid;
+      gap:10px;
+      padding:0;
+      list-style:none;
+    }
+
+    .steps li {
+      counter-increment:step;
+      position:relative;
+      padding:12px 14px 12px 48px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fffaf1;
+    }
+
+    .steps li::before {
+      content:counter(step);
+      position:absolute;
+      left:14px;
+      top:13px;
+      width:24px;
+      height:24px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:var(--dark);
+      color:#fff;
+      font-size:12px;
+      font-weight:900;
+    }
+
+    @media (max-width: 860px) {
+      main { padding:16px 12px 36px; }
+      header { grid-template-columns:1fr; padding:22px; }
+      .grid-2,.grid-3 { grid-template-columns:1fr; }
+      h1 { font-size:28px; }
+      table { min-width:760px; }
+      .table-scroll { overflow:auto; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">User Guide</p>
+        <h1>flash-linear-attention-npu-io 网站使用说明</h1>
+        <p class="meta">面向项目管理员和开发同学，说明如何查看计划、提交交付件、维护任务和理解权限边界。</p>
+      </div>
+      <nav class="top-actions" aria-label="页面入口">
+        <a href="./index.html">返回项目看板</a>
+        <a href="./design-diagrams.html">查看设计图</a>
+      </nav>
+    </header>
+
+    <nav class="toc" aria-label="目录">
+      <a href="#quick-start">1. 快速开始</a>
+      <a href="#views">2. 三类视图</a>
+      <a href="#task-table">3. 任务明细</a>
+      <a href="#developer">4. 开发同学权限</a>
+      <a href="#admin">5. 管理员权限</a>
+      <a href="#rules">6. 状态、风险、优先级</a>
+      <a href="#accounts">7. 账号与密码</a>
+      <a href="#sync">8. PR 同步与实时刷新</a>
+      <a href="#faq">9. 常见问题</a>
+    </nav>
+
+    <section id="quick-start" class="card">
+      <h2>1. 快速开始</h2>
+      <div class="grid-2">
+        <div class="callout dev">
+          <strong>开发同学：</strong>登录后主要维护自己任务的 <code>PR 链接</code> 和 <code>转测报告</code>，同算子关联任务可查看但不可编辑。
+        </div>
+        <div class="callout admin">
+          <strong>管理员：</strong>可维护全量任务、人员、分组、专项、排期、风险、优先级和账号权限。
+        </div>
+      </div>
+      <ol class="steps">
+        <li>打开项目看板：<a href="./index.html">flash-linear-attention-npu 项目看板</a>。</li>
+        <li>只查看数据时无需登录；页面会默认展示当前时间窗口内的任务计划、风险和任务明细。</li>
+        <li>需要编辑时，在顶部工具栏输入账号和密码，点击 <span class="kbd">登录</span>。</li>
+        <li>修改字段后，单条任务可点行内保存；多条任务可统一点 <span class="kbd">保存全部</span>。</li>
+        <li>保存后数据写入 Cloudflare D1，其他人页面会在几秒内自动刷新或提示有新数据。</li>
+      </ol>
+    </section>
+
+    <section id="views" class="card">
+      <h2>2. 三类视图</h2>
+      <div class="grid-3">
+        <div class="callout">
+          <strong>甘特计划</strong>
+          <p>按任务展示计划起止时间。管理员编辑时可拖动任务条调整排期，也可在条边缘拉伸缩短或延长。</p>
+        </div>
+        <div class="callout">
+          <strong>人力视图</strong>
+          <p>按人员展示每天正在做什么。同一天多任务会叠放显示；中国法定节假日、周末和调休日会在日期列中标注。</p>
+        </div>
+        <div class="callout">
+          <strong>算子视图</strong>
+          <p>按算子聚合特性任务，一个算子一行，便于看该算子有哪些交付点、哪些特性延期或缺交付件。</p>
+        </div>
+      </div>
+      <h3>时间窗口怎么用</h3>
+      <ul>
+        <li><code>开始</code> 和 <code>结束</code> 定义整个时间轴范围。</li>
+        <li>绿色窗口条表示当前显示范围，初始化会铺满当前时间轴，可在轴内拖动或拉伸。</li>
+        <li><span class="kbd">前扩 7 天</span> 和 <span class="kbd">后扩 7 天</span> 用于扩大可观察范围。</li>
+        <li><span class="kbd">显示全量</span> 会把时间轴重置为覆盖全部任务计划的范围。</li>
+        <li>任务条末尾展示计划完成日期；延期阶段会用白底红框 <span class="pill delay">delay</span> 风格突出。</li>
+      </ul>
+    </section>
+
+    <section id="task-table" class="card">
+      <h2>3. 任务明细</h2>
+      <p>任务明细是最主要的编辑区域，支持筛选、排序、保存、PR/报告录入和任务管理。</p>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>功能</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>筛选</td><td>支持按风险、优先级、事项关键字、责任人、分组、专项、状态筛选。责任人筛选支持多选。</td></tr>
+            <tr><td>排序</td><td>点击表头可排序。默认排序是风险从高到低；风险相同时按优先级 P0 到 P2；仍相同时 DDL 更早的排在前面。</td></tr>
+            <tr><td>PR 链接</td><td>可从 PR 候选池选择，也支持输入 PR 号快速匹配。一个 PR 可关联多个任务，一个任务也可关联多个 PR。</td></tr>
+            <tr><td>转测报告</td><td>填写转测报告链接后，若 PR 已合入且报告齐备，状态会进入 <span class="pill done">done</span>。</td></tr>
+            <tr><td>保存</td><td>字段级保存，只提交变更字段，降低多人同时编辑时互相覆盖的风险。</td></tr>
+            <tr><td>最近变更</td><td>页面底部展示最近 10 条变更，可展开查看具体字段差异。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout safe">
+        如果保存时提示“后台已有新数据”，说明有人在你打开页面后提交过修改。此时应先刷新或手动合并，系统不会让你直接覆盖别人的修改。
+      </div>
+    </section>
+
+    <section id="developer" class="card">
+      <h2>4. 开发同学权限</h2>
+      <p>开发账号用于让每位同学维护自己的交付件，同时避免误改项目排期和风险判断。</p>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>权限项</th><th>开发同学是否可操作</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>查看任务</td><td>可以</td><td>进入编辑后，仅看到自己负责的任务，以及当前时间窗口内与自己任务属于同一算子的关联任务。</td></tr>
+            <tr><td>编辑自己任务的 PR 链接</td><td>可以</td><td>用于提交代码合入依据。可选 PR 候选池，也可输入 PR 号匹配。</td></tr>
+            <tr><td>编辑自己任务的转测报告</td><td>可以</td><td>用于闭环交付。报告齐备后状态可自动进入完成判断。</td></tr>
+            <tr><td>查看同算子关联任务</td><td>可以，只读</td><td>用于理解上下游和同算子交付情况，不允许编辑。</td></tr>
+            <tr><td>新增、删除任务</td><td>不可以</td><td>避免个人误删或新增无排期闭环的任务。</td></tr>
+            <tr><td>拖动、拉伸、切分甘特条</td><td>不可以</td><td>开发同学不能自行改排期。</td></tr>
+            <tr><td>修改风险、优先级、状态</td><td>不可以</td><td>这些字段由规则和管理员维护。</td></tr>
+            <tr><td>修改人员、分组、专项</td><td>不可以</td><td>组织结构由管理员维护。</td></tr>
+            <tr><td>修改自己的密码</td><td>可以</td><td>登录后点击 <span class="kbd">修改密码</span>，输入旧密码、新密码并确认后生效。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>开发同学推荐操作流程</h3>
+      <ol class="steps">
+        <li>登录后确认顶部状态显示自己的账号。</li>
+        <li>在任务明细中筛选自己的名字，或直接查看默认权限范围内的任务。</li>
+        <li>为自己负责的任务填写或选择 PR 链接。</li>
+        <li>转测完成后填写转测报告链接。</li>
+        <li>点击单行保存或保存全部。</li>
+        <li>如果发现任务责任人、排期、风险、优先级不正确，联系管理员调整。</li>
+      </ol>
+    </section>
+
+    <section id="admin" class="card">
+      <h2>5. 管理员权限</h2>
+      <p>管理员账号用于维护项目主数据和权限数据，应避免多人共用同一个管理员账号长期操作。</p>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>模块</th><th>管理员能力</th><th>关键规则</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>任务</td><td>新增、编辑、删除、保存全部、调整 PR/报告、风险、优先级、状态、责任人等字段。</td><td>删除任务属于高风险操作，会弹窗确认。</td></tr>
+            <tr><td>排期</td><td>拖动任务条、拉伸任务条、切分任务、修改起止日期。</td><td>改任务排期必须填写变更原因，否则不允许保存。</td></tr>
+            <tr><td>人员</td><td>新增、编辑、删除真实人员。</td><td><code>待排人力</code> 是系统占位，不在人员管理中编辑。删除人员前必须先解除其任务关联。</td></tr>
+            <tr><td>分组</td><td>新增、编辑、删除转测分组。</td><td>删除分组不会删除任务；关联任务和专项会转入默认分组。</td></tr>
+            <tr><td>专项</td><td>新增、编辑、删除专项。</td><td>删除专项不会删除任务；关联任务的专项字段会变为普通事项。</td></tr>
+            <tr><td>账号</td><td>创建开发账号、创建管理员账号、升级角色、重置密码。</td><td>重置密码属于高风险动作，应通过受控 Actions/script 执行，并单独转发密码。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>高风险操作确认</h3>
+      <ul>
+        <li>删除任务、删除人员、删除专项、删除分组、修改密码都会弹出确认。</li>
+        <li>改排期必须备注原因，原因会写入任务备注或甘特分段原因。</li>
+        <li>后台版本变化时保存会被拒绝，需要刷新或人工合并。</li>
+      </ul>
+    </section>
+
+    <section id="rules" class="card">
+      <h2>6. 状态、风险、优先级规则</h2>
+      <div class="grid-3">
+        <div>
+          <h3>状态</h3>
+          <ul>
+            <li><span class="pill delay">delay</span>：超过 DDL，且交付件未完备。</li>
+            <li><span class="pill done">done</span>：交付件完备。</li>
+            <li><span class="pill doing">doing</span>：未超过 DDL，且已规定起始闭环时间、正在推进。</li>
+            <li><span class="pill todo">todo</span>：待排人力，或只有事项但未规定闭环时间。</li>
+            <li><span class="pill pending">Pending</span>：更高优先级事项插入，导致任务因人力问题挂起。</li>
+          </ul>
+        </div>
+        <div>
+          <h3>风险</h3>
+          <ul>
+            <li><span class="pill low">低</span>：PR 已合入；或有未合入 PR 且距离 DDL 大于 5 天。</li>
+            <li><span class="pill medium">中</span>：有未合入 PR 且距离 DDL 小于等于 5 天；或无 PR 但距离 DDL 大于 10 天。</li>
+            <li><span class="pill high">高</span>：无 PR 且距离 DDL 小于等于 10 天；或责任人为待排人力/待填写。</li>
+          </ul>
+        </div>
+        <div>
+          <h3>优先级</h3>
+          <ul>
+            <li><span class="pill p0">P0</span>：有对外承诺的事项。</li>
+            <li><span class="pill p1">P1</span>：无对外承诺但收益较高、涉及易用性，或内部目标早于对外交付承诺。</li>
+            <li><span class="pill p2">P2</span>：不阻塞使用、收益较小、自规划类型事项。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout safe">
+        风险和状态会根据 PR、转测报告、DDL、责任人等信息联动更新。管理员仍可按实际情况修正，但应保留变更原因和审计记录。
+      </div>
+    </section>
+
+    <section id="accounts" class="card">
+      <h2>7. 账号与密码</h2>
+      <h3>账号来源</h3>
+      <ul>
+        <li>开发账号通常由 GitHub Actions 生成，artifact 名称为 <code>initial-person-accounts</code> 或统一的 <code>initial-accounts</code>。</li>
+        <li>管理员账号也可以写入统一的 <code>initial-accounts.csv</code>。</li>
+        <li>CSV 中 <code>username</code> 是登录账号，<code>password</code> 是初始密码，<code>role</code> 是权限角色。</li>
+        <li>如果 <code>password</code> 为空，表示该账号已存在且本次没有重置密码；旧密码无法反查，只能使用原始 artifact 或重置。</li>
+      </ul>
+      <h3>分发建议</h3>
+      <ul>
+        <li>不要把整份 CSV 发到群里。</li>
+        <li>按人单独转发其账号和初始密码。</li>
+        <li>提醒同学首次登录后立即点击 <span class="kbd">修改密码</span>。</li>
+        <li>artifact 有过期时间，管理员应下载后妥善保存，避免过期后找不到初始密码。</li>
+      </ul>
+      <h3>密码安全</h3>
+      <ul>
+        <li>网站不会明文存储密码；后端保存的是加盐哈希。</li>
+        <li>用户忘记密码时无法反查，只能由管理员重置。</li>
+        <li>管理员重置账号密码属于高风险操作，应确认身份后再执行。</li>
+      </ul>
+    </section>
+
+    <section id="sync" class="card">
+      <h2>8. PR 同步与实时刷新</h2>
+      <h3>PR 候选池</h3>
+      <ul>
+        <li>系统每天北京时间 08:00 和 14:00 扫描 <code>flashserve/flash-linear-attention-npu</code> 仓库 PR。</li>
+        <li>候选池包含已合入 PR 和未合入但仍打开的 PR；关闭但未合入的 PR 不纳入候选。</li>
+        <li>页面选择 PR 时支持输入 PR 号快速匹配，避免下拉列表过长。</li>
+        <li>已经关联的 PR 也可以重复关联到其他任务；一个任务也可以关联多个 PR。</li>
+      </ul>
+      <h3>数据实时刷新</h3>
+      <ul>
+        <li>前端会周期性检查后端版本。</li>
+        <li>如果没有本地未保存修改，后台有新版本时页面会自动刷新。</li>
+        <li>如果本地有未保存修改，页面不会自动覆盖，会提示先刷新或手动合并。</li>
+        <li>所有写操作会写入审计日志，可在“最近变更”查看最近 10 条。</li>
+      </ul>
+    </section>
+
+    <section id="faq" class="card">
+      <h2>9. 常见问题</h2>
+      <h3>为什么我登录后只看到一部分任务？</h3>
+      <p>开发账号只展示自己负责的任务，以及当前时间窗口内与自己任务属于同一算子的关联任务。如果窗口内没有自己的任务，关联任务也不会额外展示。</p>
+      <h3>为什么我不能拖动甘特条？</h3>
+      <p>只有管理员可以调整排期。开发账号只能维护自己的 PR 链接和转测报告。</p>
+      <h3>为什么保存时要求填写排期变更原因？</h3>
+      <p>排期变化会影响项目承诺和人力安排，因此必须备注原因，便于后续审计和复盘。</p>
+      <h3>为什么 PR 已填但风险没变低？</h3>
+      <p>需要确认 PR 是否在候选池中、是否已合入、是否保存成功，以及 DDL 距离是否触发规则。没有转测报告时，即使 PR 已合入也不代表完成。</p>
+      <h3>为什么任务显示 delay？</h3>
+      <p>到达 DDL 当天 24:00 后，如果 PR 未合入或转测报告未填写，任务会进入 delay。甘特图会用白底红框展示延期阶段，直到交付件完备。</p>
+      <h3>管理员账号能多人共用吗？</h3>
+      <p>不建议。多人共用会导致审计日志无法区分真实操作者，也更容易出现并发修改冲突。建议每位管理员使用独立账号。</p>
+    </section>
+  </main>
+</body>
+</html>
