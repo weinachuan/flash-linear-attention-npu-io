@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import io
 import os
 import smtplib
 import ssl
@@ -42,7 +43,7 @@ def read_mapping(path: Path) -> dict[str, str]:
     if not path.exists():
         raise FileNotFoundError(f"邮箱映射文件不存在：{path}")
     mapping: dict[str, str] = {}
-    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+    with open_text_with_fallback(path) as handle:
         reader = csv.DictReader(handle)
         required = {"name", "email"}
         if not reader.fieldnames or not required.issubset(set(reader.fieldnames)):
@@ -55,6 +56,15 @@ def read_mapping(path: Path) -> dict[str, str]:
                 continue
             mapping[name] = email
     return mapping
+
+
+def open_text_with_fallback(path: Path):
+    for encoding in ("utf-8-sig", "gb18030"):
+        try:
+            return io.StringIO(path.read_text(encoding=encoding))
+        except UnicodeDecodeError:
+            continue
+    return io.StringIO(path.read_text(encoding="utf-8-sig"))
 
 
 def collect_notices(notice_dir: Path) -> dict[str, Path]:
