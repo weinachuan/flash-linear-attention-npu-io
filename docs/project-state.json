@@ -1,6 +1,6 @@
 {
   "storageVersion": 2,
-  "generatedAt": "2026-06-20T19:28:05.803Z",
+  "generatedAt": "2026-06-21T17:48:45+08:00",
   "version": "0",
   "project": {
     "name": "flash-linear-attention-npu",
@@ -990,7 +990,7 @@
       "target": "",
       "owner": "鲍超俊",
       "status": "doing",
-      "risk": "低",
+      "risk": "中",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": "",
@@ -1003,7 +1003,7 @@
       "notes": "",
       "position": 19,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-21T17:48:45+08:00",
       "segments": [
         {
           "id": "seg-2015742518",
@@ -1424,7 +1424,7 @@
       "target": "",
       "owner": "法振尧",
       "status": "doing",
-      "risk": "低",
+      "risk": "中",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1437,7 +1437,7 @@
       "notes": "",
       "position": 33,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-21T17:48:45+08:00",
       "segments": [
         {
           "id": "seg-ef7acb84aa",
@@ -1579,7 +1579,7 @@
       "target": "",
       "owner": "吴雨舒",
       "status": "doing",
-      "risk": "低",
+      "risk": "中",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1592,7 +1592,7 @@
       "notes": "",
       "position": 38,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-21T17:48:45+08:00",
       "segments": [
         {
           "id": "seg-9c104cb6fd",
