@@ -1,7 +1,7 @@
 {
   "storageVersion": 2,
-  "generatedAt": "2026-06-21T17:48:45+08:00",
-  "version": "0",
+  "generatedAt": "2026-06-21T19:43:38.281Z",
+  "version": "2026-06-21T09:48:46.355Z",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -1003,7 +1003,7 @@
       "notes": "",
       "position": 19,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-21T17:48:45+08:00",
+      "updated_at": "2026-06-21T09:48:46.289Z",
       "segments": [
         {
           "id": "seg-2015742518",
@@ -1437,7 +1437,7 @@
       "notes": "",
       "position": 33,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-21T17:48:45+08:00",
+      "updated_at": "2026-06-21T09:48:46.289Z",
       "segments": [
         {
           "id": "seg-ef7acb84aa",
@@ -1592,7 +1592,7 @@
       "notes": "",
       "position": 38,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-21T17:48:45+08:00",
+      "updated_at": "2026-06-21T09:48:46.289Z",
       "segments": [
         {
           "id": "seg-9c104cb6fd",
