@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-06-22T12:09:10+08:00",
+  "generatedAt": "2026-06-22T19:52:36+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
   "total": 50,
   "items": [
     {
-      "number": 70,
-      "title": "full 算子增加GVA和支持Vdim 256",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/70",
+      "number": 72,
+      "title": "full 算子 add vdim 256 && GVA",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/72",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-22T03:43:43Z",
-      "createdAt": "2026-06-18T02:40:40Z",
+      "updatedAt": "2026-06-22T09:33:38Z",
+      "createdAt": "2026-06-22T08:01:31Z",
       "headRef": "main",
       "labels": []
     },
@@ -35,20 +35,8 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-22T03:52:38Z",
+      "updatedAt": "2026-06-22T09:29:45Z",
       "createdAt": "2026-06-16T12:27:30Z",
-      "headRef": "main",
-      "labels": []
-    },
-    {
-      "number": 55,
-      "title": "feat: add causal_conv1d_bwd custom op",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/55",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-22T03:57:43Z",
-      "createdAt": "2026-06-15T02:32:37Z",
       "headRef": "main",
       "labels": []
     },
@@ -59,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-18T07:02:37Z",
+      "updatedAt": "2026-06-22T11:52:09Z",
       "createdAt": "2026-06-13T06:33:24Z",
       "headRef": "main",
       "labels": []
@@ -217,6 +205,18 @@
       "mergedAt": "2026-06-15T09:24:10Z",
       "updatedAt": "2026-06-15T09:24:11Z",
       "createdAt": "2026-06-15T09:14:12Z",
+      "headRef": "main",
+      "labels": []
+    },
+    {
+      "number": 55,
+      "title": "feat: add causal_conv1d_bwd custom op",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/55",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-22T08:11:40Z",
+      "updatedAt": "2026-06-22T08:11:40Z",
+      "createdAt": "2026-06-15T02:32:37Z",
       "headRef": "main",
       "labels": []
     },
