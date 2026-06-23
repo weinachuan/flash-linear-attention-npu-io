@@ -1,19 +1,31 @@
 {
-  "generatedAt": "2026-06-23T11:29:50+08:00",
+  "generatedAt": "2026-06-23T17:37:07+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 52,
+  "total": 54,
   "items": [
     {
-      "number": 73,
-      "title": "perf: optimize ChunkBwdDvLocal pipeline",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/73",
+      "number": 76,
+      "title": "add <<<>>> callable for dqkwg",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/76",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-23T03:16:17Z",
-      "createdAt": "2026-06-22T17:29:06Z",
-      "headRef": "20260616_235015_update-chunk-bwd-dv-local-docs",
+      "updatedAt": "2026-06-23T08:14:54Z",
+      "createdAt": "2026-06-23T08:14:36Z",
+      "headRef": "0622-dqkwg-call",
+      "labels": []
+    },
+    {
+      "number": 75,
+      "title": "add da gva 950",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/75",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-23T07:09:02Z",
+      "createdAt": "2026-06-23T07:08:52Z",
+      "headRef": "da_gva_950",
       "labels": []
     },
     {
@@ -35,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-23T03:23:11Z",
+      "updatedAt": "2026-06-23T07:55:42Z",
       "createdAt": "2026-06-16T12:27:30Z",
       "headRef": "main",
       "labels": []
@@ -47,7 +59,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-23T03:25:20Z",
+      "updatedAt": "2026-06-23T09:35:47Z",
       "createdAt": "2026-06-13T06:33:24Z",
       "headRef": "main",
       "labels": []
@@ -134,6 +146,18 @@
       "updatedAt": "2026-06-23T03:12:11Z",
       "createdAt": "2026-06-23T02:21:57Z",
       "headRef": "main",
+      "labels": []
+    },
+    {
+      "number": 73,
+      "title": "perf: optimize ChunkBwdDvLocal pipeline",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/73",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-23T06:18:50Z",
+      "updatedAt": "2026-06-23T06:18:50Z",
+      "createdAt": "2026-06-22T17:29:06Z",
+      "headRef": "20260616_235015_update-chunk-bwd-dv-local-docs",
       "labels": []
     },
     {
