@@ -1,6 +1,6 @@
 {
   "storageVersion": 2,
-  "generatedAt": "2026-06-23T20:07:38.050Z",
+  "generatedAt": "2026-06-24T17:28:04+08:00",
   "version": "2026-06-23T03:29:51.147Z",
   "project": {
     "name": "flash-linear-attention-npu",
@@ -1600,7 +1600,7 @@
       "target": "",
       "owner": "吴雨舒",
       "status": "doing",
-      "risk": "中",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1613,7 +1613,7 @@
       "notes": "",
       "position": 38,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-21T09:48:46.289Z",
+      "updated_at": "2026-06-24T17:28:04+08:00",
       "segments": [
         {
           "id": "seg-9c104cb6fd",
