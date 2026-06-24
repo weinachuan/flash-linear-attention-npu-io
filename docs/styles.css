@@ -303,6 +303,8 @@ td .link-input { min-width:220px; }
 .admin-item { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; padding:9px 10px; border:1px solid var(--line); background:#fffaf1; }
 .admin-item strong { font-size:13px; }
 .admin-item small { display:block; margin-top:3px; color:var(--muted); }
+.admin-pl-label { display:inline-flex; align-items:center; gap:5px; margin-left:8px; color:var(--muted); font-size:12px; font-weight:900; }
+.admin-pl-label select { min-width:92px; padding:4px 7px; font-size:12px; }
 .panel-title-row { display:flex; justify-content:space-between; gap:14px; align-items:center; margin-bottom:12px; }
 .panel-title-row h2 { margin:0; }
 .view-switch { display:flex; gap:6px; padding:4px; border:1px solid var(--line); border-radius:999px; background:#f6eddf; }
@@ -357,6 +359,7 @@ td .link-input { min-width:220px; }
 .person-chip { display:inline-flex; align-items:center; max-width:100%; padding:4px 10px; border-radius:999px; border:1px solid rgba(39,117,96,.22); background:#ecf6f1; color:#174f41; font-weight:900; }
 .person-chip em { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-style:normal; font-size:12px; }
 .person-chip.placeholder { border-color:rgba(186,121,14,.28); background:#fff3db; color:#8a570c; }
+.pl-chip { display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(28,45,38,.18); background:#eef3ec; color:#1d3128; border-radius:999px; padding:3px 9px; font-weight:900; white-space:nowrap; }
 .owner-preview { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
 .operator-view { min-height:100%; height:100%; padding:12px; overflow-x:auto; overflow-y:scroll; scrollbar-gutter:stable; }
 .operator-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:12px; }

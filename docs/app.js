@@ -54,6 +54,8 @@ const OPERATOR_OWNER_RULES = {
 };
 
 const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "Pending"], ["delayed", "delay"], ["done", "done"]];
+const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇"];
+const DEFAULT_PL = PL_OPTIONS[0];
 const AUDIT_TASK_FIELDS = ["title", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "pr_link", "test_report", "notes"];
 const AUDIT_FIELD_LABELS = {
   title: "事项",
@@ -75,7 +77,8 @@ const TABLE_SORT_LABELS = {
   priority: "优先级",
   title: "事项",
   owner: "责任人",
-  group_id: "分组",
+  owner_pl: "责任人分组",
+  group_id: "转测迭代计划排期",
   special_id: "专项",
   date: "计划日期",
   pr_link: "PR 链接",
@@ -110,7 +113,7 @@ const state = {
   view: { start: "", end: "", total: 1 },
   timeline: { start: "", end: "", total: 1 },
   activePlanView: "timeline",
-  filters: { q: "", risk: "", priority: "", owner: [], group_id: "", special_id: "", status: "" },
+  filters: { q: "", risk: "", priority: "", owner: [], pl: "", group_id: "", special_id: "", status: "" },
   sort: { field: "risk", direction: "desc" },
   ownerFilterOpen: false,
   ownerFilterQuery: "",
@@ -277,10 +280,12 @@ function filteredTasks() {
     const q = state.filters.q.toLowerCase();
     const ownerNames = taskOwnerNames(task);
     const ownerFilters = ownerFilterValues();
-    return (!q || [task.title, task.owner, task.scope, ownerNames.join(" ")].some((value) => String(value || "").toLowerCase().includes(q)))
+    const plNames = taskPlNames(task);
+    return (!q || [task.title, task.owner, task.scope, ownerNames.join(" "), plNames.join(" ")].some((value) => String(value || "").toLowerCase().includes(q)))
       && (!state.filters.risk || task.risk === state.filters.risk)
       && (!state.filters.priority || task.priority === state.filters.priority)
       && (!ownerFilters.length || ownerFilters.some((name) => ownerNames.includes(name)))
+      && (!state.filters.pl || plNames.includes(state.filters.pl))
       && (!state.filters.group_id || task.group_id === state.filters.group_id)
       && (!state.filters.special_id || (state.filters.special_id === "__none__" ? !task.special_id : task.special_id === state.filters.special_id))
       && (!state.filters.status || task.status === state.filters.status);
@@ -314,6 +319,7 @@ function compareTaskByField(a, b, field) {
   if (field === "group_id") return groupTitle(a.group_id).localeCompare(groupTitle(b.group_id), "zh-CN");
   if (field === "special_id") return specialTitle(a.special_id).localeCompare(specialTitle(b.special_id), "zh-CN");
   if (field === "owner") return taskOwnerNames(a).join("、").localeCompare(taskOwnerNames(b).join("、"), "zh-CN");
+  if (field === "owner_pl") return taskPlNames(a).join("、").localeCompare(taskPlNames(b).join("、"), "zh-CN");
   if (field === "title") return displayTaskTitle(a).localeCompare(displayTaskTitle(b), "zh-CN");
   if (field === "pr_link" || field === "test_report") return String(a[field] || "").localeCompare(String(b[field] || ""), "zh-CN");
   return 0;
@@ -449,6 +455,7 @@ function renderTableFilters() {
     tableFilterSelect("priority", [["", "全部"], ["P0", "P0"], ["P1", "P1"], ["P2", "P2"]]),
     `<th><input data-table-filter="q" type="search" placeholder="筛事项" value="${escapeAttr(state.filters.q)}"></th>`,
     ownerFilterDropdown(),
+    tableFilterSelect("pl", [["", "全部"], ...plFilterOptions().map((pl) => [pl, pl])]),
     tableFilterSelect("group_id", [["", "全部"], ...groups.map((group) => [group.id, group.title])]),
     tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...specials.map((special) => [special.id, special.title])]),
     `<th></th>`,
@@ -598,12 +605,21 @@ function ownerFilterOptions() {
     .map((name) => [name, name]);
 }
 
+function plFilterOptions() {
+  return uniqueStrings([
+    ...PL_OPTIONS,
+    ...(state.data.people || []).map((person) => normalizePl(person.pl)),
+    ...(visibleTasksForCurrentUser() || []).flatMap(taskPlNames),
+  ]).sort((a, b) => a.localeCompare(b, "zh-CN"));
+}
+
 function operatorOwnerRuleNames() {
   return uniqueStrings(Object.values(OPERATOR_OWNER_RULES).flat().map((rule) => rule.owner));
 }
 
 function isSelectableOwnerName(name) {
-  return Boolean(name && !/[、/,，;；&]/.test(name) && !isPlaceholderOwner(name));
+  const normalized = normalizeOwnerName(name);
+  return Boolean(normalized && !/[、/,，;；&]/.test(normalized) && (!isPlaceholderOwner(normalized) || normalized === "待排人力"));
 }
 
 function updateTableFilter(event) {
@@ -1306,6 +1322,7 @@ function ensurePeopleCatalog() {
       id: current?.id || `P${String(index + 1).padStart(2, "0")}`,
       name,
       position: Number.isFinite(current?.position) ? current.position : index,
+      pl: normalizePl(current?.pl),
       placeholder: isPlaceholderOwner(name),
     });
   });
@@ -1333,7 +1350,10 @@ function taskOwnerNames(task, referenceDate = "") {
 
 function taskPeople(task, referenceDate = "") {
   const byName = new Map((state.data.people || []).map((person) => [person.name, person]));
-  return taskOwnerNames(task, referenceDate).map((name) => byName.get(name) || { id: "P??", name, position: 9999, placeholder: isPlaceholderOwner(name) });
+  return taskOwnerNames(task, referenceDate).map((name) => {
+    const person = byName.get(name);
+    return person ? { ...person, pl: normalizePl(person.pl) } : { id: "P??", name, position: 9999, pl: DEFAULT_PL, placeholder: isPlaceholderOwner(name) };
+  });
 }
 
 function peopleForTasks(tasks) {
@@ -1380,6 +1400,24 @@ function personChipHtml(person) {
 
 function ownerChipsHtml(task) {
   return taskPeople(task).map(personChipHtml).join("");
+}
+
+function normalizePl(value) {
+  const text = String(value || "").trim();
+  return PL_OPTIONS.includes(text) ? text : DEFAULT_PL;
+}
+
+function taskPlNames(task, referenceDate = "") {
+  return uniqueStrings(taskPeople(task, referenceDate).map((person) => normalizePl(person.pl)));
+}
+
+function taskPlChipsHtml(task) {
+  return taskPlNames(task).map((pl) => `<span class="pl-chip">${escapeHtml(pl)}</span>`).join("");
+}
+
+function plSelectHtml(value) {
+  const current = normalizePl(value);
+  return `<select data-person-pl>${PL_OPTIONS.map((pl) => `<option value="${escapeAttr(pl)}" ${pl === current ? "selected" : ""}>${escapeHtml(pl)}</option>`).join("")}</select>`;
 }
 
 function ownerPickerOptions(task) {
@@ -1690,6 +1728,7 @@ function readOnlyTaskRowHtml(task, className = "") {
       <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
       <td>${escapeHtml(displayTaskTitle(task))}</td>
       <td>${ownerChipsHtml(task)}</td>
+      <td>${taskPlChipsHtml(task)}</td>
       <td>${escapeHtml(groupTitle(task.group_id))}</td>
       <td>${escapeHtml(specialTitle(task.special_id))}</td>
       <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
@@ -1716,6 +1755,7 @@ function developerTaskRowHtml(task) {
       <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
       <td>${escapeHtml(displayTaskTitle(task))}</td>
       <td>${ownerChipsHtml(task)}</td>
+      <td>${taskPlChipsHtml(task)}</td>
       <td>${escapeHtml(groupTitle(task.group_id))}</td>
       <td>${escapeHtml(specialTitle(task.special_id))}</td>
       <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
@@ -1745,6 +1785,7 @@ function renderRows(tasks) {
         <td>${selectHtml("priority", [["P0","P0"],["P1","P1"],["P2","P2"]], task.priority)}</td>
         <td><input class="title-input" data-field="title" value="${escapeAttr(task.title)}"></td>
         <td>${ownerEditorHtml(task)}</td>
+        <td>${taskPlChipsHtml(task)}</td>
         <td>${selectHtml("group_id", state.data.groups.map((g) => [g.id, g.title]), task.group_id)}</td>
         <td>${selectHtml("special_id", [["","普通事项"], ...state.data.specials.map((s) => [s.id, s.title])], task.special_id || "")}</td>
         <td><input type="date" data-field="start_date" value="${escapeAttr(task.start_date)}"> ~ <input type="date" data-field="end_date" value="${escapeAttr(task.end_date)}"></td>
@@ -1866,6 +1907,7 @@ function renderAdmin() {
       <div class="admin-item" data-person-id="${escapeAttr(person.id)}">
         <div>
           <strong>${personChipHtml(person)}</strong>
+          <label class="admin-pl-label">PL ${plSelectHtml(person.pl)}</label>
           <small>${assignmentCount} 项关联任务 · ${idle ? "当前窗口空闲" : "当前窗口有排期"}</small>
         </div>
         <span class="ops">
@@ -1876,6 +1918,7 @@ function renderAdmin() {
     `;
   }).join("") : `<p class="empty">暂无真实人员。系统占位人力不会在这里展示。</p>`;
   document.querySelectorAll("[data-admin]").forEach((button) => button.addEventListener("click", () => handleAdminAction(button).catch(showError)));
+  document.querySelectorAll("[data-person-pl]").forEach((select) => select.addEventListener("change", () => handlePersonPlChange(select).catch(showError)));
 }
 
 function renderAudit() {
@@ -2240,7 +2283,7 @@ async function addPerson() {
   ensurePeopleCatalog();
   if ((state.data.people || []).some((person) => person.name === name)) return alert("人员已存在。");
   const maxPosition = Math.max(-1, ...(state.data.people || []).map((person) => Number(person.position) || 0));
-  const person = { id: `person-${crypto.randomUUID().slice(0, 10)}`, name, position: maxPosition + 1, placeholder: false };
+  const person = { id: `person-${crypto.randomUUID().slice(0, 10)}`, name, position: maxPosition + 1, pl: DEFAULT_PL, placeholder: false };
   state.data.people.push(person);
   if (WORKER_API_BASE) {
     const entry = cloudflareAuditEntry("person.create", "person", person.id, `新增人员：${name}`, { name });
@@ -2252,6 +2295,28 @@ async function addPerson() {
     return;
   }
   await saveRepository(`新增人员：${name}`, "person.create", "person", person.id, { name });
+}
+
+async function handlePersonPlChange(select) {
+  const personId = select.closest("[data-person-id]")?.dataset.personId;
+  const person = state.data.people.find((item) => item.id === personId);
+  if (!person || person.placeholder) return;
+  const pl = normalizePl(select.value);
+  if (normalizePl(person.pl) === pl) return;
+  person.pl = pl;
+  if (WORKER_API_BASE) {
+    const entry = cloudflareAuditEntry("person.patch", "person", person.id, `更新人员 PL：${person.name} -> ${pl}`, { name: person.name, pl });
+    const result = await workerPatch(`/api/people/${encodeURIComponent(person.id)}`, {
+      fields: { pl },
+      auditEntry: entry,
+    });
+    if (result.person) mergeEntityItem("people", result.person);
+    applyCloudflareMutationResult(result);
+    if (result.entry) state.audit.push(result.entry);
+    render();
+    return;
+  }
+  await saveRepository(`更新人员 PL：${person.name} -> ${pl}`, "person.update_pl", "person", person.id, { name: person.name, pl });
 }
 
 async function handleAdminAction(button) {

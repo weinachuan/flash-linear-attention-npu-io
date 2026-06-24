@@ -115,11 +115,12 @@ def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, An
         ]))
 
     for index, person in enumerate(state.get("people", [])):
-        lines.append(insert("people", ["id", "name", "position", "placeholder"], [
+        lines.append(insert("people", ["id", "name", "position", "placeholder", "pl"], [
             person.get("id"),
             person.get("name") or "待排人力",
             RawSql(sql_int(person.get("position"), index)),
             RawSql("1" if person.get("placeholder") else "0"),
+            person.get("pl") or "赵臣臣",
         ]))
 
     for index, task in enumerate(state.get("tasks", [])):

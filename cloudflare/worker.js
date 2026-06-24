@@ -4,6 +4,8 @@ const DEFAULT_PROJECT = {
   baselineDate: "2026-06-15",
   projectOwner: { name: "待填写", email: "待填写" },
 };
+const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇"];
+const DEFAULT_PL = PL_OPTIONS[0];
 const PASSWORD_HASH_ITERATIONS = 100000;
 
 export default {
@@ -154,6 +156,7 @@ async function exportState(env) {
     specials: await selectAll(env, "SELECT * FROM specials ORDER BY position, title"),
     people: (await selectAll(env, "SELECT * FROM people ORDER BY position, name")).map((person) => ({
       ...person,
+      pl: normalizePl(person.pl),
       placeholder: Boolean(person.placeholder),
     })),
     tasks: (tasks.results || []).map((task) => ({
@@ -205,12 +208,13 @@ async function replaceState(env, state) {
 
   (state.people || []).forEach((person, index) => {
     statements.push(env.DB.prepare(
-      "INSERT INTO people(id, name, position, placeholder) VALUES (?, ?, ?, ?)"
+      "INSERT INTO people(id, name, position, placeholder, pl) VALUES (?, ?, ?, ?, ?)"
     ).bind(
       person.id,
       person.name || "待排人力",
       numberOr(person.position, index),
       person.placeholder ? 1 : 0,
+      normalizePl(person.pl),
     ));
   });
 
@@ -1064,8 +1068,8 @@ const ENTITY_CONFIG = {
     singular: "person",
     table: "people",
     label: "人员",
-    fields: new Set(["name", "position", "placeholder"]),
-    select: "SELECT id, name, position, placeholder FROM people WHERE id = ?",
+    fields: new Set(["name", "position", "placeholder", "pl"]),
+    select: "SELECT id, name, position, placeholder, pl FROM people WHERE id = ?",
   },
 };
 
@@ -1117,6 +1121,7 @@ function normalizeEntityForInsert(type, item) {
       name,
       position: numberOr(item.position, 0),
       placeholder: item.placeholder ? 1 : 0,
+      pl: normalizePl(item.pl),
     };
   }
   throw withStatus(404, "unsupported entity");
@@ -1135,6 +1140,7 @@ function normalizeEntityPatchFields(type, fields) {
 function normalizeEntityValue(type, field, value) {
   if (field === "position") return numberOr(value, 0);
   if (field === "collapsed" || field === "placeholder") return value ? 1 : 0;
+  if (field === "pl") return normalizePl(value);
   if (field === "group_id") return value || null;
   if (field === "due_date" || field === "start_date" || field === "end_date") {
     if (!isYmd(value)) throw withStatus(400, `${field} must be YYYY-MM-DD`);
@@ -1159,8 +1165,8 @@ async function insertEntity(env, type, item) {
   if (type === "people") {
     const duplicate = await env.DB.prepare("SELECT id FROM people WHERE name = ?").bind(item.name).first();
     if (duplicate) throw withStatus(409, "person already exists");
-    await env.DB.prepare("INSERT INTO people(id, name, position, placeholder) VALUES (?, ?, ?, ?)")
-      .bind(item.id, item.name, item.position, item.placeholder ? 1 : 0)
+    await env.DB.prepare("INSERT INTO people(id, name, position, placeholder, pl) VALUES (?, ?, ?, ?, ?)")
+      .bind(item.id, item.name, item.position, item.placeholder ? 1 : 0, normalizePl(item.pl))
       .run();
   }
 }
@@ -1168,7 +1174,7 @@ async function insertEntity(env, type, item) {
 async function getEntityById(env, type, id) {
   const row = await env.DB.prepare(entityConfig(type).select).bind(id).first();
   if (!row) return null;
-  if (type === "people") return { ...row, placeholder: Boolean(row.placeholder) };
+  if (type === "people") return { ...row, pl: normalizePl(row.pl), placeholder: Boolean(row.placeholder) };
   if (type === "specials") return { ...row, collapsed: Boolean(row.collapsed) };
   return row;
 }
@@ -1491,6 +1497,11 @@ function nowIso() {
 function numberOr(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+}
+
+function normalizePl(value) {
+  const text = String(value || "").trim();
+  return PL_OPTIONS.includes(text) ? text : DEFAULT_PL;
 }
 
 function clamp(value, min, max) {

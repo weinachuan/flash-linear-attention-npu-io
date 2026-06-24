@@ -78,6 +78,7 @@ def find_user(users: list[dict[str, Any]], name: str) -> dict[str, Any] | None:
     for user in users:
         if normalize_name(user.get("username")) == target:
             return user
+    for user in users:
         if normalize_name(user.get("display_name")) == target:
             return user
         if normalize_name(user.get("displayName")) == target:

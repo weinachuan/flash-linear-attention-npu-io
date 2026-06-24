@@ -270,127 +270,148 @@
       "id": "P16",
       "name": "待排人力",
       "position": 0,
-      "placeholder": true
+      "placeholder": true,
+      "pl": "赵臣臣"
     },
     {
       "id": "P01",
       "name": "方梓阳",
       "position": 1,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P02",
       "name": "吴雨舒",
       "position": 2,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P03",
       "name": "陈琳鑫",
       "position": 3,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P04",
       "name": "叶倩雯",
       "position": 4,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P05",
       "name": "黄浚哲",
       "position": 5,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P06",
       "name": "杨子奇",
       "position": 6,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P07",
       "name": "陈市",
       "position": 7,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P08",
       "name": "龚翔宇",
       "position": 8,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P09",
       "name": "姜东明",
       "position": 9,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P10",
       "name": "江波",
       "position": 10,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P11",
       "name": "刘福疆",
       "position": 11,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P12",
       "name": "石俊杰",
       "position": 12,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P13",
       "name": "鲍超俊",
       "position": 13,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P14",
       "name": "江奇",
       "position": 14,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P15",
       "name": "张艺",
       "position": 15,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P17",
       "name": "张硕累",
       "position": 16,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P18",
       "name": "法振尧",
       "position": 17,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P19",
       "name": "周云飞",
       "position": 18,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "P20",
       "name": "李佳敏",
       "position": 19,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     },
     {
       "id": "person-赵怡然",
       "name": "赵怡然",
       "position": 20,
-      "placeholder": false
+      "placeholder": false,
+      "pl": "赵臣臣"
     }
   ],
   "tasks": [
