@@ -1,7 +1,7 @@
 {
   "storageVersion": 2,
-  "generatedAt": "2026-06-24T17:28:04+08:00",
-  "version": "2026-06-23T03:29:51.147Z",
+  "generatedAt": "2026-06-24T19:47:54.553Z",
+  "version": "2026-06-24T11:42:43.045Z",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -1106,7 +1106,7 @@
       "status": "doing",
       "risk": "高",
       "priority": "P0",
-      "group_id": "M-2026-06-25",
+      "group_id": "M-2026-07-15",
       "special_id": null,
       "start_date": "2026-06-23",
       "end_date": "2026-07-03",
@@ -1117,7 +1117,7 @@
       "notes": "6-23下发，1.5周人力",
       "position": 22,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-23T02:39:32.582Z",
+      "updated_at": "2026-06-24T01:43:58.415Z",
       "segments": [
         {
           "id": "seg-c065d374c1",
@@ -1168,7 +1168,7 @@
       "status": "doing",
       "risk": "中",
       "priority": "P0",
-      "group_id": "M-2026-06-25",
+      "group_id": "M-2026-07-15",
       "special_id": null,
       "start_date": "2026-06-23",
       "end_date": "2026-07-08",
@@ -1179,7 +1179,7 @@
       "notes": "6-23下发，2人周",
       "position": 24,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-23T02:40:29.617Z",
+      "updated_at": "2026-06-24T03:51:56.094Z",
       "segments": [
         {
           "id": "seg-3e03d6ffc0",
@@ -1540,24 +1540,24 @@
       "status": "doing",
       "risk": "高",
       "priority": "P1",
-      "group_id": "M-2026-06-25",
+      "group_id": "M-2026-07-15",
       "special_id": "launch",
-      "start_date": "2026-06-19",
-      "end_date": "2026-06-25",
+      "start_date": "2026-06-25",
+      "end_date": "2026-06-28",
       "evidence": [],
       "dependencies": [],
       "pr_link": "",
       "test_report": "",
-      "notes": "",
+      "notes": "6.25号开始执行，工作时间三天",
       "position": 36,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-24T11:42:42.507Z",
       "segments": [
         {
           "id": "seg-797e0353b8",
-          "start_date": "2026-06-19",
-          "end_date": "2026-06-25",
-          "reason": "",
+          "start_date": "2026-06-25",
+          "end_date": "2026-06-28",
+          "reason": "6.25号开始执行，工作时间三天",
           "position": 0
         }
       ]
@@ -1578,11 +1578,11 @@
       "evidence": [],
       "dependencies": [],
       "pr_link": "",
-      "test_report": "",
+      "test_report": "1111",
       "notes": "",
       "position": 37,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-22T09:36:23.204Z",
+      "updated_at": "2026-06-24T08:36:41.500Z",
       "segments": [
         {
           "id": "seg-709935c665",
@@ -1613,7 +1613,7 @@
       "notes": "",
       "position": 38,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-24T17:28:04+08:00",
+      "updated_at": "2026-06-24T09:28:05.264Z",
       "segments": [
         {
           "id": "seg-9c104cb6fd",
