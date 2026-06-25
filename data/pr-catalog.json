@@ -1,9 +1,33 @@
 {
-  "generatedAt": "2026-06-25T19:15:40+08:00",
+  "generatedAt": "2026-06-25T23:29:45+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 65,
+  "total": 67,
   "items": [
+    {
+      "number": 92,
+      "title": "feat(recurrent_gated_delta_rule): recurrent_gated_delta_rule 支持<<<>>>",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/92",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-25T13:12:28Z",
+      "createdAt": "2026-06-25T12:59:30Z",
+      "headRef": "rrr",
+      "labels": []
+    },
+    {
+      "number": 91,
+      "title": "Feature/gdn one click package",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/91",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-25T12:40:29Z",
+      "createdAt": "2026-06-25T12:40:19Z",
+      "headRef": "feature/gdn-one-click-package",
+      "labels": []
+    },
     {
       "number": 90,
       "title": "chunk_bwd_dv_local tiling代码合并",
@@ -11,7 +35,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-25T10:23:02Z",
+      "updatedAt": "2026-06-25T11:23:47Z",
       "createdAt": "2026-06-25T10:19:34Z",
       "headRef": "cs-dev",
       "labels": []
@@ -71,7 +95,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-25T11:06:38Z",
+      "updatedAt": "2026-06-25T14:32:20Z",
       "createdAt": "2026-06-13T06:33:24Z",
       "headRef": "main",
       "labels": []
