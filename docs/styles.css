@@ -217,19 +217,6 @@ body.editing .bar:hover { box-shadow:0 0 0 2px rgba(32,37,31,.18); }
     #fffdf8 !important;
   box-shadow:0 0 0 1px rgba(207,61,50,.35), 0 0 14px rgba(207,61,50,.42);
 }
-.bar[data-auto-extended="true"]::after {
-  content:"delay";
-  position:absolute;
-  right:5px;
-  top:50%;
-  transform:translateY(-50%);
-  color:var(--high);
-  font-size:9px;
-  font-weight:950;
-  line-height:1;
-  letter-spacing:.02em;
-  text-transform:uppercase;
-}
 .task-detail-panel { min-height:340px; }
 .table-wrap { overflow:auto; min-height:220px; max-height:58vh; background:#fffaf1; }
 table { width:100%; min-width:1500px; border-collapse:collapse; }
@@ -458,27 +445,13 @@ td .link-input { min-width:220px; }
 .work-chip em { margin-bottom:2px; font-size:9px; font-style:normal; opacity:.86; }
 .work-chip b { font-size:11px; }
 .work-chip.delay-chip {
-  position:relative;
   min-height:36px;
-  padding-right:38px;
   border:2px solid var(--high);
   background:
     repeating-linear-gradient(-45deg, rgba(207,61,50,.18) 0 4px, transparent 4px 8px),
     #fffdf8 !important;
   color:var(--high);
   box-shadow:0 0 0 1px rgba(207,61,50,.32), 0 0 12px rgba(207,61,50,.24);
-}
-.work-chip.delay-chip::after {
-  content:"delay";
-  position:absolute;
-  right:6px;
-  top:50%;
-  transform:translateY(-50%);
-  color:var(--high);
-  font-size:9px;
-  font-weight:950;
-  letter-spacing:.02em;
-  text-transform:uppercase;
 }
 .work-chip.delay-chip em { color:#9f2c26; opacity:.82; }
 .work-chip.delay-chip b { color:var(--high); }
@@ -510,8 +483,8 @@ td .link-input { min-width:220px; }
 .operator-bar.delay-chip {
   position:absolute;
   overflow:hidden;
-  min-width:58px;
-  padding-right:42px;
+  min-width:40px;
+  padding:0;
   border:2px solid var(--high);
   background:
     repeating-linear-gradient(-45deg, rgba(207,61,50,.18) 0 4px, transparent 4px 8px),
@@ -522,20 +495,6 @@ td .link-input { min-width:220px; }
 .operator-bar.delay-chip b { display:none; }
 .operator-bar.delay-chip small {
   display:none;
-}
-.operator-bar.delay-chip::after {
-  content:"delay";
-  position:absolute;
-  left:50%;
-  right:auto;
-  top:50%;
-  transform:translate(-50%,-50%);
-  color:var(--high);
-  font-size:9px;
-  font-weight:950;
-  line-height:1;
-  letter-spacing:.02em;
-  text-transform:uppercase;
 }
 .link-pill { display:inline-flex; align-items:center; min-height:24px; margin-right:4px; padding:3px 8px; border-radius:999px; border:1px solid rgba(39,117,96,.24); background:#eef7f2; color:#1e6856; text-decoration:none; font-size:12px; font-weight:900; }
 .link-pill:hover { background:#dff0e8; }

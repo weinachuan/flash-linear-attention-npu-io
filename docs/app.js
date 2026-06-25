@@ -839,7 +839,7 @@ function taskRenderSegments(task) {
       id: `delay-${segments[latestIndex].id || latestIndex}`,
       start_date: delayStart,
       end_date: today,
-      reason: "delay 自动延长",
+      reason: "自动延长",
       position: segments.length,
       source_index: latestIndex,
       auto_extended: true,
@@ -1079,7 +1079,7 @@ function renderGantt(tasks) {
       const clippedEnd = minDate(segment.end_date, end);
       const left = daysBetween(start, clippedStart) / total * 100;
       const width = Math.max(1.2, (daysBetween(clippedStart, clippedEnd) + 1) / total * 100);
-      const titleSuffix = segment.auto_extended ? "；delay 自动延长至今日，交付件完备后停止延长" : "；编辑模式下拖动移动，边缘拉伸";
+      const titleSuffix = segment.auto_extended ? "；自动延长至今日，交付件完备后停止延长" : "；编辑模式下拖动移动，边缘拉伸";
       return `<span class="bar" data-risk="${task.risk}" data-status="${statusClass(evaluateTaskDelivery(task).status)}" data-auto-extended="${segment.auto_extended ? "true" : "false"}" data-task-id="${escapeAttr(task.id)}" data-segment-index="${segment.source_index ?? index}" style="left:${left}%;width:${width}%" title="${escapeHtml(displayTaskTitle(task))}：${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}${titleSuffix}"><small>${escapeHtml(formatMonthDay(segment.end_date))}</small></span>`;
     }).join("");
     return `<div class="gantt-row"><div class="gantt-title">${escapeHtml(displayTaskTitle(task))}</div><div class="track">${bars}</div></div>`;
@@ -1159,12 +1159,16 @@ function peopleLaneCellHtml(plan, day) {
   const laneCount = Math.max(1, plan?.laneCount || 0);
   const slots = Array.from({ length: laneCount }, () => `<span class="work-lane-placeholder"></span>`);
   if (!plan) return slots.join("");
-  const tasks = [...plan.taskById.values()]
-    .filter((task) => taskPeople(task, day).some((person) => person.id === plan.personId)
-      && taskRenderSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day));
-  tasks.forEach((task) => {
+  const taskItems = [...plan.taskById.values()]
+    .map((task) => {
+      if (!taskPeople(task, day).some((person) => person.id === plan.personId)) return null;
+      const segment = taskRenderSegments(task).find((item) => item.start_date <= day && item.end_date >= day);
+      return segment ? { task, segment } : null;
+    })
+    .filter(Boolean);
+  taskItems.forEach(({ task, segment }) => {
     const lane = plan.taskLane.get(task.id);
-    slots[lane] = taskChipHtml(task);
+    slots[lane] = taskChipHtml(task, segment);
   });
   return slots.join("");
 }
@@ -1180,22 +1184,20 @@ function renderOperatorView(tasks) {
     <div class="view-note">按源仓算子全名聚合；每个算子一行，行内展示该算子的多个特性交付条。</div>
     <div class="operator-gantt">
       ${rows.map((row) => {
-        const bars = row.items.map((item, index) => {
-          const renderStart = taskRenderStart(item.task);
-          const renderEnd = taskRenderEnd(item.task);
-          const clippedStart = maxDate(renderStart, start);
-          const clippedEnd = minDate(renderEnd, end);
+        const bars = row.items.map((item, index) => taskRenderSegments(item.task).map((segment, segmentIndex) => {
+          if (!datesOverlap(segment.start_date, segment.end_date, start, end)) return "";
+          const clippedStart = maxDate(segment.start_date, start);
+          const clippedEnd = minDate(segment.end_date, end);
           const left = daysBetween(start, clippedStart) / total * 100;
           const width = Math.max(2, (daysBetween(clippedStart, clippedEnd) + 1) / total * 100);
-          const delayed = taskIsDelayed(item.task);
-          const titleSuffix = delayed ? " · delay 自动延长至今日，交付件完备后停止延长" : "";
+          const isDelaySegment = Boolean(segment.auto_extended);
+          const titleSuffix = isDelaySegment ? " · 自动延长段，交付件完备后停止延长" : "";
           return `
-            <span class="operator-bar ${riskClass(item.task.risk)} ${delayed ? "delay-chip" : ""}" style="left:${left}%;width:${width}%;top:${index * 26 + 6}px" title="${escapeAttr(displayTaskTitle(item.task))} · ${escapeAttr(renderStart)} ~ ${escapeAttr(renderEnd)}${titleSuffix}">
-              <b>${escapeHtml(featureTitle(item.task, item.operator))}</b>
-              <small>${escapeHtml(formatMonthDay(renderEnd))}</small>
+            <span class="operator-bar ${isDelaySegment ? "delay-chip" : riskClass(item.task.risk)}" style="left:${left}%;width:${width}%;top:${index * 26 + 6}px" title="${escapeAttr(displayTaskTitle(item.task))} · ${escapeAttr(segment.start_date)} ~ ${escapeAttr(segment.end_date)}${titleSuffix}">
+              ${isDelaySegment ? "" : `<b>${escapeHtml(featureTitle(item.task, item.operator))}</b><small>${escapeHtml(formatMonthDay(segment.end_date))}</small>`}
             </span>
           `;
-        }).join("");
+        }).join("")).join("");
         return `
           <div class="operator-gantt-row" style="--lane-count:${Math.max(1, row.items.length)}">
             <div class="operator-name">
@@ -1233,19 +1235,15 @@ function tasksForPerson(person) {
   return (state.data.tasks || []).filter((task) => taskOwnerNames(task).includes(person.name));
 }
 
-function taskChipHtml(task) {
+function taskChipHtml(task, segment = null) {
   const operators = taskOperators(task);
   const operatorLabel = operators.length ? operators.map((operator) => operator.label).join(" / ") : specialTitle(task.special_id);
-  const delayed = taskIsDelayed(task);
-  const titleSuffix = delayed ? "；delay 自动延长至今日，交付件完备后停止延长" : "";
-  return `<span class="work-chip ${riskClass(task.risk)} ${delayed ? "delay-chip" : ""}" title="${escapeAttr(displayTaskTitle(task))}${titleSuffix}">
+  const isDelaySegment = Boolean(segment?.auto_extended);
+  const titleSuffix = isDelaySegment ? "；自动延长段，交付件完备后停止延长" : "";
+  return `<span class="work-chip ${isDelaySegment ? "delay-chip" : riskClass(task.risk)}" title="${escapeAttr(displayTaskTitle(task))}${titleSuffix}">
     <em>${escapeHtml(operatorLabel || groupTitle(task.group_id))}</em>
     <b>${escapeHtml(compactTaskTitle(task))}</b>
   </span>`;
-}
-
-function taskIsDelayed(task) {
-  return evaluateTaskDelivery(task).status === "delayed";
 }
 
 function featureTitle(task, operator = taskOperators(task)[0]) {
