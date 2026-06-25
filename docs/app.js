@@ -2051,7 +2051,12 @@ function paintBar(bar, startOffset, endOffset) {
 }
 
 function renderAdmin() {
-  if (!isAdminEditMode()) return;
+  if (!isAdminEditMode()) {
+    $("#groupAdmin").innerHTML = "";
+    $("#specialAdmin").innerHTML = "";
+    $("#personAdmin").innerHTML = "";
+    return;
+  }
   $("#groupAdmin").innerHTML = state.data.groups.map((group) => `
     <div class="admin-item" data-group-id="${escapeAttr(group.id)}">
       <div><strong>${escapeHtml(group.title)}</strong><small>${escapeHtml(group.start_date)} ~ ${escapeHtml(group.end_date)}</small></div>
@@ -2569,6 +2574,10 @@ function handlePersonPlChange(select) {
 }
 
 async function handleAdminAction(button) {
+  if (!isAdminEditMode()) {
+    alert("当前账号没有管理员权限。");
+    return;
+  }
   const action = button.dataset.admin;
   const groupId = button.closest("[data-group-id]")?.dataset.groupId;
   const specialId = button.closest("[data-special-id]")?.dataset.specialId;

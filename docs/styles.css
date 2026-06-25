@@ -62,6 +62,8 @@ body.editing .edit-only { display:inline-flex !important; }
 body.editing section.edit-only { display:block !important; }
 body.editing th.edit-only,body.editing td.edit-only { display:table-cell !important; }
 body.editing .admin-only { display:none !important; }
+body.editing section.admin-only { display:none !important; }
+body.editing th.admin-only,body.editing td.admin-only { display:none !important; }
 body.admin-editing .admin-only { display:inline-flex !important; }
 body.admin-editing section.admin-only { display:block !important; }
 body.admin-editing th.admin-only,body.admin-editing td.admin-only { display:table-cell !important; }
