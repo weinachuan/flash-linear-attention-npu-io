@@ -1,9 +1,45 @@
 {
-  "generatedAt": "2026-06-24T17:28:04+08:00",
+  "generatedAt": "2026-06-25T11:29:20+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 58,
+  "total": 61,
   "items": [
+    {
+      "number": 85,
+      "title": "docs: update PrepareWyReprBwdFull shapes",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/85",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-25T03:04:48Z",
+      "createdAt": "2026-06-25T02:51:43Z",
+      "headRef": "codex/update-prepare-wy-bwd-full-readme",
+      "labels": []
+    },
+    {
+      "number": 84,
+      "title": "feat(chunk_gated_delta_rule_bwd_dhu): add ascend910b fast kernel laun…",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/84",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-25T02:29:18Z",
+      "createdAt": "2026-06-25T02:28:03Z",
+      "headRef": "feat/chunk-gated-delta-rule-bwd-dhu-fast-kernel",
+      "labels": []
+    },
+    {
+      "number": 83,
+      "title": "Cs dev",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/83",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-24T12:44:45Z",
+      "createdAt": "2026-06-24T12:42:07Z",
+      "headRef": "cs-dev",
+      "labels": []
+    },
     {
       "number": 81,
       "title": "add ops solve_tril A2",
@@ -11,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-24T08:11:18Z",
+      "updatedAt": "2026-06-25T01:14:39Z",
       "createdAt": "2026-06-24T08:04:25Z",
       "headRef": "main",
       "labels": []
@@ -26,18 +62,6 @@
       "updatedAt": "2026-06-24T08:56:18Z",
       "createdAt": "2026-06-24T00:49:31Z",
       "headRef": "sync-github",
-      "labels": []
-    },
-    {
-      "number": 76,
-      "title": "feat: add <<<>>> callable for dqkwg",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/76",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-24T08:36:49Z",
-      "createdAt": "2026-06-23T08:14:36Z",
-      "headRef": "0622-dqkwg-call",
       "labels": []
     },
     {
@@ -66,12 +90,12 @@
     },
     {
       "number": 54,
-      "title": "add ops solve_tril (basic)",
+      "title": "add ops solve_tril (ascend950)",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/54",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-24T03:51:03Z",
+      "updatedAt": "2026-06-25T01:44:48Z",
       "createdAt": "2026-06-13T06:33:24Z",
       "headRef": "main",
       "labels": []
@@ -170,6 +194,18 @@
       "updatedAt": "2026-06-24T09:06:52Z",
       "createdAt": "2026-06-24T07:09:11Z",
       "headRef": "feat/recompute-wu-fwd-fast-kernel",
+      "labels": []
+    },
+    {
+      "number": 76,
+      "title": "feat: add <<<>>> callable for dqkwg",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/76",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-25T02:32:04Z",
+      "updatedAt": "2026-06-25T02:32:05Z",
+      "createdAt": "2026-06-23T08:14:36Z",
+      "headRef": "0622-dqkwg-call",
       "labels": []
     },
     {
