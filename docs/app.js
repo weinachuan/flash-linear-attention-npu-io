@@ -461,9 +461,9 @@ function renderTableFilters() {
     tableFilterSelect("priority", [["", "全部"], ["P0", "P0"], ["P1", "P1"], ["P2", "P2"]]),
     `<th><input data-table-filter="q" type="search" placeholder="筛事项" value="${escapeAttr(state.filters.q)}"></th>`,
     ownerFilterDropdown(),
-    tableFilterSelect("pl", [["", "全部"], ...plFilterOptions().map((pl) => [pl, pl])]),
-    tableFilterSelect("group_id", [["", "全部"], ...groups.map((group) => [group.id, group.title])]),
-    tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...specials.map((special) => [special.id, special.title])]),
+    tableFilterSelect("pl", [["", "全部"], ...plFilterOptions().map((pl) => [pl, pl])], "col-pl"),
+    tableFilterSelect("group_id", [["", "全部"], ...groups.map((group) => [group.id, group.title])], "col-group"),
+    tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...specials.map((special) => [special.id, special.title])], "col-special"),
     `<th></th>`,
     `<th></th>`,
     `<th></th>`,
@@ -513,7 +513,7 @@ function updateTableSort(field) {
   render({ includeTableFilters: false });
 }
 
-function tableFilterSelect(field, options) {
+function tableFilterSelect(field, options, className = "") {
   const seen = new Set();
   const normalized = options.filter(([id]) => {
     const key = String(id);
@@ -521,7 +521,8 @@ function tableFilterSelect(field, options) {
     seen.add(key);
     return true;
   });
-  return `<th><select data-table-filter="${field}">${normalized.map(([id, label]) => `<option value="${escapeAttr(id)}" ${state.filters[field] === id ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select></th>`;
+  const klass = className ? ` class="${escapeAttr(className)}"` : "";
+  return `<th${klass}><select data-table-filter="${field}">${normalized.map(([id, label]) => `<option value="${escapeAttr(id)}" ${state.filters[field] === id ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select></th>`;
 }
 
 function ownerFilterDropdown() {
@@ -1879,9 +1880,9 @@ function readOnlyTaskRowHtml(task, className = "") {
       <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
       <td>${escapeHtml(displayTaskTitle(task))}</td>
       <td>${ownerChipsHtml(task)}</td>
-      <td>${taskPlChipsHtml(task)}</td>
-      <td>${escapeHtml(groupTitle(task.group_id))}</td>
-      <td>${escapeHtml(specialTitle(task.special_id))}</td>
+      <td class="col-pl">${taskPlChipsHtml(task)}</td>
+      <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
+      <td class="col-special">${escapeHtml(specialTitle(task.special_id))}</td>
       <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
       <td>${linkListHtml(task.pr_link, "PR")}</td>
       <td>${linkListHtml(task.test_report, "报告")}</td>
@@ -1906,9 +1907,9 @@ function developerTaskRowHtml(task) {
       <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
       <td>${escapeHtml(displayTaskTitle(task))}</td>
       <td>${ownerChipsHtml(task)}</td>
-      <td>${taskPlChipsHtml(task)}</td>
-      <td>${escapeHtml(groupTitle(task.group_id))}</td>
-      <td>${escapeHtml(specialTitle(task.special_id))}</td>
+      <td class="col-pl">${taskPlChipsHtml(task)}</td>
+      <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
+      <td class="col-special">${escapeHtml(specialTitle(task.special_id))}</td>
       <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
       <td>${prLinkEditorHtml(task)}</td>
       <td><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
@@ -1935,9 +1936,9 @@ function renderRows(tasks) {
         <td>${selectHtml("priority", [["P0","P0"],["P1","P1"],["P2","P2"]], task.priority)}</td>
         <td><input class="title-input" data-field="title" value="${escapeAttr(task.title)}"></td>
         <td>${ownerEditorHtml(task)}</td>
-        <td>${taskPlChipsHtml(task)}</td>
-        <td>${selectHtml("group_id", state.data.groups.map((g) => [g.id, g.title]), task.group_id)}</td>
-        <td>${selectHtml("special_id", [["","普通事项"], ...state.data.specials.map((s) => [s.id, s.title])], task.special_id || "")}</td>
+        <td class="col-pl">${taskPlChipsHtml(task)}</td>
+        <td class="col-group">${selectHtml("group_id", state.data.groups.map((g) => [g.id, g.title]), task.group_id)}</td>
+        <td class="col-special">${selectHtml("special_id", [["","普通事项"], ...state.data.specials.map((s) => [s.id, s.title])], task.special_id || "")}</td>
         <td><input type="date" data-field="start_date" value="${escapeAttr(task.start_date)}"> ~ <input type="date" data-field="end_date" value="${escapeAttr(task.end_date)}"></td>
         <td>${prLinkEditorHtml(task)}</td>
         <td><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>

@@ -278,6 +278,10 @@ th { position:sticky; top:0; background:#fff6e8; font-size:12px; z-index:30; }
 .task-table .filter-row th::before { display:none; }
 .task-table tbody td { background:#fffdf8; }
 .task-table th:last-child,.task-table td:last-child { min-width:132px; }
+.task-table .col-pl { min-width:118px; }
+.task-table .col-group { min-width:168px; }
+.task-table .col-special { min-width:150px; }
+.task-table th.col-group .sort-button { white-space:nowrap; }
 .check-filter { position:relative; min-width:116px; }
 .check-filter-trigger {
   position:relative;
