@@ -1540,6 +1540,7 @@ function weekdayName(value) {
 }
 
 function linkListHtml(value, label) {
+  if (label === "PR") return prLinkPillsHtml(value);
   const links = parseLinks(value);
   if (!links.length) return `<span class="muted-cell">-</span>`;
   return links.map((link, index) => `<a class="link-pill" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}${links.length > 1 ? index + 1 : ""}</a>`).join("");
@@ -1656,8 +1657,40 @@ function prLinkEditorHtml(task) {
     <div class="pr-link-editor">
       <input class="link-input" data-field="pr_link" placeholder="PR URL，可填多个" value="${escapeAttr(task.pr_link || "")}">
       ${prCatalogQuickPickerHtml()}
+      ${prLinkPreviewHtml(task.pr_link)}
     </div>
   `;
+}
+
+function prLinkPreviewHtml(value) {
+  const html = prLinkPillsHtml(value);
+  return html.includes("muted-cell") ? "" : `<div class="pr-link-preview">${html}</div>`;
+}
+
+function prLinkPillsHtml(value) {
+  const refs = parsePrRefs(value);
+  if (!refs.length) return `<span class="muted-cell">-</span>`;
+  return refs.map((ref, index) => prPillHtml(ref, index, refs.length)).join("");
+}
+
+function prPillHtml(ref, index, total) {
+  const pr = findPrCandidate(ref);
+  const status = pr?.status === "merged" ? "merged" : (pr?.status === "open" ? "open" : "unknown");
+  const href = pr?.url || (/^https?:\/\//i.test(ref) ? ref : "");
+  const label = total > 1 ? `PR${index + 1}` : "PR";
+  const statusText = prStatusText(pr);
+  const title = pr ? `#${pr.number} ${statusText} ${pr.title || ""}`.trim() : String(ref || "");
+  const body = `${escapeHtml(label)}<em>${escapeHtml(statusText)}</em>`;
+  const attrs = `class="link-pill pr-${status}" title="${escapeAttr(title)}"`;
+  if (!href) return `<span ${attrs}>${body}</span>`;
+  return `<a ${attrs} href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${body}</a>`;
+}
+
+function prStatusText(pr) {
+  if (pr?.statusText) return pr.statusText;
+  if (pr?.status === "merged") return "\u5df2\u5408\u5165";
+  if (pr?.status === "open") return "\u672a\u5408\u5165";
+  return "\u672a\u5339\u914d";
 }
 
 function prCatalogQuickPickerHtml() {
@@ -2195,6 +2228,7 @@ async function addTask() {
     const entry = cloudflareAuditEntry("task.create", "task", task.id, `新增任务：${title}`, { title });
     const result = await workerPost("/api/tasks", { task, auditEntry: entry });
     if (result.task) mergeTask(result.task);
+    if (result.prCatalog) state.prCatalog = result.prCatalog;
     applyCloudflareMutationResult(result);
     if (result.entry) state.audit.push(result.entry);
     render();
@@ -2529,6 +2563,7 @@ async function patchTask(task, fields, auditEntry) {
     expectedVersion: state.serverVersion || "",
   });
   if (result.task) mergeTask(result.task);
+  if (result.prCatalog) state.prCatalog = result.prCatalog;
   if (result.version) {
     state.serverVersion = result.version;
     state.pendingRemoteVersion = "";
@@ -2583,6 +2618,7 @@ async function saveRepository(summary, action, entity, id, detail = {}) {
       expectedVersion: state.serverVersion || "",
     });
     if (result.state) state.data = result.state;
+    if (result.prCatalog) state.prCatalog = result.prCatalog;
     if (result.version) state.serverVersion = result.version;
     state.pendingRemoteVersion = "";
     state.audit.push(entry);

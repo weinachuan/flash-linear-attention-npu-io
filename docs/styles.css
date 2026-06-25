@@ -384,6 +384,14 @@ td .link-input { min-width:220px; }
 .operator-bar small { flex:0 0 auto; font-size:10px; font-weight:950; opacity:.9; }
 .link-pill { display:inline-flex; align-items:center; min-height:24px; margin-right:4px; padding:3px 8px; border-radius:999px; border:1px solid rgba(39,117,96,.24); background:#eef7f2; color:#1e6856; text-decoration:none; font-size:12px; font-weight:900; }
 .link-pill:hover { background:#dff0e8; }
+.pr-link-preview { display:flex; flex-wrap:wrap; gap:4px; }
+.link-pill em { margin-left:5px; font-style:normal; font-size:10px; opacity:.88; }
+.link-pill.pr-merged { border-color:rgba(39,117,96,.28); background:#e5f4ee; color:#17614e; }
+.link-pill.pr-merged:hover { background:#d8eee5; }
+.link-pill.pr-open { border-color:rgba(203,126,5,.34); background:#fff1cc; color:#8a570c; }
+.link-pill.pr-open:hover { background:#ffe6ad; }
+.link-pill.pr-unknown { border-color:rgba(136,126,110,.32); background:#f4eee4; color:#6d6256; }
+.link-pill.pr-unknown:hover { background:#eee4d5; }
 .muted-cell { color:#b0a491; font-weight:800; }
 @media (max-width:980px) {
   .hero,.summary,.gantt-row,.audit-item,.admin-grid { grid-template-columns:1fr; }

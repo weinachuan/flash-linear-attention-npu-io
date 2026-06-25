@@ -6,6 +6,9 @@ const DEFAULT_PROJECT = {
 };
 const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟"];
 const DEFAULT_PL = PL_OPTIONS[0];
+const UPSTREAM_REPO = "flashserve/flash-linear-attention-npu";
+const GITHUB_API_ROOT = "https://api.github.com";
+const PR_STATUS_TEXT = { merged: "\u5df2\u5408\u5165", open: "\u672a\u5408\u5165" };
 const OPERATOR_RULES = [
   { id: "chunk_gated_delta_rule_fwd_h", aliases: ["chunk_gated_delta_rule_fwd_h", "fwd_h"] },
   { id: "chunk_fwd_o", aliases: ["chunk_fwd_o", "fwd_o"] },
@@ -125,7 +128,7 @@ export default {
         await authorizeStateChange(env, user, payload.state);
         await replaceState(env, payload.state);
         if (payload.prCatalog && user.role === "admin") await setJsonMeta(env, "prCatalog", payload.prCatalog);
-        const catalog = await getJsonMeta(env, "prCatalog", emptyPrCatalog());
+        const catalog = await refreshPrCatalogForState(env, payload.state);
         await syncTaskDeliveryRulesFromCatalog(env, catalog.items || []);
         const version = await bumpStateVersion(env);
         const entry = payload.auditEntry || {
@@ -143,6 +146,7 @@ export default {
           entry,
           version,
           state: await exportState(env),
+          prCatalog: catalog,
         });
       }
       return errorResponse(request, env, 404, "api not found");
@@ -481,7 +485,7 @@ function normalizePrCatalog(catalog) {
       title: String(item.title || ""),
       url: String(item.url || ""),
       status: item.status === "merged" ? "merged" : "open",
-      statusText: item.statusText || (item.status === "merged" ? "已合入" : "未合入"),
+      statusText: item.statusText || PR_STATUS_TEXT[item.status === "merged" ? "merged" : "open"],
       mergedAt: item.mergedAt || null,
       updatedAt: item.updatedAt || null,
       createdAt: item.createdAt || null,
@@ -496,6 +500,113 @@ function normalizePrCatalog(catalog) {
     total: items.length,
     items,
   };
+}
+
+async function refreshPrCatalogForState(env, state) {
+  return refreshPrCatalogForPrLinks(env, (state?.tasks || []).map((task) => task.pr_link));
+}
+
+async function refreshPrCatalogForPrLinks(env, prLinkValues) {
+  const numbers = uniquePrNumbersFromLinks(prLinkValues);
+  const catalog = await getJsonMeta(env, "prCatalog", emptyPrCatalog());
+  if (!numbers.length) return catalog;
+  const nextCatalog = await refreshPrCatalogNumbers(env, catalog, numbers);
+  if (catalogComparable(catalog) !== catalogComparable(nextCatalog)) {
+    await setJsonMeta(env, "prCatalog", nextCatalog);
+  }
+  return nextCatalog;
+}
+
+async function refreshPrCatalogNumbers(env, catalog, numbers) {
+  const normalized = normalizePrCatalog(catalog);
+  const byNumber = new Map((normalized.items || []).map((item) => [String(item.number), item]));
+  let changed = false;
+  for (const number of numbers) {
+    const item = await fetchPrCatalogItem(env, number, normalized.sourceRepo || UPSTREAM_REPO);
+    if (item === undefined) continue;
+    const key = String(number);
+    if (item) {
+      const previous = byNumber.get(key);
+      if (!previous || JSON.stringify(previous) !== JSON.stringify(item)) {
+        byNumber.set(key, item);
+        changed = true;
+      }
+    } else if (byNumber.has(key)) {
+      byNumber.delete(key);
+      changed = true;
+    }
+  }
+  if (!changed) return normalized;
+  const items = [...byNumber.values()].sort(comparePrCatalogItems);
+  return {
+    ...normalized,
+    generatedAt: nowIso(),
+    total: items.length,
+    items,
+  };
+}
+
+async function fetchPrCatalogItem(env, number, sourceRepo) {
+  try {
+    const pr = await fetchGithubPullRequest(env, sourceRepo, number);
+    return pr ? prCatalogItemFromGithub(pr) : null;
+  } catch (error) {
+    console.warn(`failed to refresh PR #${number}: ${error.message}`);
+    return undefined;
+  }
+}
+
+async function fetchGithubPullRequest(env, sourceRepo, number) {
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    "User-Agent": "flash-linear-attention-npu-io-worker",
+  };
+  const token = env.GITHUB_TOKEN || env.FLASH_IO_GITHUB_TOKEN || "";
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const response = await fetch(`${GITHUB_API_ROOT}/repos/${sourceRepo}/pulls/${encodeURIComponent(number)}`, { headers });
+  if (!response.ok) throw new Error(`GitHub API HTTP ${response.status}`);
+  return response.json();
+}
+
+function prCatalogItemFromGithub(pr) {
+  const merged = Boolean(pr?.merged_at);
+  if (pr?.state !== "open" && !merged) return null;
+  const status = merged ? "merged" : "open";
+  return {
+    number: Number(pr.number),
+    title: String(pr.title || ""),
+    url: String(pr.html_url || ""),
+    status,
+    statusText: PR_STATUS_TEXT[status],
+    mergedAt: pr.merged_at || null,
+    updatedAt: pr.updated_at || null,
+    createdAt: pr.created_at || null,
+    headRef: String(pr.head?.ref || ""),
+    labels: Array.isArray(pr.labels) ? pr.labels.map((label) => String(label?.name || "")).filter(Boolean) : [],
+  };
+}
+
+function comparePrCatalogItems(a, b) {
+  const statusOrder = (a.status === "open" ? 0 : 1) - (b.status === "open" ? 0 : 1);
+  if (statusOrder) return statusOrder;
+  return (Number(b.number) || 0) - (Number(a.number) || 0);
+}
+
+function uniquePrNumbersFromLinks(values) {
+  const numbers = [];
+  for (const value of values || []) {
+    for (const ref of parsePrRefs(value)) {
+      const number = prNumberFromRef(ref);
+      if (number) numbers.push(number);
+    }
+  }
+  return [...new Set(numbers)];
+}
+
+function prNumberFromRef(ref) {
+  const value = String(ref || "").trim();
+  return value.match(/\/pull\/(\d+)/)?.[1] || value.match(/^#?(\d+)$/)?.[1] || "";
 }
 
 function catalogComparable(catalog) {
@@ -725,7 +836,7 @@ async function createTask(request, env) {
   const payload = await readJson(request);
   const task = normalizeTaskForInsert(payload.task || payload);
   await insertTask(env, task);
-  const catalog = await getJsonMeta(env, "prCatalog", emptyPrCatalog());
+  const catalog = await refreshPrCatalogForPrLinks(env, [task.pr_link]);
   await syncTaskDeliveryRuleForTask(env, task.id, catalog.items || []);
   const version = await bumpStateVersion(env);
   const entry = payload.auditEntry || {
@@ -738,7 +849,7 @@ async function createTask(request, env) {
     source: "cloudflare-d1",
   };
   await insertAudit(env, { ...entry, source: "cloudflare-d1" });
-  return { ok: true, version, entry, task: await getTaskById(env, task.id) };
+  return { ok: true, version, entry, task: await getTaskById(env, task.id), prCatalog: catalog };
 }
 
 async function deleteTask(request, env, taskId) {
@@ -908,7 +1019,8 @@ async function patchTask(request, env, taskId) {
   }
   if (nextSegments) await replaceTaskSegments(env, taskId, nextSegments);
 
-  const catalog = await getJsonMeta(env, "prCatalog", emptyPrCatalog());
+  const taskAfterPatch = await getTaskById(env, taskId);
+  const catalog = await refreshPrCatalogForPrLinks(env, [taskAfterPatch?.pr_link || oldTask.pr_link]);
   await syncTaskDeliveryRuleForTask(env, taskId, catalog.items || []);
   const version = await bumpStateVersion(env);
   const entry = payload.auditEntry || {
@@ -921,7 +1033,7 @@ async function patchTask(request, env, taskId) {
     source: "cloudflare-d1",
   };
   await insertAudit(env, { ...entry, source: "cloudflare-d1" });
-  return { ok: true, version, entry, task: await getTaskById(env, taskId) };
+  return { ok: true, version, entry, task: await getTaskById(env, taskId), prCatalog: catalog };
 }
 
 function assertSchedulePatchHasReason(oldTask, fields, changedFields) {
