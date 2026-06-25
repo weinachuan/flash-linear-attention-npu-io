@@ -731,7 +731,7 @@ async function login(request, env) {
 }
 
 async function listUsers(env) {
-  const rows = await selectAll(env, "SELECT id, username, display_name, owner_name, role, active, created_at, updated_at FROM users ORDER BY role, username");
+  const rows = await selectAll(env, "SELECT id, username, display_name, owner_name, email, role, active, created_at, updated_at FROM users ORDER BY role, username");
   return rows.map((row) => ({ ...row, active: Boolean(row.active) }));
 }
 
@@ -740,6 +740,8 @@ async function createUser(request, env) {
   const username = String(payload.username || "").trim();
   const password = String(payload.password || "");
   if (!username || !password) throw withStatus(400, "username and password are required");
+  const email = normalizeEmail(payload.email);
+  if (email && !isValidEmail(email)) throw withStatus(400, "email is invalid");
   const existing = await env.DB.prepare("SELECT * FROM users WHERE username = ?").bind(username).first();
   if (existing && payload.resetPassword !== true && payload.confirmReset !== true) {
     throw withStatus(409, "user already exists; resetPassword=true is required to reset password");
@@ -750,11 +752,12 @@ async function createUser(request, env) {
   const id = payload.id || `user-${crypto.randomUUID().slice(0, 10)}`;
   const now = nowIso();
   await env.DB.prepare(
-    `INSERT INTO users(id, username, display_name, owner_name, role, password_hash, salt, active, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO users(id, username, display_name, owner_name, email, role, password_hash, salt, active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(username) DO UPDATE SET
        display_name = excluded.display_name,
        owner_name = excluded.owner_name,
+       email = excluded.email,
        role = excluded.role,
        password_hash = excluded.password_hash,
        salt = excluded.salt,
@@ -765,6 +768,7 @@ async function createUser(request, env) {
     username,
     String(payload.displayName || payload.display_name || username).trim(),
     String(payload.ownerName || payload.owner_name || payload.displayName || payload.display_name || username).trim(),
+    email,
     role,
     passwordHash,
     salt,
@@ -783,6 +787,61 @@ async function createUser(request, env) {
     source: "cloudflare-d1",
   });
   return { ok: true, user: publicUser(row) };
+}
+
+async function createPersonAccount(env, person, email) {
+  const username = String(person.name || "").trim();
+  if (!username) throw withStatus(400, "person name is required");
+  const existing = await env.DB.prepare("SELECT * FROM users WHERE username = ?").bind(username).first();
+  const now = nowIso();
+  if (existing) {
+    await env.DB.prepare("UPDATE users SET display_name = ?, owner_name = ?, email = ?, updated_at = ? WHERE id = ?")
+      .bind(username, username, email, now, existing.id)
+      .run();
+    return {
+      username,
+      email,
+      role: existing.role || "developer",
+      status: "existing",
+      password: "",
+    };
+  }
+  const password = randomToken(18);
+  const salt = randomToken(18);
+  const passwordHash = await hashPassword(password, salt);
+  const id = `user-${crypto.randomUUID().slice(0, 10)}`;
+  await env.DB.prepare(
+    `INSERT INTO users(id, username, display_name, owner_name, email, role, password_hash, salt, active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(
+    id,
+    username,
+    username,
+    username,
+    email,
+    "developer",
+    passwordHash,
+    salt,
+    1,
+    now,
+    now,
+  ).run();
+  await insertAudit(env, {
+    ts: now,
+    action: "user.create",
+    entity: "user",
+    id,
+    summary: `创建账号：${username}`,
+    detail: { username, role: "developer", sourceEntity: "person" },
+    source: "cloudflare-d1",
+  });
+  return {
+    username,
+    email,
+    role: "developer",
+    status: "created",
+    password,
+  };
 }
 
 async function patchUser(request, env, userId) {
@@ -823,6 +882,10 @@ function normalizeUserPatchFields(fields) {
       next.active = value === false || value === 0 || value === "0" ? 0 : 1;
     } else if (field === "display_name" || field === "owner_name") {
       next[field] = String(value || "").trim();
+    } else if (field === "email") {
+      const email = normalizeEmail(value);
+      if (email && !isValidEmail(email)) throw withStatus(400, "email is invalid");
+      next.email = email;
     } else {
       throw withStatus(400, `unsupported user field: ${rawField}`);
     }
@@ -879,7 +942,9 @@ async function createEntity(request, env, type) {
   const payload = await readJson(request);
   const singular = entitySingular(type);
   const item = normalizeEntityForInsert(type, payload.item || payload.entity || payload[singular] || payload);
+  const accountEmail = type === "people" && payload.createAccount ? normalizeRequiredEmail(payload.email) : "";
   await insertEntity(env, type, item);
+  const account = type === "people" && payload.createAccount ? await createPersonAccount(env, item, accountEmail) : null;
   const version = await bumpStateVersion(env);
   const entry = payload.auditEntry || {
     ts: nowIso(),
@@ -891,7 +956,9 @@ async function createEntity(request, env, type) {
     source: "cloudflare-d1",
   };
   await insertAudit(env, { ...entry, source: "cloudflare-d1" });
-  return { ok: true, version, entry, [entitySingular(type)]: await getEntityById(env, type, item.id) };
+  const response = { ok: true, version, entry, [entitySingular(type)]: await getEntityById(env, type, item.id) };
+  if (account) response.account = account;
+  return response;
 }
 
 async function patchEntity(request, env, type, id) {
@@ -1670,6 +1737,21 @@ function numberOr(value, fallback) {
 function normalizePl(value) {
   const text = String(value || "").trim();
   return PL_OPTIONS.includes(text) ? text : DEFAULT_PL;
+}
+
+function normalizeEmail(value) {
+  return String(value || "").trim();
+}
+
+function normalizeRequiredEmail(value) {
+  const email = normalizeEmail(value);
+  if (!email) throw withStatus(400, "email is required");
+  if (!isValidEmail(email)) throw withStatus(400, "email is invalid");
+  return email;
+}
+
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(value));
 }
 
 function clamp(value, min, max) {

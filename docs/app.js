@@ -1428,6 +1428,14 @@ function normalizePl(value) {
   return PL_OPTIONS.includes(text) ? text : DEFAULT_PL;
 }
 
+function normalizeEmail(value) {
+  return String(value || "").trim();
+}
+
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(value));
+}
+
 function taskPlNames(task, referenceDate = "") {
   return uniqueStrings(taskPeople(task, referenceDate).map((person) => normalizePl(person.pl)));
 }
@@ -2331,23 +2339,49 @@ async function addSpecial() {
 }
 
 async function addPerson() {
-  const name = normalizeOwnerName(prompt("人员姓名：", ""));
+  const rawName = prompt("人员姓名：", "");
+  if (rawName === null) return;
+  const name = normalizeOwnerName(rawName);
   if (!name || isPlaceholderOwner(name)) return alert("人员姓名不能为空，也不能使用系统占位名称。");
   ensurePeopleCatalog();
   if ((state.data.people || []).some((person) => person.name === name)) return alert("人员已存在。");
+  const rawPl = prompt(`PL（从以下列表中填写）：${PL_OPTIONS.join("、")}`, DEFAULT_PL);
+  if (rawPl === null) return;
+  const pl = String(rawPl || "").trim();
+  if (!PL_OPTIONS.includes(pl)) return alert(`PL 需从列表中选择：${PL_OPTIONS.join("、")}`);
+  const rawEmail = prompt("邮箱（仅写入后端账号，不展示在项目看板）：", "");
+  if (rawEmail === null) return;
+  const email = normalizeEmail(rawEmail);
+  if (!isValidEmail(email)) return alert("邮箱不能为空，且需要是有效邮箱格式。");
+  if (!WORKER_API_BASE) return alert("新增人员自动创建账号需要 Cloudflare D1 后端模式。");
   const maxPosition = Math.max(-1, ...(state.data.people || []).map((person) => Number(person.position) || 0));
-  const person = { id: `person-${crypto.randomUUID().slice(0, 10)}`, name, position: maxPosition + 1, pl: DEFAULT_PL, placeholder: false };
-  state.data.people.push(person);
+  const person = { id: `person-${crypto.randomUUID().slice(0, 10)}`, name, position: maxPosition + 1, pl, placeholder: false };
   if (WORKER_API_BASE) {
-    const entry = cloudflareAuditEntry("person.create", "person", person.id, `新增人员：${name}`, { name });
-    const result = await workerPost("/api/people", { person, auditEntry: entry });
+    const entry = cloudflareAuditEntry("person.create", "person", person.id, `新增人员：${name}`, { name, pl });
+    const result = await workerPost("/api/people", { person, email, createAccount: true, auditEntry: entry });
     if (result.person) mergeEntityItem("people", result.person);
     applyCloudflareMutationResult(result);
     if (result.entry) state.audit.push(result.entry);
+    if (result.account?.password) {
+      const message = [
+        `${name}，你好：`,
+        "",
+        "你的 flash-linear-attention-npu 项目看板账号已准备好。",
+        "",
+        "登录地址：https://weinachuan.github.io/flash-linear-attention-npu-io/",
+        `账号：${result.account.username || name}`,
+        `初始密码：${result.account.password}`,
+        `绑定邮箱：${result.account.email || email}`,
+        "",
+        "首次登录后建议点击“修改密码”更新为自己的密码。",
+      ].join("\n");
+      prompt("人员已新增并创建账号，请复制以下通知内容：", message);
+    } else if (result.account?.status === "existing") {
+      alert("人员已新增，但同名账号已存在，未重置密码。需要新密码时请在账号管理中重置。");
+    }
     render();
     return;
   }
-  await saveRepository(`新增人员：${name}`, "person.create", "person", person.id, { name });
 }
 
 function rememberPersonBaseline(personId) {
