@@ -6,6 +6,30 @@ const DEFAULT_PROJECT = {
 };
 const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟"];
 const DEFAULT_PL = PL_OPTIONS[0];
+const OPERATOR_RULES = [
+  { id: "chunk_gated_delta_rule_fwd_h", aliases: ["chunk_gated_delta_rule_fwd_h", "fwd_h"] },
+  { id: "chunk_fwd_o", aliases: ["chunk_fwd_o", "fwd_o"] },
+  { id: "recompute_wu_fwd", aliases: ["recompute_wu_fwd", "recompute_w_u", "recompute_wu", "recompute"] },
+  { id: "chunk_bwd_dv_local", aliases: ["chunk_bwd_dv_local", "chunk_dv_local", "dv_local"] },
+  { id: "chunk_bwd_dqkwg", aliases: ["chunk_bwd_dqkwg", "dqkwg"] },
+  { id: "chunk_gated_delta_rule_bwd_dhu", aliases: ["chunk_gated_delta_rule_bwd_dhu", "dhu"] },
+  { id: "prepare_wy_repr_bwd_da", aliases: ["prepare_wy_repr_bwd_da", "prepare_wy_bwd_da"] },
+  { id: "prepare_wy_repr_bwd_full", aliases: ["prepare_wy_repr_bwd_full", "prepare_wy_bwd_full"] },
+  { id: "causal_conv1d_fwd", aliases: ["causal_conv1d_fwd", "causal_conv1d TND", "TND 转 NTD"] },
+  { id: "causal_conv1d_bwd", aliases: ["causal_conv1d_bwd", "causal_conv1d bwd"] },
+  { id: "solve_tril_npu", aliases: ["solve_tril_npu", "solve_tril", "solve_tri"] },
+  { id: "kimi_delta_attention_triton", aliases: ["kimi_delta_attention", "KDA triton", "KDA"] },
+];
+const OPERATOR_OWNER_RULES = {
+  chunk_fwd_o: [{ owner: "吴雨舒" }],
+  chunk_gated_delta_rule_fwd_h: [{ owner: "方梓阳" }],
+  recompute_wu_fwd: [{ until: "2026-06-30", owner: "方梓阳" }, { owner: "周云飞" }],
+  chunk_bwd_dv_local: [{ until: "2026-06-18", owner: "陈琳鑫" }, { owner: "叶倩雯" }],
+  chunk_bwd_dqkwg: [{ until: "2026-06-30", owner: "黄浚哲" }, { owner: "李佳敏" }],
+  chunk_gated_delta_rule_bwd_dhu: [{ owner: "方梓阳" }],
+  prepare_wy_repr_bwd_da: [{ owner: "杨子奇" }],
+  prepare_wy_repr_bwd_full: [{ until: "2026-06-30", owner: "张硕累" }, { owner: "周云飞" }],
+};
 const PASSWORD_HASH_ITERATIONS = 100000;
 
 export default {
@@ -1328,9 +1352,42 @@ function sameJson(a, b) {
 }
 
 function taskBelongsToUser(task, user) {
-  const owner = String(task.owner || "");
-  const ownerName = String(user.ownerName || user.displayName || user.username || "");
-  return ownerName && owner.split(/[、/,，;；&\s]+/).map((item) => item.trim()).includes(ownerName);
+  const ownerName = normalizeOwnerName(user.ownerName || user.displayName || user.username || "");
+  return Boolean(ownerName && taskOwnerNames(task).includes(ownerName));
+}
+
+function taskOwnerNames(task) {
+  return splitOwnerNames(task?.owner, task);
+}
+
+function splitOwnerNames(owner, task = null) {
+  const raw = normalizeOwnerName(owner);
+  return uniqueStrings(raw.split(/[、/,，;；&\s]+/).flatMap((name) => {
+    const normalized = normalizeOwnerName(name);
+    if (normalized !== "对应算子责任人") return [normalized];
+    const owners = operatorOwnerNamesForTask(task);
+    return owners.length ? owners : [normalized];
+  }).filter(Boolean));
+}
+
+function operatorOwnerNamesForTask(task) {
+  const referenceDate = task?.end_date || task?.start_date || "";
+  return uniqueStrings(taskOperators(task).flatMap((operator) => operatorOwnerNames(operator.id, referenceDate)));
+}
+
+function operatorOwnerNames(operatorId, referenceDate = "") {
+  const rules = OPERATOR_OWNER_RULES[operatorId] || [];
+  const rule = rules.find((item) => !item.until || !referenceDate || referenceDate <= item.until) || rules[rules.length - 1];
+  return rule?.owner ? splitOwnerNames(rule.owner) : [];
+}
+
+function taskOperators(task) {
+  const text = `${task?.title || ""} ${task?.scope || ""} ${task?.target || ""}`.toLowerCase();
+  return OPERATOR_RULES.filter((operator) => operator.aliases.some((alias) => text.includes(String(alias).toLowerCase())));
+}
+
+function uniqueStrings(items) {
+  return [...new Set(items.filter(Boolean))];
 }
 
 function publicUser(row) {
