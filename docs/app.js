@@ -1284,18 +1284,7 @@ function featureTitle(task, operator = taskOperators(task)[0]) {
 
 function taskOperators(task) {
   const explicitIds = parseOperatorIds(task?.operator_ids);
-  if (explicitIds.length) return explicitIds.map(operatorById).filter(Boolean);
-  const title = task?.title || "";
-  if (/性能看板|一键编报|一键编包|ops\s*目录整改/i.test(title)) return [];
-  if (title.startsWith("多算子")) {
-    return ["chunk_fwd_o", "chunk_gated_delta_rule_fwd_h", "chunk_gated_delta_rule_bwd_dhu", "recompute_wu_fwd", "chunk_bwd_dv_local", "chunk_bwd_dqkwg"].map(operatorById).filter(Boolean);
-  }
-  const lower = title.toLowerCase();
-  const matched = [];
-  operatorCatalog().forEach((operator) => {
-    if (operator.aliases.some((alias) => lower.includes(alias.toLowerCase()))) matched.push(operator);
-  });
-  return uniqueBy(matched, "id");
+  return explicitIds.map(operatorById).filter(Boolean);
 }
 
 function operatorById(id) {
@@ -1624,7 +1613,6 @@ function ownerEditorHtml(task) {
 function operatorEditorHtml(task) {
   const selected = parseOperatorIds(task.operator_ids);
   const selectedSet = new Set(selected);
-  const inferred = taskOperators({ ...task, operator_ids: "" }).map((operator) => operator.id);
   const options = operatorCatalog().map((operator) => `
     <label class="owner-option">
       <input type="checkbox" data-operator-picker-value value="${escapeAttr(operator.id)}" ${selectedSet.has(operator.id) ? "checked" : ""}>
@@ -1633,7 +1621,7 @@ function operatorEditorHtml(task) {
   `).join("");
   const hint = selected.length
     ? "已显式关联算子，可多选；不选则不强制关联"
-    : (inferred.length ? "未显式关联；当前按标题别名识别" : "未关联算子，可保持为空");
+    : "未关联算子，可保持为空";
   return `
     <div class="operator-editor">
       <input type="hidden" data-field="operator_ids" value="${escapeAttr(normalizeOperatorIdsText(task.operator_ids))}">

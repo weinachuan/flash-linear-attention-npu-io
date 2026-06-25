@@ -1687,14 +1687,7 @@ function operatorOwnerNames(operator, referenceDate = "") {
 
 function taskOperators(task, operators = defaultOperators()) {
   const explicitIds = parseOperatorIds(task?.operator_ids);
-  if (explicitIds.length) return explicitIds.map((id) => operators.find((operator) => operator.id === id)).filter(Boolean);
-  if (String(task?.title || "").startsWith("多算子")) {
-    return ["chunk_fwd_o", "chunk_gated_delta_rule_fwd_h", "chunk_gated_delta_rule_bwd_dhu", "recompute_wu_fwd", "chunk_bwd_dv_local", "chunk_bwd_dqkwg"]
-      .map((id) => operators.find((operator) => operator.id === id))
-      .filter(Boolean);
-  }
-  const text = `${task?.title || ""} ${task?.scope || ""} ${task?.target || ""}`.toLowerCase();
-  return operators.filter((operator) => (operator.aliases || []).some((alias) => text.includes(String(alias).toLowerCase())));
+  return explicitIds.map((id) => operators.find((operator) => operator.id === id)).filter(Boolean);
 }
 
 async function readOperators(env) {
