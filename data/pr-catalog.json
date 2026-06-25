@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-06-25T11:29:20+08:00",
+  "generatedAt": "2026-06-25T17:20:24+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 61,
+  "total": 63,
   "items": [
     {
-      "number": 85,
-      "title": "docs: update PrepareWyReprBwdFull shapes",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/85",
+      "number": 87,
+      "title": "chunk_bwd_dv_local A5 regbase改写",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/87",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-25T03:04:48Z",
-      "createdAt": "2026-06-25T02:51:43Z",
-      "headRef": "codex/update-prepare-wy-bwd-full-readme",
+      "updatedAt": "2026-06-25T07:01:39Z",
+      "createdAt": "2026-06-25T05:54:37Z",
+      "headRef": "cs-dev",
       "labels": []
     },
     {
@@ -23,33 +23,9 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-25T02:29:18Z",
+      "updatedAt": "2026-06-25T09:08:29Z",
       "createdAt": "2026-06-25T02:28:03Z",
       "headRef": "feat/chunk-gated-delta-rule-bwd-dhu-fast-kernel",
-      "labels": []
-    },
-    {
-      "number": 83,
-      "title": "Cs dev",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/83",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-24T12:44:45Z",
-      "createdAt": "2026-06-24T12:42:07Z",
-      "headRef": "cs-dev",
-      "labels": []
-    },
-    {
-      "number": 81,
-      "title": "add ops solve_tril A2",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/81",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-25T01:14:39Z",
-      "createdAt": "2026-06-24T08:04:25Z",
-      "headRef": "main",
       "labels": []
     },
     {
@@ -95,7 +71,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-25T01:44:48Z",
+      "updatedAt": "2026-06-25T09:15:55Z",
       "createdAt": "2026-06-13T06:33:24Z",
       "headRef": "main",
       "labels": []
@@ -170,6 +146,54 @@
       "updatedAt": "2026-06-15T07:32:12Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 88,
+      "title": "fwd_o 算子文档补充GVA",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/88",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-25T07:17:27Z",
+      "updatedAt": "2026-06-25T07:17:27Z",
+      "createdAt": "2026-06-25T06:43:53Z",
+      "headRef": "fwd-o-doc-gva",
+      "labels": []
+    },
+    {
+      "number": 86,
+      "title": "prepare_wy_repr_bwd_da <<<>>>适配",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/86",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-25T07:16:33Z",
+      "updatedAt": "2026-06-25T07:16:33Z",
+      "createdAt": "2026-06-25T04:03:30Z",
+      "headRef": "da_fast_kernel",
+      "labels": []
+    },
+    {
+      "number": 85,
+      "title": "docs: update PrepareWyReprBwdFull shapes",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/85",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-25T06:49:32Z",
+      "updatedAt": "2026-06-25T06:49:32Z",
+      "createdAt": "2026-06-25T02:51:43Z",
+      "headRef": "codex/update-prepare-wy-bwd-full-readme",
+      "labels": []
+    },
+    {
+      "number": 81,
+      "title": "add ops solve_tril A2",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/81",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-25T07:17:14Z",
+      "updatedAt": "2026-06-25T07:17:14Z",
+      "createdAt": "2026-06-24T08:04:25Z",
+      "headRef": "main",
       "labels": []
     },
     {
