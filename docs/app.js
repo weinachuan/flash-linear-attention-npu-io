@@ -541,7 +541,7 @@ function ownerFilterDropdown() {
     <th>
       <div class="check-filter ${state.ownerFilterOpen ? "open" : ""}" data-owner-filter>
         <button type="button" class="check-filter-trigger" data-owner-filter-toggle aria-expanded="${state.ownerFilterOpen ? "true" : "false"}">
-          <span>${escapeHtml(label)}</span><b>⌄</b>
+          <span>${escapeHtml(label)}</span>
         </button>
         <div class="check-filter-menu">
           <input class="check-filter-search" data-owner-filter-search type="search" placeholder="搜索责任人" value="${escapeAttr(state.ownerFilterQuery)}">
