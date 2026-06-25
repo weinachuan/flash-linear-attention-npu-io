@@ -4,7 +4,7 @@ const DEFAULT_PROJECT = {
   baselineDate: "2026-06-15",
   projectOwner: { name: "待填写", email: "待填写" },
 };
-const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇"];
+const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟"];
 const DEFAULT_PL = PL_OPTIONS[0];
 const PASSWORD_HASH_ITERATIONS = 100000;
 

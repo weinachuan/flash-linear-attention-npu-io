@@ -301,6 +301,7 @@ td .link-input { min-width:220px; }
 .admin-grid h3 { margin:0 0 8px; font-size:14px; color:#514638; }
 .admin-list { display:grid; gap:8px; }
 .admin-item { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; padding:9px 10px; border:1px solid var(--line); background:#fffaf1; }
+.admin-item.dirty { border-color:rgba(203,126,5,.55); background:#fff4d8; box-shadow:inset 3px 0 0 #c98205; }
 .admin-item strong { font-size:13px; }
 .admin-item small { display:block; margin-top:3px; color:var(--muted); }
 .admin-pl-label { display:inline-flex; align-items:center; gap:5px; margin-left:8px; color:var(--muted); font-size:12px; font-weight:900; }

@@ -54,7 +54,7 @@ const OPERATOR_OWNER_RULES = {
 };
 
 const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "Pending"], ["delayed", "delay"], ["done", "done"]];
-const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇"];
+const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟"];
 const DEFAULT_PL = PL_OPTIONS[0];
 const AUDIT_TASK_FIELDS = ["title", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "pr_link", "test_report", "notes"];
 const AUDIT_FIELD_LABELS = {
@@ -107,7 +107,9 @@ const state = {
   realtimeTimer: null,
   loading: false,
   dirtyTaskIds: new Set(),
+  dirtyPersonIds: new Set(),
   taskBaselines: new Map(),
+  personBaselines: new Map(),
   axis: { start: "", end: "", total: 1 },
   baseTimeline: { start: "", end: "", total: 1 },
   view: { start: "", end: "", total: 1 },
@@ -145,7 +147,9 @@ async function load() {
       state.serverVersion = data.version || data.generatedAt || "";
       state.pendingRemoteVersion = "";
       state.dirtyTaskIds.clear();
+      state.dirtyPersonIds.clear();
       state.taskBaselines.clear();
+      state.personBaselines.clear();
       state.audit = audit;
       state.prCatalog = prCatalog || { generatedAt: "", sourceRepo: "", total: 0, items: [] };
       ensurePeopleCatalog();
@@ -163,7 +167,9 @@ async function load() {
     state.audit = auditRes && auditRes.ok ? parseAudit(await auditRes.text()) : [];
     state.prCatalog = prCatalogRes && prCatalogRes.ok ? await prCatalogRes.json() : { generatedAt: "", sourceRepo: "", total: 0, items: [] };
     state.dirtyTaskIds.clear();
+    state.dirtyPersonIds.clear();
     state.taskBaselines.clear();
+    state.personBaselines.clear();
     ensurePeopleCatalog();
     syncAllTaskDeliveryRules();
     render();
@@ -1904,7 +1910,7 @@ function renderAdmin() {
     const assignmentCount = tasksForPerson(person).length;
     const idle = personIsIdleInView(person, filteredTasks().filter(taskIntersectsView));
     return `
-      <div class="admin-item" data-person-id="${escapeAttr(person.id)}">
+      <div class="admin-item ${state.dirtyPersonIds.has(person.id) ? "dirty" : ""}" data-person-id="${escapeAttr(person.id)}">
         <div>
           <strong>${personChipHtml(person)}</strong>
           <label class="admin-pl-label">PL ${plSelectHtml(person.pl)}</label>
@@ -1918,7 +1924,7 @@ function renderAdmin() {
     `;
   }).join("") : `<p class="empty">暂无真实人员。系统占位人力不会在这里展示。</p>`;
   document.querySelectorAll("[data-admin]").forEach((button) => button.addEventListener("click", () => handleAdminAction(button).catch(showError)));
-  document.querySelectorAll("[data-person-pl]").forEach((select) => select.addEventListener("change", () => handlePersonPlChange(select).catch(showError)));
+  document.querySelectorAll("[data-person-pl]").forEach((select) => select.addEventListener("change", () => handlePersonPlChange(select)));
 }
 
 function renderAudit() {
@@ -2063,7 +2069,9 @@ async function ensureNoVersionConflict() {
   );
   if (shouldRefresh) {
     state.dirtyTaskIds.clear();
+    state.dirtyPersonIds.clear();
     state.taskBaselines.clear();
+    state.personBaselines.clear();
     state.serverVersion = latest;
     await load();
   }
@@ -2071,11 +2079,15 @@ async function ensureNoVersionConflict() {
 }
 
 async function saveAllTasks() {
-  if (!state.dirtyTaskIds.size) {
-    alert("没有待保存的任务变更。");
+  if (!state.dirtyTaskIds.size && !state.dirtyPersonIds.size) {
+    alert("没有待保存的变更。");
     return;
   }
-  await saveTaskRows();
+  if (state.dirtyTaskIds.size) {
+    const savedTasks = await saveTaskRows();
+    if (savedTasks === false) return;
+  }
+  if (state.dirtyPersonIds.size) await saveDirtyPeople();
 }
 
 async function saveTaskRows(extraRows = []) {
@@ -2090,9 +2102,9 @@ async function saveTaskRows(extraRows = []) {
   const ids = [...state.dirtyTaskIds];
   if (!ids.length) {
     alert("没有待保存的任务变更。");
-    return;
+    return false;
   }
-  if (!(await ensureNoVersionConflict())) return;
+  if (!(await ensureNoVersionConflict())) return false;
   ids.forEach((id) => {
     const row = rows.get(id);
     if (row) applyRowToTask(row);
@@ -2103,11 +2115,11 @@ async function saveTaskRows(extraRows = []) {
     state.taskBaselines.clear();
     render();
     alert("没有检测到字段变更。");
-    return;
+    return false;
   }
   for (const change of changes) {
     const task = state.data.tasks.find((item) => item.id === change.id);
-    if (task && !promptScheduleChangeReason(task, change)) return;
+    if (task && !promptScheduleChangeReason(task, change)) return false;
   }
   const summary = changes.length === 1 ? `更新任务：${changes[0].title}` : `批量更新任务：${changes.length}项`;
   const action = changes.length === 1 ? "task.update" : "task.batch_update";
@@ -2135,9 +2147,10 @@ async function saveTaskRows(extraRows = []) {
     state.taskBaselines.clear();
     $("#editStatus").textContent = "已按字段写入 Cloudflare D1";
     render();
-    return;
+    return true;
   }
   await saveRepository(summary, action, "task", id, { ids: changes.map((change) => change.id), changes });
+  return true;
 }
 
 function taskPatchFieldsFromChange(task, change) {
@@ -2297,26 +2310,75 @@ async function addPerson() {
   await saveRepository(`新增人员：${name}`, "person.create", "person", person.id, { name });
 }
 
-async function handlePersonPlChange(select) {
+function rememberPersonBaseline(personId) {
+  if (!personId || state.personBaselines.has(personId)) return;
+  const person = state.data.people.find((item) => item.id === personId);
+  if (person) state.personBaselines.set(personId, { name: person.name, pl: normalizePl(person.pl) });
+}
+
+async function saveDirtyPeople() {
+  const ids = [...state.dirtyPersonIds];
+  if (!ids.length) return true;
+  if (!(await ensureNoVersionConflict())) return false;
+  const changes = ids.map((id) => {
+    const person = state.data.people.find((item) => item.id === id);
+    const before = state.personBaselines.get(id);
+    if (!person || !before) return null;
+    const nextPl = normalizePl(person.pl);
+    return before.pl === nextPl ? null : { id, name: person.name, from: before.pl, to: nextPl };
+  }).filter(Boolean);
+  if (!changes.length) {
+    state.dirtyPersonIds.clear();
+    state.personBaselines.clear();
+    render();
+    return false;
+  }
+  if (WORKER_API_BASE) {
+    $("#editStatus").textContent = "正在写入人员 PL 到 Cloudflare D1...";
+    for (const change of changes) {
+      const entry = cloudflareAuditEntry("person.patch", "person", change.id, `更新人员 PL：${change.name} -> ${change.to}`, {
+        name: change.name,
+        pl: change.to,
+        from: change.from,
+      });
+      const result = await workerPatch(`/api/people/${encodeURIComponent(change.id)}`, {
+        fields: { pl: change.to },
+        auditEntry: entry,
+      });
+      if (result.person) mergeEntityItem("people", result.person);
+      syncCloudflareVersion(result);
+      if (result.entry) state.audit.push(result.entry);
+    }
+    state.dirtyPersonIds.clear();
+    state.personBaselines.clear();
+    $("#editStatus").textContent = "已写入人员 PL 到 Cloudflare D1";
+    render();
+    return true;
+  }
+  const summary = changes.length === 1 ? `更新人员 PL：${changes[0].name} -> ${changes[0].to}` : `批量更新人员 PL：${changes.length}项`;
+  await saveRepository(summary, changes.length === 1 ? "person.update_pl" : "person.batch_update_pl", changes.length === 1 ? "person" : "people", changes.length === 1 ? changes[0].id : "batch", { changes });
+  state.dirtyPersonIds.clear();
+  state.personBaselines.clear();
+  render();
+  return true;
+}
+
+function handlePersonPlChange(select) {
   const personId = select.closest("[data-person-id]")?.dataset.personId;
   const person = state.data.people.find((item) => item.id === personId);
   if (!person || person.placeholder) return;
   const pl = normalizePl(select.value);
   if (normalizePl(person.pl) === pl) return;
+  rememberPersonBaseline(person.id);
   person.pl = pl;
-  if (WORKER_API_BASE) {
-    const entry = cloudflareAuditEntry("person.patch", "person", person.id, `更新人员 PL：${person.name} -> ${pl}`, { name: person.name, pl });
-    const result = await workerPatch(`/api/people/${encodeURIComponent(person.id)}`, {
-      fields: { pl },
-      auditEntry: entry,
-    });
-    if (result.person) mergeEntityItem("people", result.person);
-    applyCloudflareMutationResult(result);
-    if (result.entry) state.audit.push(result.entry);
-    render();
-    return;
+  const baseline = state.personBaselines.get(person.id);
+  if (baseline && baseline.pl === pl) {
+    state.dirtyPersonIds.delete(person.id);
+    state.personBaselines.delete(person.id);
+  } else {
+    state.dirtyPersonIds.add(person.id);
   }
-  await saveRepository(`更新人员 PL：${person.name} -> ${pl}`, "person.update_pl", "person", person.id, { name: person.name, pl });
+  render();
 }
 
 async function handleAdminAction(button) {
@@ -2492,12 +2554,16 @@ function cloudflareAuditEntry(action, entity, id, summary, detail = {}) {
   return { ts: nowIso(), action, entity, id, summary, detail, source: "cloudflare-d1" };
 }
 
-function applyCloudflareMutationResult(result) {
+function syncCloudflareVersion(result) {
   if (result.version) {
     state.serverVersion = result.version;
     state.pendingRemoteVersion = "";
     if (state.data) state.data.version = result.version;
   }
+}
+
+function applyCloudflareMutationResult(result) {
+  syncCloudflareVersion(result);
   state.dirtyTaskIds.clear();
   state.taskBaselines.clear();
 }
@@ -2521,7 +2587,9 @@ async function saveRepository(summary, action, entity, id, detail = {}) {
     state.pendingRemoteVersion = "";
     state.audit.push(entry);
     state.dirtyTaskIds.clear();
+    state.dirtyPersonIds.clear();
     state.taskBaselines.clear();
+    state.personBaselines.clear();
     $("#editStatus").textContent = "已写入 Cloudflare D1";
     render();
     return;
@@ -2537,7 +2605,9 @@ async function saveRepository(summary, action, entity, id, detail = {}) {
     [DATA_PATHS.pageAudit]: auditText,
   }, `记录数据变更: ${summary}`);
   state.dirtyTaskIds.clear();
+  state.dirtyPersonIds.clear();
   state.taskBaselines.clear();
+  state.personBaselines.clear();
   $("#editStatus").textContent = "已写入 GitHub 仓库，Pages 稍后刷新";
   render();
 }
@@ -2547,7 +2617,7 @@ function updateEditStatus() {
     $("#editStatus").textContent = WORKER_API_BASE ? "只读模式：请登录账号" : "只读模式";
     return;
   }
-  const dirtyCount = state.dirtyTaskIds.size;
+  const dirtyCount = state.dirtyTaskIds.size + state.dirtyPersonIds.size;
   const target = WORKER_API_BASE ? "Cloudflare D1" : "GitHub 仓库";
   const user = WORKER_API_BASE && state.authUser ? `（${state.authUser.displayName || state.authUser.username} / ${state.authUser.role}）` : "";
   const scope = isDeveloperEditMode() ? "仅显示自己任务及同算子关联任务；只能提交自己任务的 PR/转测报告链接" : "甘特条可拖动，边缘可拉伸";
@@ -2574,7 +2644,7 @@ async function checkRemoteVersion() {
     return;
   }
   if (version === state.serverVersion) return;
-  if (state.dirtyTaskIds.size) {
+  if (state.dirtyTaskIds.size || state.dirtyPersonIds.size) {
     state.pendingRemoteVersion = version;
     updateEditStatus();
     return;
