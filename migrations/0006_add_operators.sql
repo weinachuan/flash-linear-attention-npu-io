@@ -20,5 +20,5 @@ INSERT OR IGNORE INTO operators(id, label, aliases, owner_rules, position, activ
   ('prepare_wy_repr_bwd_full', 'prepare_wy_repr_bwd_full', '["prepare_wy_repr_bwd_full","prepare_wy_bwd_full"]', '[{"until":"2026-06-30","owner":"张硕累"},{"owner":"周云飞"}]', 7, 1),
   ('causal_conv1d_fwd', 'causal_conv1d_fwd', '["causal_conv1d_fwd","causal_conv1d TND","TND 转 NTD"]', '[]', 8, 1),
   ('causal_conv1d_bwd', 'causal_conv1d_bwd', '["causal_conv1d_bwd","causal_conv1d bwd"]', '[]', 9, 1),
-  ('solve_tril_npu', 'solve_tril_npu', '["solve_tril_npu","solve_tril","solve_tri"]', '[]', 10, 1),
+  ('solve_tril', 'solve_tril', '["solve_tril","solve_tri"]', '[]', 10, 1),
   ('kimi_delta_attention_triton', 'kimi_delta_attention_triton', '["kimi_delta_attention","KDA triton","KDA"]', '[]', 11, 1);

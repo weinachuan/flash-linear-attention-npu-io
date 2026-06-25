@@ -46,7 +46,7 @@ OPERATOR_RULES = [
     ("prepare_wy_repr_bwd_full", ["prepare_wy_repr_bwd_full", "prepare_wy_bwd_full"]),
     ("causal_conv1d_fwd", ["causal_conv1d_fwd", "causal_conv1d tnd", "tnd 转 ntd", "tnd", "ntd"]),
     ("causal_conv1d_bwd", ["causal_conv1d_bwd", "causal_conv1d bwd"]),
-    ("solve_tril_npu", ["solve_tril_npu", "solve_tril", "solve_tri"]),
+    ("solve_tril", ["solve_tril", "solve_tri"]),
     ("kimi_delta_attention_triton", ["kimi_delta_attention", "kda triton", "kda"]),
 ]
 
