@@ -1495,10 +1495,15 @@ function ownerEditorHtml(task) {
 function toggleOwnerPicker(button) {
   const editor = button.closest(".owner-editor");
   if (!editor) return;
-  document.querySelectorAll(".owner-editor.open").forEach((item) => {
-    if (item !== editor) item.classList.remove("open");
-  });
+  closeOwnerPickers(null, editor);
   editor.classList.toggle("open");
+}
+
+function closeOwnerPickers(event = null, except = null) {
+  if (event?.target?.closest?.(".owner-picker-panel")) return;
+  document.querySelectorAll(".owner-editor.open").forEach((editor) => {
+    if (editor !== except) editor.classList.remove("open");
+  });
 }
 
 function syncOwnerFromPicker(control) {
@@ -3027,10 +3032,14 @@ document.addEventListener("click", (event) => {
 });
 document.addEventListener("click", (event) => {
   if (event.target.closest(".owner-editor")) return;
-  document.querySelectorAll(".owner-editor.open").forEach((editor) => editor.classList.remove("open"));
+  closeOwnerPickers(event);
 });
+document.addEventListener("scroll", closeOwnerPickers, true);
 document.addEventListener("scroll", positionOwnerFilterMenu, true);
-window.addEventListener("resize", positionOwnerFilterMenu);
+window.addEventListener("resize", () => {
+  closeOwnerPickers();
+  positionOwnerFilterMenu();
+});
 
 function showError(error) {
   $("#editStatus").textContent = `写入失败：${error.message}`;
