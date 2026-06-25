@@ -1473,22 +1473,39 @@ function ownerPickerOptions(task) {
 
 function ownerEditorHtml(task) {
   const owners = taskOwnerNames(task);
-  const options = ownerPickerOptions(task).map((name) => `<option value="${escapeAttr(name)}" ${owners.includes(name) ? "selected" : ""}>${escapeHtml(name)}</option>`).join("");
+  const options = ownerPickerOptions(task).map((name) => `
+    <label class="owner-option">
+      <input type="checkbox" data-owner-picker-value value="${escapeAttr(name)}" ${owners.includes(name) ? "checked" : ""}>
+      <span>${escapeHtml(name)}</span>
+    </label>
+  `).join("");
   return `
     <div class="owner-editor">
-      <input class="owner-input" data-field="owner" value="${escapeAttr(task.owner)}" placeholder="可手动输入，或在下方多选">
-      <select class="owner-picker" data-owner-picker multiple size="5">${options}</select>
-      <div class="owner-hint">按 Ctrl/Shift 可多选；保存时写入责任人字段</div>
+      <div class="owner-combo">
+        <input class="owner-input" data-field="owner" value="${escapeAttr(task.owner)}" placeholder="可手动输入，或勾选责任人">
+        <button type="button" class="owner-picker-toggle" data-owner-picker-toggle>选择</button>
+      </div>
+      <div class="owner-picker-panel">${options}</div>
+      <div class="owner-hint">勾选后自动写入责任人字段；也可直接手动编辑</div>
       <div class="owner-preview">${ownerChipsHtml(task)}</div>
     </div>
   `;
 }
 
-function syncOwnerFromPicker(select) {
-  const row = select.closest("tr");
+function toggleOwnerPicker(button) {
+  const editor = button.closest(".owner-editor");
+  if (!editor) return;
+  document.querySelectorAll(".owner-editor.open").forEach((item) => {
+    if (item !== editor) item.classList.remove("open");
+  });
+  editor.classList.toggle("open");
+}
+
+function syncOwnerFromPicker(control) {
+  const row = control.closest("tr");
   const input = row?.querySelector('[data-field="owner"]');
   if (!input) return;
-  const selected = [...select.selectedOptions].map((option) => option.value).filter(Boolean);
+  const selected = [...row.querySelectorAll("[data-owner-picker-value]:checked")].map((option) => option.value).filter(Boolean);
   input.value = selected.length ? selected.join("/") : "待排人力";
   markTaskDirty(input);
   syncOwnerPreview(row);
@@ -1496,10 +1513,8 @@ function syncOwnerFromPicker(select) {
 
 function syncOwnerPickerFromInput(input) {
   const row = input.closest("tr");
-  const select = row?.querySelector("[data-owner-picker]");
-  if (!select) return;
   const names = splitOwnerNames(input.value);
-  [...select.options].forEach((option) => { option.selected = names.includes(option.value); });
+  row?.querySelectorAll("[data-owner-picker-value]").forEach((option) => { option.checked = names.includes(option.value); });
   syncOwnerPreview(row);
 }
 
@@ -1867,7 +1882,8 @@ function renderRows(tasks) {
   document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => handleTaskAction(button).catch(showError)));
   document.querySelectorAll("#rows [data-field]").forEach((control) => control.addEventListener("change", () => markTaskDirty(control)));
   document.querySelectorAll('#rows [data-field="owner"]').forEach((control) => control.addEventListener("change", () => syncOwnerPickerFromInput(control)));
-  document.querySelectorAll("#rows [data-owner-picker]").forEach((control) => control.addEventListener("change", () => syncOwnerFromPicker(control)));
+  document.querySelectorAll("#rows [data-owner-picker-toggle]").forEach((control) => control.addEventListener("click", () => toggleOwnerPicker(control)));
+  document.querySelectorAll("#rows [data-owner-picker-value]").forEach((control) => control.addEventListener("change", () => syncOwnerFromPicker(control)));
   document.querySelectorAll("#rows [data-pr-append]").forEach((control) => control.addEventListener("click", () => appendPrFromSearch(control)));
   document.querySelectorAll("#rows [data-pr-search]").forEach((control) => control.addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
@@ -3008,6 +3024,10 @@ document.addEventListener("click", (event) => {
   if (!state.ownerFilterOpen || event.target.closest("[data-owner-filter]")) return;
   state.ownerFilterOpen = false;
   renderTableFilters();
+});
+document.addEventListener("click", (event) => {
+  if (event.target.closest(".owner-editor")) return;
+  document.querySelectorAll(".owner-editor.open").forEach((editor) => editor.classList.remove("open"));
 });
 document.addEventListener("scroll", positionOwnerFilterMenu, true);
 window.addEventListener("resize", positionOwnerFilterMenu);
