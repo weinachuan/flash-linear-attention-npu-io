@@ -412,6 +412,13 @@
       "position": 20,
       "placeholder": false,
       "pl": "赵臣臣"
+    },
+    {
+      "id": "person-魏纳川",
+      "name": "魏纳川",
+      "position": 21,
+      "placeholder": false,
+      "pl": "赵臣臣"
     }
   ],
   "tasks": [
