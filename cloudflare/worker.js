@@ -429,8 +429,7 @@ function findPrCandidate(query, catalogItems) {
 }
 
 function prOptionLabel(pr) {
-  const status = pr.statusText || (pr.status === "merged" ? "已合入" : "未合入");
-  return `#${pr.number} ${status} ${pr.title || ""}`.trim();
+  return `#${pr.number} ${pr.title || ""}`.trim();
 }
 
 function taskHasReport(task) {

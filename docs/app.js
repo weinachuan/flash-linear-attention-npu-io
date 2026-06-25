@@ -1678,19 +1678,11 @@ function prPillHtml(ref, index, total) {
   const status = pr?.status === "merged" ? "merged" : (pr?.status === "open" ? "open" : "unknown");
   const href = pr?.url || (/^https?:\/\//i.test(ref) ? ref : "");
   const label = total > 1 ? `PR${index + 1}` : "PR";
-  const statusText = prStatusText(pr);
-  const title = pr ? `#${pr.number} ${statusText} ${pr.title || ""}`.trim() : String(ref || "");
-  const body = `${escapeHtml(label)}<em>${escapeHtml(statusText)}</em>`;
+  const title = pr ? `#${pr.number} ${pr.title || ""}`.trim() : String(ref || "");
+  const body = escapeHtml(label);
   const attrs = `class="link-pill pr-${status}" title="${escapeAttr(title)}"`;
   if (!href) return `<span ${attrs}>${body}</span>`;
   return `<a ${attrs} href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${body}</a>`;
-}
-
-function prStatusText(pr) {
-  if (pr?.statusText) return pr.statusText;
-  if (pr?.status === "merged") return "\u5df2\u5408\u5165";
-  if (pr?.status === "open") return "\u672a\u5408\u5165";
-  return "\u672a\u5339\u914d";
 }
 
 function prCatalogQuickPickerHtml() {
@@ -1723,8 +1715,7 @@ function renderPrCatalogDatalist() {
 }
 
 function prOptionLabel(pr) {
-  const status = pr.statusText || (pr.status === "merged" ? "已合入" : "未合入");
-  return `#${pr.number} ${status} ${pr.title || ""}`.trim();
+  return `#${pr.number} ${pr.title || ""}`.trim();
 }
 
 function findPrCandidate(query) {
