@@ -9,6 +9,24 @@ const DEFAULT_PL = PL_OPTIONS[0];
 const UPSTREAM_REPO = "flashserve/flash-linear-attention-npu";
 const GITHUB_API_ROOT = "https://api.github.com";
 const PR_STATUS_TEXT = { merged: "\u5df2\u5408\u5165", open: "\u672a\u5408\u5165" };
+const CHINA_WORK_CALENDARS = {
+  2026: buildChinaWorkCalendar([
+    ["元旦", "2026-01-01", "2026-01-03"],
+    ["春节", "2026-02-15", "2026-02-23"],
+    ["清明节", "2026-04-04", "2026-04-06"],
+    ["劳动节", "2026-05-01", "2026-05-05"],
+    ["端午节", "2026-06-19", "2026-06-21"],
+    ["中秋节", "2026-09-25", "2026-09-27"],
+    ["国庆节", "2026-10-01", "2026-10-07"],
+  ], [
+    ["2026-01-04", "元旦调休上班"],
+    ["2026-02-14", "春节调休上班"],
+    ["2026-02-28", "春节调休上班"],
+    ["2026-05-09", "劳动节调休上班"],
+    ["2026-09-20", "国庆节调休上班"],
+    ["2026-10-10", "国庆节调休上班"],
+  ]),
+};
 const OPERATOR_RULES = [
   { id: "chunk_gated_delta_rule_fwd_h", aliases: ["chunk_gated_delta_rule_fwd_h", "fwd_h"] },
   { id: "chunk_fwd_o", aliases: ["chunk_fwd_o", "fwd_o"] },
@@ -373,11 +391,11 @@ function evaluateTaskDelivery(task, catalogItems) {
 
 function evaluateTaskRisk(task, catalogItems) {
   const pr = prLinkSummary(task.pr_link, catalogItems);
-  const daysUntilDdl = daysBetween(todayBjYmd(), taskDdl(task));
+  const workdaysUntilDdl = workdaysUntil(todayBjYmd(), taskDdl(task));
   if (taskHasWaitingOwner(task)) return "高";
   if (pr.allMerged) return "低";
-  if (pr.hasOpen) return daysUntilDdl <= 5 ? "中" : "低";
-  return daysUntilDdl <= 10 ? "高" : "中";
+  if (pr.hasOpen) return workdaysUntilDdl <= 3 ? "中" : "低";
+  return workdaysUntilDdl <= 6 ? "高" : "中";
 }
 
 function evaluateTaskStatus(task, catalogItems) {
@@ -469,6 +487,62 @@ function todayBjYmd() {
 
 function daysBetween(a, b) {
   return Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+}
+
+function workdaysUntil(start, end) {
+  if (!isYmd(start) || !isYmd(end) || end <= start) return 0;
+  let count = 0;
+  for (let day = addDays(start, 1); day <= end; day = addDays(day, 1)) {
+    if (!chinaWorkdayInfo(day).nonWorking) count += 1;
+  }
+  return count;
+}
+
+function chinaWorkdayInfo(value) {
+  if (!isYmd(value)) return { nonWorking: false, label: "" };
+  const calendar = CHINA_WORK_CALENDARS[value.slice(0, 4)];
+  if (calendar?.adjustedWorkdays?.[value]) {
+    return { nonWorking: false, adjustedWorkday: true, label: calendar.adjustedWorkdays[value] };
+  }
+  if (calendar?.holidays?.[value]) {
+    return { nonWorking: true, holiday: true, label: calendar.holidays[value] };
+  }
+  if (isWeekend(value)) {
+    return { nonWorking: true, weekend: true, label: "周末" };
+  }
+  return { nonWorking: false, label: "工作日" };
+}
+
+function buildChinaWorkCalendar(holidayRanges, adjustedWorkdays) {
+  const holidays = {};
+  holidayRanges.forEach(([name, start, end]) => {
+    dateList(start, end).forEach((day) => { holidays[day] = name; });
+  });
+  return {
+    holidays,
+    adjustedWorkdays: Object.fromEntries(adjustedWorkdays),
+  };
+}
+
+function dateList(start, end) {
+  const result = [];
+  for (let day = start; day <= end; day = addDays(day, 1)) result.push(day);
+  return result;
+}
+
+function addDays(value, days) {
+  const date = dateFromYmd(value);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function dateFromYmd(value) {
+  return new Date(`${value}T00:00:00Z`);
+}
+
+function isWeekend(value) {
+  const day = dateFromYmd(value).getUTCDay();
+  return day === 0 || day === 6;
 }
 
 function isYmd(value) {

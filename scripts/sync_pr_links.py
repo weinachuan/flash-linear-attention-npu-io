@@ -15,6 +15,25 @@ AUDIT_PATHS = [ROOT / "data" / "audit-log.jsonl", ROOT / "docs" / "audit-log.jso
 SOURCE_REPO = "flashserve/flash-linear-attention-npu"
 API_ROOT = "https://api.github.com"
 BJ_TZ = timezone(timedelta(hours=8))
+CHINA_HOLIDAY_RANGES = [
+    ("元旦", "2026-01-01", "2026-01-03"),
+    ("春节", "2026-02-15", "2026-02-23"),
+    ("清明节", "2026-04-04", "2026-04-06"),
+    ("劳动节", "2026-05-01", "2026-05-05"),
+    ("端午节", "2026-06-19", "2026-06-21"),
+    ("中秋节", "2026-09-25", "2026-09-27"),
+    ("国庆节", "2026-10-01", "2026-10-07"),
+]
+CHINA_ADJUSTED_WORKDAYS = {
+    datetime.strptime(value, "%Y-%m-%d").date()
+    for value in ("2026-01-04", "2026-02-14", "2026-02-28", "2026-05-09", "2026-09-20", "2026-10-10")
+}
+CHINA_HOLIDAYS = {
+    day
+    for _, start, end in CHINA_HOLIDAY_RANGES
+    for day in (datetime.strptime(start, "%Y-%m-%d").date() + timedelta(days=offset)
+                for offset in range((datetime.strptime(end, "%Y-%m-%d").date() - datetime.strptime(start, "%Y-%m-%d").date()).days + 1))
+}
 
 OPERATOR_RULES = [
     ("chunk_gated_delta_rule_fwd_h", ["chunk_gated_delta_rule_fwd_h", "fwd_h"]),
@@ -50,6 +69,43 @@ FEATURE_PATTERNS = [
 
 def now_bj():
     return datetime.now(BJ_TZ).replace(microsecond=0).isoformat()
+
+
+def today_bj():
+    return datetime.now(BJ_TZ).date()
+
+
+def is_china_workday(day):
+    if day in CHINA_ADJUSTED_WORKDAYS:
+        return True
+    if day in CHINA_HOLIDAYS:
+        return False
+    return day.weekday() < 5
+
+
+def workdays_until(start, end):
+    if end <= start:
+        return 0
+    count = 0
+    day = start + timedelta(days=1)
+    while day <= end:
+        if is_china_workday(day):
+            count += 1
+        day += timedelta(days=1)
+    return count
+
+
+def task_ddl(task):
+    value = task.get("end_date") or task.get("start_date")
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except Exception:
+        return today_bj()
+
+
+def task_has_waiting_owner(task):
+    owner = str(task.get("owner") or "").strip()
+    return not owner or owner in ("待填写", "待排人力") or "待排人力" in re.split(r"[、/,，;；&\s]+", owner)
 
 
 def normalize(text):
@@ -212,11 +268,14 @@ def matched_prs(task, pull_requests, pr_index):
 def risk_for_matches(task, matches):
     if task.get("status") == "done":
         return "低"
-    if not matches:
+    if task_has_waiting_owner(task):
         return "高"
+    workdays_until_ddl = workdays_until(today_bj(), task_ddl(task))
+    if not matches:
+        return "高" if workdays_until_ddl <= 6 else "中"
     if any(pr.get("merged_at") for pr in matches):
         return "低"
-    return "中"
+    return "中" if workdays_until_ddl <= 3 else "低"
 
 
 def collect_changes(data, pull_requests):
@@ -265,7 +324,7 @@ def update_state(path, pull_requests, timestamp):
     if changed:
         data["generatedAt"] = timestamp
         data.setdefault("repoScan", {})["scanDate"] = timestamp[:10]
-        data.setdefault("repoScan", {})["rule"] = "已合入 PR 标低风险；未合入但匹配到 PR 标中风险；未匹配到 PR 标高风险。"
+        data.setdefault("repoScan", {})["rule"] = "已合入 PR 标低风险；未合入 PR 按距离 DDL 3 个中国工作日阈值判定低/中风险；未匹配 PR 按距离 DDL 6 个中国工作日阈值判定中/高风险。"
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return changed
 

@@ -15,6 +15,25 @@ AUDIT_PATHS = [ROOT / "data" / "audit-log.jsonl", ROOT / "docs" / "audit-log.jso
 SOURCE_REPO = "flashserve/flash-linear-attention-npu"
 API_ROOT = "https://api.github.com"
 BJ_TZ = timezone(timedelta(hours=8))
+CHINA_HOLIDAY_RANGES = [
+    ("元旦", "2026-01-01", "2026-01-03"),
+    ("春节", "2026-02-15", "2026-02-23"),
+    ("清明节", "2026-04-04", "2026-04-06"),
+    ("劳动节", "2026-05-01", "2026-05-05"),
+    ("端午节", "2026-06-19", "2026-06-21"),
+    ("中秋节", "2026-09-25", "2026-09-27"),
+    ("国庆节", "2026-10-01", "2026-10-07"),
+]
+CHINA_ADJUSTED_WORKDAYS = {
+    datetime.strptime(value, "%Y-%m-%d").date()
+    for value in ("2026-01-04", "2026-02-14", "2026-02-28", "2026-05-09", "2026-09-20", "2026-10-10")
+}
+CHINA_HOLIDAYS = {
+    day
+    for _, start, end in CHINA_HOLIDAY_RANGES
+    for day in (datetime.strptime(start, "%Y-%m-%d").date() + timedelta(days=offset)
+                for offset in range((datetime.strptime(end, "%Y-%m-%d").date() - datetime.strptime(start, "%Y-%m-%d").date()).days + 1))
+}
 
 
 def now_bj():
@@ -23,6 +42,26 @@ def now_bj():
 
 def today_bj():
     return datetime.now(BJ_TZ).date()
+
+
+def is_china_workday(day):
+    if day in CHINA_ADJUSTED_WORKDAYS:
+        return True
+    if day in CHINA_HOLIDAYS:
+        return False
+    return day.weekday() < 5
+
+
+def workdays_until(start, end):
+    if end <= start:
+        return 0
+    count = 0
+    day = start + timedelta(days=1)
+    while day <= end:
+        if is_china_workday(day):
+            count += 1
+        day += timedelta(days=1)
+    return count
 
 
 def github_get(path):
@@ -162,7 +201,7 @@ def task_ddl(task):
 def evaluate_task_delivery(task, catalog_items):
     pr = evaluate_pr_links(task.get("pr_link", ""), catalog_items)
     ddl = task_ddl(task)
-    days_until_ddl = (ddl - today_bj()).days
+    workdays_until_ddl = workdays_until(today_bj(), ddl)
     report = has_report(task)
     completed = completion_override(task) or (pr["allMerged"] and report)
     delayed = not completed and today_bj() > ddl
@@ -172,9 +211,9 @@ def evaluate_task_delivery(task, catalog_items):
     elif pr["allMerged"]:
         risk = "低"
     elif pr["hasOpen"]:
-        risk = "中" if days_until_ddl <= 5 else "低"
+        risk = "中" if workdays_until_ddl <= 3 else "低"
     else:
-        risk = "高" if days_until_ddl <= 10 else "中"
+        risk = "高" if workdays_until_ddl <= 6 else "中"
 
     status = task.get("status") or "todo"
     if completed:

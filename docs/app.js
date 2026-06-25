@@ -1547,6 +1547,15 @@ function chinaWorkdayInfo(value) {
   return { nonWorking: false, label: "工作日" };
 }
 
+function workdaysUntil(start, end) {
+  if (!isYmd(start) || !isYmd(end) || end <= start) return 0;
+  let count = 0;
+  for (let day = addDays(start, 1); day <= end; day = addDays(day, 1)) {
+    if (!chinaWorkdayInfo(day).nonWorking) count += 1;
+  }
+  return count;
+}
+
 function isWeekend(value) {
   const day = dateFromYmd(value).getUTCDay();
   return day === 0 || day === 6;
@@ -1608,8 +1617,8 @@ function todayBjYmd() {
   return new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
-function taskDaysUntilDdl(task) {
-  return daysBetween(todayBjYmd(), taskDdl(task));
+function taskWorkdaysUntilDdl(task) {
+  return workdaysUntil(todayBjYmd(), taskDdl(task));
 }
 
 function taskPastDdlMidnight(task) {
@@ -1626,7 +1635,7 @@ function taskHasClosedSchedule(task) {
 
 function evaluateTaskRisk(task) {
   const pr = prLinkSummary(task.pr_link);
-  const daysUntilDdl = taskDaysUntilDdl(task);
+  const workdaysUntilDdl = taskWorkdaysUntilDdl(task);
   if (taskHasWaitingOwner(task)) {
     return "高";
   }
@@ -1634,9 +1643,9 @@ function evaluateTaskRisk(task) {
     return "低";
   }
   if (pr.hasOpen) {
-    return daysUntilDdl <= 5 ? "中" : "低";
+    return workdaysUntilDdl <= 3 ? "中" : "低";
   }
-  return daysUntilDdl <= 10 ? "高" : "中";
+  return workdaysUntilDdl <= 6 ? "高" : "中";
 }
 
 function evaluateTaskStatus(task) {
