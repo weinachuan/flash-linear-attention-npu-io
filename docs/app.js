@@ -54,7 +54,7 @@ const OPERATOR_OWNER_RULES = {
 };
 
 const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "Pending"], ["delayed", "delay"], ["done", "done"]];
-const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟"];
+const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟", "陈龙"];
 const DEFAULT_PL = PL_OPTIONS[0];
 const AUDIT_TASK_FIELDS = ["title", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "pr_link", "test_report", "notes"];
 const AUDIT_FIELD_LABELS = {

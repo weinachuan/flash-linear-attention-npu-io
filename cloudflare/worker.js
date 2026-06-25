@@ -4,7 +4,7 @@ const DEFAULT_PROJECT = {
   baselineDate: "2026-06-15",
   projectOwner: { name: "待填写", email: "待填写" },
 };
-const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟"];
+const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟", "陈龙"];
 const DEFAULT_PL = PL_OPTIONS[0];
 const UPSTREAM_REPO = "flashserve/flash-linear-attention-npu";
 const GITHUB_API_ROOT = "https://api.github.com";
