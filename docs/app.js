@@ -1187,8 +1187,10 @@ function renderOperatorView(tasks) {
           const clippedEnd = minDate(renderEnd, end);
           const left = daysBetween(start, clippedStart) / total * 100;
           const width = Math.max(2, (daysBetween(clippedStart, clippedEnd) + 1) / total * 100);
+          const delayed = taskIsDelayed(item.task);
+          const titleSuffix = delayed ? " · delay 自动延长至今日，交付件完备后停止延长" : "";
           return `
-            <span class="operator-bar ${riskClass(item.task.risk)}" style="left:${left}%;width:${width}%;top:${index * 26 + 6}px" title="${escapeAttr(displayTaskTitle(item.task))} · ${escapeAttr(renderStart)} ~ ${escapeAttr(renderEnd)}">
+            <span class="operator-bar ${riskClass(item.task.risk)} ${delayed ? "delay-chip" : ""}" style="left:${left}%;width:${width}%;top:${index * 26 + 6}px" title="${escapeAttr(displayTaskTitle(item.task))} · ${escapeAttr(renderStart)} ~ ${escapeAttr(renderEnd)}${titleSuffix}">
               <b>${escapeHtml(featureTitle(item.task, item.operator))}</b>
               <small>${escapeHtml(formatMonthDay(renderEnd))}</small>
             </span>
@@ -1234,10 +1236,16 @@ function tasksForPerson(person) {
 function taskChipHtml(task) {
   const operators = taskOperators(task);
   const operatorLabel = operators.length ? operators.map((operator) => operator.label).join(" / ") : specialTitle(task.special_id);
-  return `<span class="work-chip ${riskClass(task.risk)}" title="${escapeAttr(displayTaskTitle(task))}">
+  const delayed = taskIsDelayed(task);
+  const titleSuffix = delayed ? "；delay 自动延长至今日，交付件完备后停止延长" : "";
+  return `<span class="work-chip ${riskClass(task.risk)} ${delayed ? "delay-chip" : ""}" title="${escapeAttr(displayTaskTitle(task))}${titleSuffix}">
     <em>${escapeHtml(operatorLabel || groupTitle(task.group_id))}</em>
     <b>${escapeHtml(compactTaskTitle(task))}</b>
   </span>`;
+}
+
+function taskIsDelayed(task) {
+  return evaluateTaskDelivery(task).status === "delayed";
 }
 
 function featureTitle(task, operator = taskOperators(task)[0]) {
