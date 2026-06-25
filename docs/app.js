@@ -1771,36 +1771,78 @@ function prCatalogQuickPickerHtml() {
       <div class="pr-quick-picker">
         <input class="pr-search" data-pr-search disabled placeholder="暂无 PR 候选">
         <button type="button" data-pr-append disabled>追加</button>
+        <div class="pr-suggest-menu" data-pr-suggest-menu></div>
       </div>
     `;
   }
   return `
     <div class="pr-quick-picker">
-      <input class="pr-search" data-pr-search list="prCatalogOptions" placeholder="输入 PR 号 / 标题 / 链接，回车追加">
+      <input class="pr-search" data-pr-search autocomplete="off" placeholder="输入 PR 号 / 标题 / 链接，回车追加">
       <button type="button" data-pr-append>追加</button>
+      <div class="pr-suggest-menu" data-pr-suggest-menu></div>
     </div>
   `;
-}
-
-function renderPrCatalogDatalist() {
-  let datalist = document.querySelector("#prCatalogOptions");
-  if (!datalist) {
-    datalist = document.createElement("datalist");
-    datalist.id = "prCatalogOptions";
-    document.body.appendChild(datalist);
-  }
-  const items = state.prCatalog?.items || [];
-  datalist.innerHTML = items.map((pr) => `<option value="${escapeAttr(prOptionLabel(pr))}"></option>`).join("");
 }
 
 function prOptionLabel(pr) {
   return `#${pr.number} ${pr.title || ""}`.trim();
 }
 
+function sortedPrCatalogItems() {
+  return [...(state.prCatalog?.items || [])].sort((a, b) => {
+    const byNumber = (Number(b.number) || 0) - (Number(a.number) || 0);
+    return byNumber || String(b.updated_at || b.updatedAt || "").localeCompare(String(a.updated_at || a.updatedAt || ""));
+  });
+}
+
+function prSuggestionItems(query) {
+  const normalized = String(query || "").trim().toLowerCase();
+  return sortedPrCatalogItems().filter((pr) => {
+    if (!normalized) return true;
+    return [String(pr.number || ""), `#${pr.number || ""}`, pr.url, prOptionLabel(pr), pr.title, pr.headRef]
+      .some((field) => String(field || "").toLowerCase().includes(normalized));
+  }).slice(0, 10);
+}
+
+function prSuggestItemHtml(pr) {
+  const status = pr?.status === "merged" ? "merged" : (pr?.status === "open" ? "open" : "unknown");
+  return `
+    <button type="button" class="pr-suggest-item pr-${status}" data-pr-suggest="${escapeAttr(pr.url || prOptionLabel(pr))}" title="${escapeAttr(prOptionLabel(pr))}">
+      <strong>#${escapeHtml(pr.number)}</strong>
+      <span>${escapeHtml(pr.title || "")}</span>
+    </button>
+  `;
+}
+
+function renderPrSuggestions(input, open = true) {
+  const picker = input.closest(".pr-quick-picker");
+  const menu = picker?.querySelector("[data-pr-suggest-menu]");
+  if (!picker || !menu) return;
+  const items = prSuggestionItems(input.value);
+  menu.innerHTML = items.length
+    ? items.map(prSuggestItemHtml).join("")
+    : `<div class="pr-suggest-empty">无匹配 PR</div>`;
+  picker.classList.toggle("open", open);
+}
+
+function closePrSuggestMenus(event = null) {
+  if (event?.target?.closest?.(".pr-suggest-menu")) return;
+  document.querySelectorAll(".pr-quick-picker.open").forEach((picker) => picker.classList.remove("open"));
+}
+
+function choosePrSuggestion(button) {
+  const row = button.closest("tr");
+  const search = row?.querySelector("[data-pr-search]");
+  if (!search) return;
+  search.value = button.dataset.prSuggest || "";
+  appendPrFromSearch(search);
+  closePrSuggestMenus();
+}
+
 function findPrCandidate(query) {
   const value = String(query || "").trim();
   if (!value) return null;
-  const items = state.prCatalog?.items || [];
+  const items = sortedPrCatalogItems();
   const normalized = value.toLowerCase();
   const number = normalized.match(/^#?(\d+)$/)?.[1]
     || normalized.match(/\/pull\/(\d+)/)?.[1]
@@ -1877,7 +1919,6 @@ function developerTaskRowHtml(task) {
 }
 
 function renderRows(tasks) {
-  renderPrCatalogDatalist();
   $("#rows").innerHTML = tasks.map((task) => {
     if (!state.token) {
       return readOnlyTaskRowHtml(task);
@@ -1912,9 +1953,24 @@ function renderRows(tasks) {
   document.querySelectorAll("#rows [data-owner-picker-value]").forEach((control) => control.addEventListener("change", () => syncOwnerFromPicker(control)));
   document.querySelectorAll("#rows [data-pr-append]").forEach((control) => control.addEventListener("click", () => appendPrFromSearch(control)));
   document.querySelectorAll("#rows [data-pr-search]").forEach((control) => control.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closePrSuggestMenus();
+      return;
+    }
     if (event.key !== "Enter") return;
     event.preventDefault();
     appendPrFromSearch(control);
+    closePrSuggestMenus();
+  }));
+  document.querySelectorAll("#rows [data-pr-search]").forEach((control) => {
+    control.addEventListener("focus", () => renderPrSuggestions(control, true));
+    control.addEventListener("input", () => renderPrSuggestions(control, true));
+  });
+  document.querySelectorAll("#rows [data-pr-suggest-menu]").forEach((menu) => menu.addEventListener("mousedown", (event) => {
+    const button = event.target.closest("[data-pr-suggest]");
+    if (!button) return;
+    event.preventDefault();
+    choosePrSuggestion(button);
   }));
 }
 
@@ -3055,10 +3111,16 @@ document.addEventListener("click", (event) => {
   if (event.target.closest(".owner-editor")) return;
   closeOwnerPickers(event);
 });
+document.addEventListener("click", (event) => {
+  if (event.target.closest(".pr-quick-picker")) return;
+  closePrSuggestMenus(event);
+});
 document.addEventListener("scroll", closeOwnerPickers, true);
+document.addEventListener("scroll", closePrSuggestMenus, true);
 document.addEventListener("scroll", positionOwnerFilterMenu, true);
 window.addEventListener("resize", () => {
   closeOwnerPickers();
+  closePrSuggestMenus();
   positionOwnerFilterMenu();
 });
 
