@@ -527,15 +527,6 @@ function tableFilterSelect(field, options) {
 function ownerFilterDropdown() {
   const selected = state.ownerFilterOpen ? state.ownerFilterDraft : ownerFilterValues();
   const selectedSet = new Set(selected);
-  const query = state.ownerFilterQuery.trim().toLowerCase();
-  const seen = new Set();
-  const options = ownerFilterOptions().filter(([id]) => !query || id.toLowerCase().includes(query));
-  const normalized = options.filter(([id]) => {
-    const key = String(id);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
   const label = ownerFilterLabel();
   return `
     <th>
@@ -546,12 +537,7 @@ function ownerFilterDropdown() {
         <div class="check-filter-menu">
           <input class="check-filter-search" data-owner-filter-search type="search" placeholder="搜索责任人" value="${escapeAttr(state.ownerFilterQuery)}">
           <div class="check-filter-options">
-            ${normalized.length ? normalized.map(([id, optionLabel]) => `
-              <label class="check-option">
-                <input type="checkbox" data-owner-filter-value value="${escapeAttr(id)}" ${selectedSet.has(id) ? "checked" : ""}>
-                <span>${escapeHtml(optionLabel)}</span>
-              </label>
-            `).join("") : `<div class="check-filter-empty">无匹配责任人</div>`}
+            ${ownerFilterOptionsHtml(selectedSet)}
           </div>
           <div class="check-filter-actions">
             <button type="button" class="check-filter-select-all" data-owner-filter-select-all>全选</button>
@@ -562,6 +548,35 @@ function ownerFilterDropdown() {
       </div>
     </th>
   `;
+}
+
+function ownerFilterOptionsHtml(selectedSet = new Set(state.ownerFilterDraft)) {
+  const query = state.ownerFilterQuery.trim().toLowerCase();
+  const seen = new Set();
+  const normalized = ownerFilterOptions()
+    .filter(([id]) => !query || id.toLowerCase().includes(query))
+    .filter(([id]) => {
+      const key = String(id);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  return normalized.length ? normalized.map(([id, optionLabel]) => `
+    <label class="check-option">
+      <input type="checkbox" data-owner-filter-value value="${escapeAttr(id)}" ${selectedSet.has(id) ? "checked" : ""}>
+      <span>${escapeHtml(optionLabel)}</span>
+    </label>
+  `).join("") : `<div class="check-filter-empty">无匹配责任人</div>`;
+}
+
+function refreshOwnerFilterOptions() {
+  const container = document.querySelector(".check-filter-options");
+  if (!container) return renderTableFilters();
+  container.innerHTML = ownerFilterOptionsHtml(new Set(state.ownerFilterDraft));
+  container.querySelectorAll("[data-owner-filter-value]").forEach((control) => {
+    control.addEventListener("click", updateOwnerFilter);
+    control.addEventListener("change", updateOwnerFilter);
+  });
 }
 
 function ownerFilterLabel() {
@@ -660,8 +675,8 @@ function toggleOwnerFilter(event) {
 function updateOwnerFilterQuery(event) {
   state.ownerFilterQuery = event.target.value;
   state.ownerFilterOpen = true;
-  renderTableFilters();
-  document.querySelector("[data-owner-filter-search]")?.focus();
+  refreshOwnerFilterOptions();
+  positionOwnerFilterMenu();
 }
 
 function updateOwnerFilter(event) {
