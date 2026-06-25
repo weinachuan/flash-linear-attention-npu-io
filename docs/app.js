@@ -1495,14 +1495,35 @@ function ownerEditorHtml(task) {
 function toggleOwnerPicker(button) {
   const editor = button.closest(".owner-editor");
   if (!editor) return;
+  const willOpen = !editor.classList.contains("open");
   closeOwnerPickers(null, editor);
-  editor.classList.toggle("open");
+  editor.classList.toggle("open", willOpen);
+  if (willOpen) positionOwnerPicker(editor);
+}
+
+function positionOwnerPicker(editor) {
+  const panel = editor?.querySelector(".owner-picker-panel");
+  const tableWrap = editor?.closest(".table-wrap");
+  if (!panel || !tableWrap) return;
+  editor.classList.remove("drop-up");
+  const editorRect = editor.getBoundingClientRect();
+  const wrapRect = tableWrap.getBoundingClientRect();
+  const defaultMaxHeight = 220;
+  const gap = 8;
+  const below = Math.max(40, wrapRect.bottom - (editorRect.top + 40) - gap);
+  const above = Math.max(40, editorRect.top - wrapRect.top - gap);
+  const dropUp = below < 160 && above > below;
+  editor.classList.toggle("drop-up", dropUp);
+  panel.style.maxHeight = `${Math.min(defaultMaxHeight, dropUp ? above : below)}px`;
 }
 
 function closeOwnerPickers(event = null, except = null) {
   if (event?.target?.closest?.(".owner-picker-panel")) return;
   document.querySelectorAll(".owner-editor.open").forEach((editor) => {
-    if (editor !== except) editor.classList.remove("open");
+    if (editor === except) return;
+    editor.classList.remove("open", "drop-up");
+    const panel = editor.querySelector(".owner-picker-panel");
+    if (panel) panel.style.maxHeight = "";
   });
 }
 

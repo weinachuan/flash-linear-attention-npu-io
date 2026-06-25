@@ -355,13 +355,17 @@ td .link-input { min-width:220px; }
   z-index:120;
   display:none;
   width:min(280px, calc(100vw - 48px));
-  max-height:250px;
+  max-height:220px;
   overflow:auto;
   padding:8px;
   border:1px solid var(--line);
   border-radius:12px;
   background:#fffdf8;
   box-shadow:0 18px 44px rgba(39,33,24,.18);
+}
+.owner-editor.drop-up .owner-picker-panel {
+  top:auto;
+  bottom:40px;
 }
 .owner-editor.open .owner-picker-panel { display:grid; gap:4px; }
 .owner-option {
