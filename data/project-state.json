@@ -1,7 +1,7 @@
 {
   "storageVersion": 2,
-  "generatedAt": "2026-06-24T19:47:54.553Z",
-  "version": "2026-06-24T11:42:43.045Z",
+  "generatedAt": "2026-06-25T20:02:17.550Z",
+  "version": "2026-06-25T19:36:32+00:00",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -265,6 +265,193 @@
       "collapsed": 0
     }
   ],
+  "operators": [
+    {
+      "id": "chunk_gated_delta_rule_fwd_h",
+      "label": "chunk_gated_delta_rule_fwd_h",
+      "aliases": [
+        "chunk_gated_delta_rule_fwd_h",
+        "fwd_h"
+      ],
+      "owner_rules": [
+        {
+          "owner": "方梓阳"
+        }
+      ],
+      "position": 0,
+      "active": true
+    },
+    {
+      "id": "chunk_fwd_o",
+      "label": "chunk_fwd_o",
+      "aliases": [
+        "chunk_fwd_o",
+        "fwd_o"
+      ],
+      "owner_rules": [
+        {
+          "owner": "吴雨舒"
+        }
+      ],
+      "position": 1,
+      "active": true
+    },
+    {
+      "id": "recompute_wu_fwd",
+      "label": "recompute_wu_fwd",
+      "aliases": [
+        "recompute_wu_fwd",
+        "recompute_w_u",
+        "recompute_wu",
+        "recompute"
+      ],
+      "owner_rules": [
+        {
+          "until": "2026-06-30",
+          "owner": "方梓阳"
+        },
+        {
+          "owner": "周云飞"
+        }
+      ],
+      "position": 2,
+      "active": true
+    },
+    {
+      "id": "chunk_bwd_dv_local",
+      "label": "chunk_bwd_dv_local",
+      "aliases": [
+        "chunk_bwd_dv_local",
+        "chunk_dv_local",
+        "dv_local"
+      ],
+      "owner_rules": [
+        {
+          "until": "2026-06-18",
+          "owner": "陈琳鑫"
+        },
+        {
+          "owner": "叶倩雯"
+        }
+      ],
+      "position": 3,
+      "active": true
+    },
+    {
+      "id": "chunk_bwd_dqkwg",
+      "label": "chunk_bwd_dqkwg",
+      "aliases": [
+        "chunk_bwd_dqkwg",
+        "dqkwg"
+      ],
+      "owner_rules": [
+        {
+          "until": "2026-06-30",
+          "owner": "黄浚哲"
+        },
+        {
+          "owner": "李佳敏"
+        }
+      ],
+      "position": 4,
+      "active": true
+    },
+    {
+      "id": "chunk_gated_delta_rule_bwd_dhu",
+      "label": "chunk_gated_delta_rule_bwd_dhu",
+      "aliases": [
+        "chunk_gated_delta_rule_bwd_dhu",
+        "dhu"
+      ],
+      "owner_rules": [
+        {
+          "owner": "方梓阳"
+        }
+      ],
+      "position": 5,
+      "active": true
+    },
+    {
+      "id": "prepare_wy_repr_bwd_da",
+      "label": "prepare_wy_repr_bwd_da",
+      "aliases": [
+        "prepare_wy_repr_bwd_da",
+        "prepare_wy_bwd_da"
+      ],
+      "owner_rules": [
+        {
+          "owner": "杨子奇"
+        }
+      ],
+      "position": 6,
+      "active": true
+    },
+    {
+      "id": "prepare_wy_repr_bwd_full",
+      "label": "prepare_wy_repr_bwd_full",
+      "aliases": [
+        "prepare_wy_repr_bwd_full",
+        "prepare_wy_bwd_full"
+      ],
+      "owner_rules": [
+        {
+          "until": "2026-06-30",
+          "owner": "张硕累"
+        },
+        {
+          "owner": "周云飞"
+        }
+      ],
+      "position": 7,
+      "active": true
+    },
+    {
+      "id": "causal_conv1d_fwd",
+      "label": "causal_conv1d_fwd",
+      "aliases": [
+        "causal_conv1d_fwd",
+        "causal_conv1d TND",
+        "TND 转 NTD"
+      ],
+      "owner_rules": [],
+      "position": 8,
+      "active": true
+    },
+    {
+      "id": "causal_conv1d_bwd",
+      "label": "causal_conv1d_bwd",
+      "aliases": [
+        "causal_conv1d_bwd",
+        "causal_conv1d bwd"
+      ],
+      "owner_rules": [],
+      "position": 9,
+      "active": true
+    },
+    {
+      "id": "solve_tril",
+      "label": "solve_tril",
+      "aliases": [
+        "solve_tril",
+        "solve_tri"
+      ],
+      "owner_rules": [],
+      "position": 10,
+      "active": true
+    },
+    {
+      "id": "kimi_delta_attention_triton",
+      "label": "kimi_delta_attention_triton",
+      "aliases": [
+        "kimi_delta_attention",
+        "KDA triton",
+        "KDA"
+      ],
+      "owner_rules": [],
+      "position": 11,
+      "active": true
+    }
+  ],
   "people": [
     {
       "id": "P16",
@@ -320,21 +507,21 @@
       "name": "陈市",
       "position": 7,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "孙伟伟"
     },
     {
       "id": "P08",
       "name": "龚翔宇",
       "position": 8,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "龚翔宇"
     },
     {
       "id": "P09",
       "name": "姜东明",
       "position": 9,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "周亭亭"
     },
     {
       "id": "P10",
@@ -348,7 +535,7 @@
       "name": "刘福疆",
       "position": 11,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "孙伟伟"
     },
     {
       "id": "P12",
@@ -362,21 +549,21 @@
       "name": "鲍超俊",
       "position": 13,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "唐超"
     },
     {
       "id": "P14",
       "name": "江奇",
       "position": 14,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "马越"
     },
     {
       "id": "P15",
       "name": "张艺",
       "position": 15,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "孙伟伟"
     },
     {
       "id": "P17",
@@ -411,7 +598,7 @@
       "name": "赵怡然",
       "position": 20,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "孙伟伟"
     },
     {
       "id": "person-魏纳川",
@@ -442,7 +629,8 @@
       "notes": "",
       "position": 0,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T09:54:58+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_gated_delta_rule_fwd_h",
       "segments": [
         {
           "id": "seg-ad6ef8526b",
@@ -473,7 +661,8 @@
       "notes": "",
       "position": 1,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T02:12:17+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_fwd_o",
       "segments": [
         {
           "id": "seg-9f801d9dcb",
@@ -504,7 +693,8 @@
       "notes": "",
       "position": 2,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T02:12:40+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "recompute_wu_fwd",
       "segments": [
         {
           "id": "seg-0801e04687",
@@ -535,7 +725,8 @@
       "notes": "",
       "position": 3,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T01:46:34+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_bwd_dv_local",
       "segments": [
         {
           "id": "seg-4d160c57ee",
@@ -566,7 +757,8 @@
       "notes": "",
       "position": 4,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T02:13:04+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_bwd_dqkwg",
       "segments": [
         {
           "id": "seg-71650b131f",
@@ -597,7 +789,8 @@
       "notes": "",
       "position": 5,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-17T06:42:07+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "prepare_wy_repr_bwd_da",
       "segments": [
         {
           "id": "seg-5ebbafe401",
@@ -628,7 +821,8 @@
       "notes": "",
       "position": 6,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T15:06:39+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "prepare_wy_repr_bwd_full",
       "segments": [
         {
           "id": "seg-9b4561eff2",
@@ -659,7 +853,8 @@
       "notes": "",
       "position": 7,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T08:05:54+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "prepare_wy_repr_bwd_full",
       "segments": [
         {
           "id": "seg-5063433fe7",
@@ -690,7 +885,8 @@
       "notes": "",
       "position": 8,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T01:46:34+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_bwd_dv_local",
       "segments": [
         {
           "id": "seg-f6b0d1664a",
@@ -721,7 +917,8 @@
       "notes": "",
       "position": 9,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T08:40:02+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_gated_delta_rule_fwd_h/chunk_fwd_o",
       "segments": [
         {
           "id": "seg-dcd9523a43",
@@ -752,7 +949,8 @@
       "notes": "",
       "position": 10,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T01:50:00+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "causal_conv1d_fwd",
       "segments": [
         {
           "id": "seg-ba848d33d5",
@@ -784,6 +982,7 @@
       "position": 11,
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-17T01:00:54+08:00",
+      "operator_ids": "",
       "segments": [
         {
           "id": "seg-3f969da999",
@@ -814,7 +1013,8 @@
       "notes": "",
       "position": 12,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T02:12:18+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_fwd_o",
       "segments": [
         {
           "id": "seg-15b69a8629",
@@ -845,7 +1045,8 @@
       "notes": "",
       "position": 13,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T01:46:34+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_bwd_dv_local",
       "segments": [
         {
           "id": "seg-c0b280b344",
@@ -862,8 +1063,8 @@
       "scope": "",
       "target": "",
       "owner": "龚翔宇",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": "",
@@ -871,12 +1072,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/74 https://github.com/flashserve/flash-linear-attention-npu/pull/72",
+      "test_report": "https://wiki.huawei.com/domains/110631/wiki/386588/WIKI2026062211535144",
       "notes": "临时插入其它任务",
       "position": 14,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "prepare_wy_repr_bwd_full",
       "segments": [
         {
           "id": "seg-4783e662-d",
@@ -893,7 +1095,7 @@
       "scope": "",
       "target": "",
       "owner": "方梓阳",
-      "status": "doing",
+      "status": "done",
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-25",
@@ -903,11 +1105,12 @@
       "evidence": [],
       "dependencies": [],
       "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/61",
-      "test_report": "",
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026062511605110",
       "notes": "",
       "position": 15,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_gated_delta_rule_bwd_dhu",
       "segments": [
         {
           "id": "seg-7f49a81021",
@@ -938,7 +1141,8 @@
       "notes": "",
       "position": 16,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_gated_delta_rule_fwd_h",
       "segments": [
         {
           "id": "seg-21513d9491",
@@ -969,7 +1173,8 @@
       "notes": "",
       "position": 17,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_fwd_o",
       "segments": [
         {
           "id": "seg-d973d56d97",
@@ -986,8 +1191,8 @@
       "scope": "",
       "target": "",
       "owner": "石俊杰",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": "",
@@ -995,12 +1200,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/81",
+      "test_report": "https://wiki.huawei.com/domains/101911/wiki/321565/WIKI2026062511589413",
       "notes": "",
       "position": 18,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:34:48+00:00",
+      "operator_ids": "solve_tril",
       "segments": [
         {
           "id": "seg-057cf6f872",
@@ -1031,7 +1237,8 @@
       "notes": "",
       "position": 19,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-21T09:48:46.289Z",
+      "updated_at": "2026-06-25T19:34:48+00:00",
+      "operator_ids": "solve_tril",
       "segments": [
         {
           "id": "seg-2015742518",
@@ -1048,7 +1255,7 @@
       "scope": "",
       "target": "",
       "owner": "江奇",
-      "status": "doing",
+      "status": "done",
       "risk": "低",
       "priority": "P0",
       "group_id": "M-2026-06-25",
@@ -1057,12 +1264,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/55",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/55 https://github.com/flashserve/flash-linear-attention-npu/pull/80",
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI20",
       "notes": "",
       "position": 20,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-23T03:29:51.115Z",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "causal_conv1d_bwd",
       "segments": [
         {
           "id": "seg-46f78664fa",
@@ -1093,7 +1301,8 @@
       "notes": "",
       "position": 21,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_bwd_dqkwg",
       "segments": [
         {
           "id": "seg-d1bde83de6",
@@ -1124,7 +1333,8 @@
       "notes": "6-23下发，1.5周人力",
       "position": 22,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-24T01:43:58.415Z",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_gated_delta_rule_fwd_h",
       "segments": [
         {
           "id": "seg-c065d374c1",
@@ -1140,28 +1350,29 @@
       "title": "性能看板",
       "scope": "",
       "target": "",
-      "owner": "待排人力",
-      "status": "todo",
-      "risk": "高",
+      "owner": "魏纳川",
+      "status": "doing",
+      "risk": "中",
       "priority": "P1",
-      "group_id": "M-2026-06-25",
+      "group_id": "M-2026-07-15",
       "special_id": null,
-      "start_date": "2026-06-19",
-      "end_date": "2026-06-25",
+      "start_date": "2026-07-04",
+      "end_date": "2026-07-22",
       "evidence": [],
       "dependencies": [],
       "pr_link": "",
       "test_report": "",
-      "notes": "",
+      "notes": "7-04下发需求，预期两周工作量",
       "position": 23,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-16T14:41:42+08:00",
+      "updated_at": "2026-06-25T13:57:04.500Z",
+      "operator_ids": "",
       "segments": [
         {
           "id": "seg-dfff37876c",
-          "start_date": "2026-06-19",
-          "end_date": "2026-06-25",
-          "reason": "",
+          "start_date": "2026-07-04",
+          "end_date": "2026-07-22",
+          "reason": "7-04下发需求，预期两周工作量",
           "position": 0
         }
       ]
@@ -1187,6 +1398,7 @@
       "position": 24,
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-24T03:51:56.094Z",
+      "operator_ids": "",
       "segments": [
         {
           "id": "seg-3e03d6ffc0",
@@ -1203,8 +1415,8 @@
       "scope": "",
       "target": "",
       "owner": "对应算子责任人",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1212,12 +1424,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/44",
+      "test_report": "https://github.com/flashserve/flash-linear-attention-npu/blob/main/fla/ops/ascendc/gdn/chunk_gdn_fwd/chunk_gated_delta_rule_fwd_h/README.md",
       "notes": "",
       "position": 25,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_gated_delta_rule_fwd_h",
       "segments": [
         {
           "id": "seg-a627326868",
@@ -1234,8 +1447,8 @@
       "scope": "",
       "target": "",
       "owner": "对应算子责任人",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1243,12 +1456,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/88",
+      "test_report": "https://github.com/flashserve/flash-linear-attention-npu/blob/main/fla/ops/ascendc/gdn/chunk_gdn_fwd/chunk_fwd_o/README.md",
       "notes": "",
       "position": 26,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_fwd_o",
       "segments": [
         {
           "id": "seg-91bb5dea40",
@@ -1265,8 +1479,8 @@
       "scope": "",
       "target": "",
       "owner": "对应算子责任人",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1274,12 +1488,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/44",
+      "test_report": "https://github.com/flashserve/flash-linear-attention-npu/blob/main/fla/ops/ascendc/gdn/chunk_gdn_fwd/recompute_wu_fwd/README.md",
       "notes": "",
       "position": 27,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "recompute_wu_fwd",
       "segments": [
         {
           "id": "seg-23fd52047e",
@@ -1310,7 +1525,8 @@
       "notes": "",
       "position": 28,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-23T06:45:39.584Z",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_bwd_dv_local",
       "segments": [
         {
           "id": "seg-a767a20051",
@@ -1327,8 +1543,8 @@
       "scope": "",
       "target": "",
       "owner": "对应算子责任人",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1336,12 +1552,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/18",
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026061711505063",
       "notes": "",
       "position": 29,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_bwd_dqkwg",
       "segments": [
         {
           "id": "seg-3ec22781b8",
@@ -1358,8 +1575,8 @@
       "scope": "",
       "target": "",
       "owner": "对应算子责任人",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1367,12 +1584,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/44",
+      "test_report": "https://github.com/flashserve/flash-linear-attention-npu/blob/main/fla/ops/ascendc/gdn/chunk_gdn_bwd/chunk_gated_delta_rule_bwd_dhu/README.md",
       "notes": "",
       "position": 30,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_gated_delta_rule_bwd_dhu",
       "segments": [
         {
           "id": "seg-017bc195b5",
@@ -1389,8 +1607,8 @@
       "scope": "",
       "target": "",
       "owner": "对应算子责任人",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1398,12 +1616,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/71",
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026061711502410",
       "notes": "",
       "position": 31,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "prepare_wy_repr_bwd_da",
       "segments": [
         {
           "id": "seg-c40d713206",
@@ -1420,8 +1639,8 @@
       "scope": "",
       "target": "",
       "owner": "对应算子责任人",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "docs",
@@ -1429,12 +1648,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/85",
+      "test_report": "https://github.com/flashserve/flash-linear-attention-npu/blob/main/fla/ops/ascendc/gdn/chunk_gdn_bwd/prepare_wy_repr_bwd_full/README.md",
       "notes": "",
       "position": 32,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "prepare_wy_repr_bwd_full",
       "segments": [
         {
           "id": "seg-10b0afbaaa",
@@ -1451,7 +1671,7 @@
       "scope": "",
       "target": "",
       "owner": "法振尧",
-      "status": "doing",
+      "status": "done",
       "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
@@ -1461,11 +1681,12 @@
       "evidence": [],
       "dependencies": [],
       "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/65",
-      "test_report": "",
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026062511592758",
       "notes": "",
       "position": 33,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-22T04:09:11.068Z",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_gated_delta_rule_fwd_h",
       "segments": [
         {
           "id": "seg-ef7acb84aa",
@@ -1482,8 +1703,8 @@
       "scope": "",
       "target": "",
       "owner": "方梓阳",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1491,12 +1712,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/79",
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026062411581203",
       "notes": "",
       "position": 34,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "recompute_wu_fwd",
       "segments": [
         {
           "id": "seg-31d82f9f10",
@@ -1513,8 +1735,8 @@
       "scope": "",
       "target": "",
       "owner": "黄浚哲",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1522,12 +1744,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/76",
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026062511596352",
       "notes": "",
       "position": 35,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_bwd_dqkwg",
       "segments": [
         {
           "id": "seg-23a092ebd3",
@@ -1545,7 +1768,7 @@
       "target": "",
       "owner": "方梓阳",
       "status": "doing",
-      "risk": "高",
+      "risk": "中",
       "priority": "P1",
       "group_id": "M-2026-07-15",
       "special_id": "launch",
@@ -1553,12 +1776,13 @@
       "end_date": "2026-06-28",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/84",
       "test_report": "",
       "notes": "6.25号开始执行，工作时间三天",
       "position": 36,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-24T11:42:42.507Z",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_gated_delta_rule_bwd_dhu",
       "segments": [
         {
           "id": "seg-797e0353b8",
@@ -1575,8 +1799,8 @@
       "scope": "",
       "target": "",
       "owner": "杨子奇",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "launch",
@@ -1584,12 +1808,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "1111",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/86",
+      "test_report": "https://wiki.huawei.com/domains/124182/wiki/237757/WIKI2026062511602683",
       "notes": "",
       "position": 37,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-24T08:36:41.500Z",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "prepare_wy_repr_bwd_da",
       "segments": [
         {
           "id": "seg-709935c665",
@@ -1606,7 +1831,7 @@
       "scope": "",
       "target": "",
       "owner": "吴雨舒",
-      "status": "doing",
+      "status": "done",
       "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
@@ -1616,11 +1841,12 @@
       "evidence": [],
       "dependencies": [],
       "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/64",
-      "test_report": "",
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026061711514377",
       "notes": "",
       "position": 38,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-24T09:28:05.264Z",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "prepare_wy_repr_bwd_full",
       "segments": [
         {
           "id": "seg-9c104cb6fd",
@@ -1651,7 +1877,8 @@
       "notes": "",
       "position": 39,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_bwd_dqkwg",
       "segments": [
         {
           "id": "seg-t42-dqkwg-regbase",
@@ -1668,8 +1895,8 @@
       "scope": "",
       "target": "",
       "owner": "赵怡然/陈市",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": null,
@@ -1677,12 +1904,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
-      "test_report": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/87",
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026062511602984",
       "notes": "",
       "position": 40,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_bwd_dv_local",
       "segments": [
         {
           "id": "seg-t42-dv-local-regbase",
@@ -1699,8 +1927,8 @@
       "scope": "",
       "target": "",
       "owner": "龚翔宇",
-      "status": "doing",
-      "risk": "高",
+      "status": "done",
+      "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-06-25",
       "special_id": "",
@@ -1708,12 +1936,13 @@
       "end_date": "2026-06-25",
       "evidence": [],
       "dependencies": [],
-      "pr_link": "",
+      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/19",
       "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026061811524808",
       "notes": "",
       "position": 41,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "prepare_wy_repr_bwd_da",
       "segments": [
         {
           "id": "seg-t42-wy-da-regbase",
@@ -1744,7 +1973,8 @@
       "notes": "",
       "position": 42,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_gated_delta_rule_fwd_h",
       "segments": [
         {
           "id": "seg-t42-fwd-h-regbase",
@@ -1775,7 +2005,8 @@
       "notes": "",
       "position": 43,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-18T10:51:38+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_fwd_o",
       "segments": [
         {
           "id": "seg-t42-fwd-o-regbase",
@@ -1806,7 +2037,8 @@
       "notes": "",
       "position": 44,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-17T11:05:11+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "chunk_gated_delta_rule_bwd_dhu",
       "segments": [
         {
           "id": "seg-t42-dhu-regbase",
@@ -1837,7 +2069,8 @@
       "notes": "",
       "position": 45,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-17T11:05:11+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "recompute_wu_fwd",
       "segments": [
         {
           "id": "seg-t42-recompute-regbase",
@@ -1868,7 +2101,8 @@
       "notes": "",
       "position": 46,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-17T00:50:24+08:00",
+      "updated_at": "2026-06-25T19:29:23+00:00",
+      "operator_ids": "kimi_delta_attention_triton",
       "segments": [
         {
           "id": "seg-4e2c4c818c",
