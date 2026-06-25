@@ -1194,7 +1194,7 @@ function renderOperatorView(tasks) {
           const titleSuffix = isDelaySegment ? " · 自动延长段，交付件完备后停止延长" : "";
           return `
             <span class="operator-bar ${isDelaySegment ? "delay-chip" : riskClass(item.task.risk)}" style="left:${left}%;width:${width}%;top:${index * 26 + 6}px" title="${escapeAttr(displayTaskTitle(item.task))} · ${escapeAttr(segment.start_date)} ~ ${escapeAttr(segment.end_date)}${titleSuffix}">
-              ${isDelaySegment ? "" : `<b>${escapeHtml(featureTitle(item.task, item.operator))}</b><small>${escapeHtml(formatMonthDay(segment.end_date))}</small>`}
+              ${isDelaySegment ? `<small>${escapeHtml(formatMonthDay(segment.end_date))}</small>` : `<b>${escapeHtml(featureTitle(item.task, item.operator))}</b><small>${escapeHtml(formatMonthDay(segment.end_date))}</small>`}
             </span>
           `;
         }).join("")).join("");
