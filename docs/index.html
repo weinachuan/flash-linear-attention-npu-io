@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>flash-linear-attention-npu 项目看板</title>
-  <link rel="stylesheet" href="./styles.css?v=20260626-table-column-width">
+  <link rel="stylesheet" href="./styles.css?v=20260626-operators">
 </head>
 <body>
   <main class="shell">
@@ -40,6 +40,7 @@
       <button id="addTask" type="button" class="edit-only admin-only">新增任务</button>
       <button id="addGroup" type="button" class="edit-only admin-only">新增分组</button>
       <button id="addSpecial" type="button" class="edit-only admin-only">新增专项</button>
+      <button id="addOperator" type="button" class="edit-only admin-only">新增算子</button>
       <button id="addPerson" type="button" class="edit-only admin-only">新增人员</button>
       <button id="saveAll" type="button" class="edit-only primary">保存全部</button>
       <span id="editStatus" class="edit-status">只读模式</span>
@@ -111,6 +112,7 @@
               <th><button type="button" class="sort-button" data-sort-field="risk">风险 <span data-sort-indicator>↓</span></button></th>
               <th><button type="button" class="sort-button" data-sort-field="priority">优先级 <span data-sort-indicator>↕</span></button></th>
               <th><button type="button" class="sort-button" data-sort-field="title">事项 <span data-sort-indicator>↕</span></button></th>
+              <th class="col-operator"><button type="button" class="sort-button" data-sort-field="operator_ids">算子 <span data-sort-indicator>↕</span></button></th>
               <th><button type="button" class="sort-button" data-sort-field="owner">责任人 <span data-sort-indicator>↕</span></button></th>
               <th class="col-pl"><button type="button" class="sort-button" data-sort-field="owner_pl">责任人分组 <span data-sort-indicator>↕</span></button></th>
               <th class="col-group"><button type="button" class="sort-button" data-sort-field="group_id">转测迭代计划排期 <span data-sort-indicator>↕</span></button></th>
@@ -129,7 +131,7 @@
     </section>
 
     <section class="panel edit-only admin-only">
-      <h2>分组 / 专项管理</h2>
+      <h2>分组 / 专项 / 算子 / 人员管理</h2>
       <div class="admin-grid">
         <div>
           <h3>分组</h3>
@@ -138,6 +140,10 @@
         <div>
           <h3>专项</h3>
           <div id="specialAdmin" class="admin-list"></div>
+        </div>
+        <div>
+          <h3>算子</h3>
+          <div id="operatorAdmin" class="admin-list"></div>
         </div>
         <div>
           <h3>人员</h3>
@@ -151,7 +157,7 @@
       <div id="audit" class="audit"></div>
     </section>
   </main>
-  <script src="./config.js?v=20260626-table-column-width"></script>
-  <script src="./app.js?v=20260626-table-column-width"></script>
+  <script src="./config.js?v=20260626-operators"></script>
+  <script src="./app.js?v=20260626-operators"></script>
 </body>
 </html>

@@ -28,18 +28,18 @@ const CHINA_WORK_CALENDARS = {
   ]),
 };
 const OPERATOR_RULES = [
-  { id: "chunk_gated_delta_rule_fwd_h", aliases: ["chunk_gated_delta_rule_fwd_h", "fwd_h"] },
-  { id: "chunk_fwd_o", aliases: ["chunk_fwd_o", "fwd_o"] },
-  { id: "recompute_wu_fwd", aliases: ["recompute_wu_fwd", "recompute_w_u", "recompute_wu", "recompute"] },
-  { id: "chunk_bwd_dv_local", aliases: ["chunk_bwd_dv_local", "chunk_dv_local", "dv_local"] },
-  { id: "chunk_bwd_dqkwg", aliases: ["chunk_bwd_dqkwg", "dqkwg"] },
-  { id: "chunk_gated_delta_rule_bwd_dhu", aliases: ["chunk_gated_delta_rule_bwd_dhu", "dhu"] },
-  { id: "prepare_wy_repr_bwd_da", aliases: ["prepare_wy_repr_bwd_da", "prepare_wy_bwd_da"] },
-  { id: "prepare_wy_repr_bwd_full", aliases: ["prepare_wy_repr_bwd_full", "prepare_wy_bwd_full"] },
-  { id: "causal_conv1d_fwd", aliases: ["causal_conv1d_fwd", "causal_conv1d TND", "TND 转 NTD"] },
-  { id: "causal_conv1d_bwd", aliases: ["causal_conv1d_bwd", "causal_conv1d bwd"] },
-  { id: "solve_tril_npu", aliases: ["solve_tril_npu", "solve_tril", "solve_tri"] },
-  { id: "kimi_delta_attention_triton", aliases: ["kimi_delta_attention", "KDA triton", "KDA"] },
+  { id: "chunk_gated_delta_rule_fwd_h", label: "chunk_gated_delta_rule_fwd_h", aliases: ["chunk_gated_delta_rule_fwd_h", "fwd_h"] },
+  { id: "chunk_fwd_o", label: "chunk_fwd_o", aliases: ["chunk_fwd_o", "fwd_o"] },
+  { id: "recompute_wu_fwd", label: "recompute_wu_fwd", aliases: ["recompute_wu_fwd", "recompute_w_u", "recompute_wu", "recompute"] },
+  { id: "chunk_bwd_dv_local", label: "chunk_bwd_dv_local", aliases: ["chunk_bwd_dv_local", "chunk_dv_local", "dv_local"] },
+  { id: "chunk_bwd_dqkwg", label: "chunk_bwd_dqkwg", aliases: ["chunk_bwd_dqkwg", "dqkwg"] },
+  { id: "chunk_gated_delta_rule_bwd_dhu", label: "chunk_gated_delta_rule_bwd_dhu", aliases: ["chunk_gated_delta_rule_bwd_dhu", "dhu"] },
+  { id: "prepare_wy_repr_bwd_da", label: "prepare_wy_repr_bwd_da", aliases: ["prepare_wy_repr_bwd_da", "prepare_wy_bwd_da"] },
+  { id: "prepare_wy_repr_bwd_full", label: "prepare_wy_repr_bwd_full", aliases: ["prepare_wy_repr_bwd_full", "prepare_wy_bwd_full"] },
+  { id: "causal_conv1d_fwd", label: "causal_conv1d_fwd", aliases: ["causal_conv1d_fwd", "causal_conv1d TND", "TND 转 NTD"] },
+  { id: "causal_conv1d_bwd", label: "causal_conv1d_bwd", aliases: ["causal_conv1d_bwd", "causal_conv1d bwd"] },
+  { id: "solve_tril_npu", label: "solve_tril_npu", aliases: ["solve_tril_npu", "solve_tril", "solve_tri"] },
+  { id: "kimi_delta_attention_triton", label: "kimi_delta_attention_triton", aliases: ["kimi_delta_attention", "KDA triton", "KDA"] },
 ];
 const OPERATOR_OWNER_RULES = {
   chunk_fwd_o: [{ owner: "吴雨舒" }],
@@ -118,11 +118,11 @@ export default {
       if (taskPatchMatch && request.method === "DELETE") {
         return jsonResponse(request, env, await deleteTask(request, env, decodeURIComponent(taskPatchMatch[1])));
       }
-      const entityRootMatch = url.pathname.match(/^\/api\/(groups|specials|people)$/);
+      const entityRootMatch = url.pathname.match(/^\/api\/(groups|specials|people|operators)$/);
       if (entityRootMatch && request.method === "POST") {
         return jsonResponse(request, env, await createEntity(request, env, entityRootMatch[1]), 201);
       }
-      const entityMatch = url.pathname.match(/^\/api\/(groups|specials|people)\/([^/]+)$/);
+      const entityMatch = url.pathname.match(/^\/api\/(groups|specials|people|operators)\/([^/]+)$/);
       if (entityMatch && request.method === "PATCH") {
         return jsonResponse(request, env, await patchEntity(request, env, entityMatch[1], decodeURIComponent(entityMatch[2])));
       }
@@ -200,6 +200,7 @@ async function exportState(env) {
     repoScan: parseJson(meta.repoScan, {}),
     groups: await selectAll(env, "SELECT * FROM groups ORDER BY position, due_date"),
     specials: await selectAll(env, "SELECT * FROM specials ORDER BY position, title"),
+    operators: await readOperators(env),
     people: (await selectAll(env, "SELECT * FROM people ORDER BY position, name")).map((person) => ({
       ...person,
       pl: normalizePl(person.pl),
@@ -209,6 +210,7 @@ async function exportState(env) {
       ...task,
       evidence: parseJson(task.evidence, []),
       dependencies: parseJson(task.dependencies, []),
+      operator_ids: task.operator_ids || "",
       segments: segmentMap.get(task.id) || [],
     })),
   };
@@ -220,6 +222,7 @@ async function replaceState(env, state) {
     env.DB.prepare("DELETE FROM task_segments"),
     env.DB.prepare("DELETE FROM tasks"),
     env.DB.prepare("DELETE FROM people"),
+    env.DB.prepare("DELETE FROM operators"),
     env.DB.prepare("DELETE FROM specials"),
     env.DB.prepare("DELETE FROM groups"),
     env.DB.prepare("DELETE FROM project_meta WHERE key IN ('project', 'repoScan')"),
@@ -264,13 +267,28 @@ async function replaceState(env, state) {
     ));
   });
 
+  const operators = Array.isArray(state.operators) && state.operators.length ? state.operators : defaultOperators();
+  operators.forEach((operator, index) => {
+    const item = normalizeOperatorForInsert(operator, index);
+    statements.push(env.DB.prepare(
+      "INSERT INTO operators(id, label, aliases, owner_rules, position, active) VALUES (?, ?, ?, ?, ?, ?)"
+    ).bind(
+      item.id,
+      item.label,
+      toJson(item.aliases),
+      toJson(item.owner_rules),
+      item.position,
+      item.active ? 1 : 0,
+    ));
+  });
+
   (state.tasks || []).forEach((task, index) => {
     statements.push(env.DB.prepare(
       `INSERT INTO tasks(
         id, title, scope, target, owner, status, risk, priority, group_id, special_id,
         start_date, end_date, evidence, dependencies, pr_link, test_report, notes,
-        position, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        operator_ids, position, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       task.id,
       task.title || "未命名任务",
@@ -289,6 +307,7 @@ async function replaceState(env, state) {
       task.pr_link || "",
       task.test_report || "",
       task.notes || "",
+      normalizeOperatorIdsText(task.operator_ids),
       numberOr(task.position, index),
       task.created_at || nowIso(),
       task.updated_at || nowIso(),
@@ -1112,7 +1131,7 @@ async function changePassword(request, env) {
 const TASK_PATCH_FIELDS = new Set([
   "title", "scope", "target", "owner", "status", "risk", "priority", "group_id", "special_id",
   "start_date", "end_date", "evidence", "dependencies", "pr_link", "test_report", "notes",
-  "position", "segments",
+  "operator_ids", "position", "segments",
 ]);
 const TASK_JSON_PATCH_FIELDS = new Set(["evidence", "dependencies"]);
 
@@ -1131,7 +1150,7 @@ async function patchTask(request, env, taskId) {
     return { ok: true, version: await getStateVersion(env), task: oldTask, entry: null };
   }
   if (user.role !== "admin") {
-    if (!taskBelongsToUser(oldTask, user)) throw withStatus(403, `no permission to update task: ${oldTask.title || taskId}`);
+    if (!(await taskBelongsToUser(env, oldTask, user))) throw withStatus(403, `no permission to update task: ${oldTask.title || taskId}`);
     const forbiddenFields = changedFields.filter((field) => !DEVELOPER_DELIVERY_FIELDS.has(field));
     if (forbiddenFields.length) {
       throw withStatus(403, `developer can only update PR/test report fields: ${forbiddenFields.join(", ")}`);
@@ -1196,6 +1215,7 @@ function normalizeTaskPatchFields(fields) {
 function normalizePatchValue(field, value) {
   if (TASK_JSON_PATCH_FIELDS.has(field)) return Array.isArray(value) ? value : [];
   if (field === "special_id") return value || null;
+  if (field === "operator_ids") return normalizeOperatorIdsText(value);
   if (field === "position") return numberOr(value, 0);
   return String(value ?? "").trim();
 }
@@ -1285,6 +1305,7 @@ function normalizeTaskForInsert(task) {
     pr_link: String(task.pr_link || ""),
     test_report: String(task.test_report || ""),
     notes: String(task.notes || ""),
+    operator_ids: normalizeOperatorIdsText(task.operator_ids),
     position: numberOr(task.position, 0),
     created_at: task.created_at || now,
     updated_at: task.updated_at || now,
@@ -1298,8 +1319,8 @@ async function insertTask(env, task) {
     `INSERT INTO tasks(
       id, title, scope, target, owner, status, risk, priority, group_id, special_id,
       start_date, end_date, evidence, dependencies, pr_link, test_report, notes,
-      position, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      operator_ids, position, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     task.id,
     task.title,
@@ -1318,6 +1339,7 @@ async function insertTask(env, task) {
     task.pr_link,
     task.test_report,
     task.notes,
+    task.operator_ids,
     task.position,
     task.created_at,
     task.updated_at,
@@ -1347,6 +1369,13 @@ const ENTITY_CONFIG = {
     fields: new Set(["name", "position", "placeholder", "pl"]),
     select: "SELECT id, name, position, placeholder, pl FROM people WHERE id = ?",
   },
+  operators: {
+    singular: "operator",
+    table: "operators",
+    label: "算子",
+    fields: new Set(["label", "aliases", "owner_rules", "position", "active"]),
+    select: "SELECT id, label, aliases, owner_rules, position, active FROM operators WHERE id = ?",
+  },
 };
 
 function entityConfig(type) {
@@ -1365,7 +1394,9 @@ function entityLabel(type) {
 
 function entityDisplayName(type, item) {
   if (!item) return "";
-  return type === "people" ? item.name : item.title;
+  if (type === "people") return item.name;
+  if (type === "operators") return item.label;
+  return item.title;
 }
 
 function normalizeEntityForInsert(type, item) {
@@ -1400,6 +1431,9 @@ function normalizeEntityForInsert(type, item) {
       pl: normalizePl(item.pl),
     };
   }
+  if (type === "operators") {
+    return normalizeOperatorForInsert(item, 0);
+  }
   throw withStatus(404, "unsupported entity");
 }
 
@@ -1416,6 +1450,9 @@ function normalizeEntityPatchFields(type, fields) {
 function normalizeEntityValue(type, field, value) {
   if (field === "position") return numberOr(value, 0);
   if (field === "collapsed" || field === "placeholder") return value ? 1 : 0;
+  if (field === "active") return value === false || value === 0 || value === "0" ? 0 : 1;
+  if (field === "aliases") return toJson(normalizeOperatorAliases(value));
+  if (field === "owner_rules") return toJson(normalizeOperatorOwnerRules(value));
   if (field === "pl") return normalizePl(value);
   if (field === "group_id") return value || null;
   if (field === "due_date" || field === "start_date" || field === "end_date") {
@@ -1444,6 +1481,14 @@ async function insertEntity(env, type, item) {
     await env.DB.prepare("INSERT INTO people(id, name, position, placeholder, pl) VALUES (?, ?, ?, ?, ?)")
       .bind(item.id, item.name, item.position, item.placeholder ? 1 : 0, normalizePl(item.pl))
       .run();
+    return;
+  }
+  if (type === "operators") {
+    const duplicate = await env.DB.prepare("SELECT id FROM operators WHERE id = ?").bind(item.id).first();
+    if (duplicate) throw withStatus(409, "operator already exists");
+    await env.DB.prepare("INSERT INTO operators(id, label, aliases, owner_rules, position, active) VALUES (?, ?, ?, ?, ?, ?)")
+      .bind(item.id, item.label, toJson(item.aliases), toJson(item.owner_rules), item.position, item.active ? 1 : 0)
+      .run();
   }
 }
 
@@ -1452,6 +1497,7 @@ async function getEntityById(env, type, id) {
   if (!row) return null;
   if (type === "people") return { ...row, pl: normalizePl(row.pl), placeholder: Boolean(row.placeholder) };
   if (type === "specials") return { ...row, collapsed: Boolean(row.collapsed) };
+  if (type === "operators") return normalizeOperatorRow(row);
   return row;
 }
 
@@ -1520,6 +1566,20 @@ async function applyEntityDelete(env, type, id, payload) {
     await env.DB.prepare("DELETE FROM people WHERE id = ?").bind(id).run();
     return { name: person.name };
   }
+  if (type === "operators") {
+    const rows = await selectAll(env, "SELECT id, operator_ids FROM tasks WHERE operator_ids <> ''");
+    const statements = rows
+      .map((task) => {
+        const next = parseOperatorIds(task.operator_ids).filter((operatorId) => operatorId !== id).join("/");
+        return next === String(task.operator_ids || "")
+          ? null
+          : env.DB.prepare("UPDATE tasks SET operator_ids = ?, updated_at = ? WHERE id = ?").bind(next, nowIso(), task.id);
+      })
+      .filter(Boolean);
+    statements.push(env.DB.prepare("DELETE FROM operators WHERE id = ?").bind(id));
+    await env.DB.batch(statements);
+    return {};
+  }
   throw withStatus(404, "unsupported entity");
 }
 
@@ -1565,6 +1625,7 @@ async function authorizeStateChange(env, user, nextState) {
   assertSameDeveloperReadonlyCollection("repoScan", current.repoScan || {}, nextState.repoScan || {});
   assertSameDeveloperReadonlyCollection("groups", current.groups || [], nextState.groups || []);
   assertSameDeveloperReadonlyCollection("specials", current.specials || [], nextState.specials || []);
+  assertSameDeveloperReadonlyCollection("operators", current.operators || [], nextState.operators || []);
   assertSameDeveloperReadonlyCollection("people", current.people || [], nextState.people || []);
   if (currentTasks.size !== nextTasks.size) {
     throw withStatus(403, "developer can only update existing own tasks");
@@ -1574,7 +1635,7 @@ async function authorizeStateChange(env, user, nextState) {
     if (!oldTask) throw withStatus(403, "developer can only update existing own tasks");
     const changedFields = developerChangedTaskFields(oldTask, nextTask);
     if (!changedFields.length) continue;
-    if (!taskBelongsToUser(oldTask, user) && !taskBelongsToUser(nextTask, user)) {
+    if (!(await taskBelongsToUser(env, oldTask, user)) && !(await taskBelongsToUser(env, nextTask, user))) {
       throw withStatus(403, `no permission to update task: ${nextTask.title || id}`);
     }
     const forbiddenFields = changedFields.filter((field) => !DEVELOPER_DELIVERY_FIELDS.has(field));
@@ -1603,39 +1664,110 @@ function sameJson(a, b) {
   return JSON.stringify(a === undefined ? null : a) === JSON.stringify(b === undefined ? null : b);
 }
 
-function taskBelongsToUser(task, user) {
+async function taskBelongsToUser(env, task, user) {
   const ownerName = normalizeOwnerName(user.ownerName || user.displayName || user.username || "");
-  return Boolean(ownerName && taskOwnerNames(task).includes(ownerName));
+  if (!ownerName) return false;
+  const directNames = ownerNames(task);
+  if (directNames.includes(ownerName)) return true;
+  if (!directNames.includes("对应算子责任人")) return false;
+  return (await operatorOwnerNamesForTask(env, task)).includes(ownerName);
 }
 
-function taskOwnerNames(task) {
-  return splitOwnerNames(task?.owner, task);
-}
-
-function splitOwnerNames(owner, task = null) {
-  const raw = normalizeOwnerName(owner);
-  return uniqueStrings(raw.split(/[、/,，;；&\s]+/).flatMap((name) => {
-    const normalized = normalizeOwnerName(name);
-    if (normalized !== "对应算子责任人") return [normalized];
-    const owners = operatorOwnerNamesForTask(task);
-    return owners.length ? owners : [normalized];
-  }).filter(Boolean));
-}
-
-function operatorOwnerNamesForTask(task) {
+async function operatorOwnerNamesForTask(env, task) {
   const referenceDate = task?.end_date || task?.start_date || "";
-  return uniqueStrings(taskOperators(task).flatMap((operator) => operatorOwnerNames(operator.id, referenceDate)));
+  const operators = await readOperators(env);
+  return uniqueStrings(taskOperators(task, operators).flatMap((operator) => operatorOwnerNames(operator, referenceDate)));
 }
 
-function operatorOwnerNames(operatorId, referenceDate = "") {
-  const rules = OPERATOR_OWNER_RULES[operatorId] || [];
+function operatorOwnerNames(operator, referenceDate = "") {
+  const rules = Array.isArray(operator?.owner_rules) ? operator.owner_rules : [];
   const rule = rules.find((item) => !item.until || !referenceDate || referenceDate <= item.until) || rules[rules.length - 1];
-  return rule?.owner ? splitOwnerNames(rule.owner) : [];
+  return rule?.owner ? ownerNames({ owner: rule.owner }) : [];
 }
 
-function taskOperators(task) {
+function taskOperators(task, operators = defaultOperators()) {
+  const explicitIds = parseOperatorIds(task?.operator_ids);
+  if (explicitIds.length) return explicitIds.map((id) => operators.find((operator) => operator.id === id)).filter(Boolean);
+  if (String(task?.title || "").startsWith("多算子")) {
+    return ["chunk_fwd_o", "chunk_gated_delta_rule_fwd_h", "chunk_gated_delta_rule_bwd_dhu", "recompute_wu_fwd", "chunk_bwd_dv_local", "chunk_bwd_dqkwg"]
+      .map((id) => operators.find((operator) => operator.id === id))
+      .filter(Boolean);
+  }
   const text = `${task?.title || ""} ${task?.scope || ""} ${task?.target || ""}`.toLowerCase();
-  return OPERATOR_RULES.filter((operator) => operator.aliases.some((alias) => text.includes(String(alias).toLowerCase())));
+  return operators.filter((operator) => (operator.aliases || []).some((alias) => text.includes(String(alias).toLowerCase())));
+}
+
+async function readOperators(env) {
+  try {
+    const rows = await selectAll(env, "SELECT id, label, aliases, owner_rules, position, active FROM operators ORDER BY position, label");
+    return rows.map(normalizeOperatorRow);
+  } catch (error) {
+    if (!String(error?.message || "").includes("no such table")) throw error;
+    return defaultOperators();
+  }
+}
+
+function defaultOperators() {
+  return OPERATOR_RULES.map((operator, index) => ({
+    id: operator.id,
+    label: operator.label || operator.id,
+    aliases: normalizeOperatorAliases(operator.aliases || []),
+    owner_rules: normalizeOperatorOwnerRules(OPERATOR_OWNER_RULES[operator.id] || []),
+    position: index,
+    active: true,
+  }));
+}
+
+function normalizeOperatorForInsert(operator, index = 0) {
+  const rawId = String(operator.id || operator.label || "").trim();
+  const id = rawId || `operator-${crypto.randomUUID().slice(0, 10)}`;
+  const label = String(operator.label || id).trim() || id;
+  return {
+    id,
+    label,
+    aliases: normalizeOperatorAliases(operator.aliases || [label, id]),
+    owner_rules: normalizeOperatorOwnerRules(operator.owner_rules || operator.ownerRules || []),
+    position: numberOr(operator.position, index),
+    active: operator.active === false || operator.active === 0 || operator.active === "0" ? 0 : 1,
+  };
+}
+
+function normalizeOperatorRow(row) {
+  const fallback = OPERATOR_OWNER_RULES[row.id] || [];
+  return {
+    id: String(row.id || ""),
+    label: String(row.label || row.id || ""),
+    aliases: normalizeOperatorAliases(parseJson(row.aliases, [])),
+    owner_rules: normalizeOperatorOwnerRules(parseJson(row.owner_rules, fallback)),
+    position: numberOr(row.position, 0),
+    active: row.active === false || row.active === 0 || row.active === "0" ? false : true,
+  };
+}
+
+function normalizeOperatorAliases(value) {
+  const raw = Array.isArray(value)
+    ? value
+    : String(value || "").split(/[、,，;；\n]+/);
+  return uniqueStrings(raw.map((item) => String(item || "").trim()).filter(Boolean));
+}
+
+function normalizeOperatorOwnerRules(value) {
+  const raw = Array.isArray(value) ? value : parseJson(value, []);
+  return raw.map((rule) => ({
+    ...(rule.until ? { until: String(rule.until).trim() } : {}),
+    owner: normalizeOwnerName(rule.owner || ""),
+  })).filter((rule) => rule.owner);
+}
+
+function parseOperatorIds(value) {
+  return uniqueStrings(String(value || "")
+    .split(/[、/,，;；\s]+/)
+    .map((item) => item.trim())
+    .filter(Boolean));
+}
+
+function normalizeOperatorIdsText(value) {
+  return parseOperatorIds(value).join("/");
 }
 
 function uniqueStrings(items) {

@@ -221,7 +221,7 @@ body.editing .bar:hover { box-shadow:0 0 0 2px rgba(32,37,31,.18); }
 }
 .task-detail-panel { min-height:340px; }
 .table-wrap { overflow:auto; min-height:220px; max-height:58vh; background:#fffaf1; }
-table { width:100%; min-width:1500px; border-collapse:collapse; }
+table { width:100%; min-width:1680px; border-collapse:collapse; }
 th,td { padding:9px 10px; border-bottom:1px solid var(--line); text-align:left; font-size:13px; vertical-align:middle; }
 th { position:sticky; top:0; background:#fff6e8; font-size:12px; z-index:30; }
 .filter-row th { top:36px; z-index:50; overflow:visible; padding:5px 8px; background:#fffaf1; box-shadow:0 8px 0 #fffaf1, 0 9px 10px rgba(64,50,31,.08); }
@@ -278,6 +278,7 @@ th { position:sticky; top:0; background:#fff6e8; font-size:12px; z-index:30; }
 .task-table .filter-row th::before { display:none; }
 .task-table tbody td { background:#fffdf8; }
 .task-table th:last-child,.task-table td:last-child { min-width:132px; }
+.task-table .col-operator { min-width:180px; }
 .task-table .col-pl { min-width:118px; }
 .task-table .col-group { min-width:168px; }
 .task-table .col-special { min-width:150px; }
@@ -358,6 +359,7 @@ td input,td select { width:100%; min-width:86px; }
 td .title-input { min-width:260px; }
 td .link-input { min-width:220px; }
 .owner-editor { position:relative; display:grid; gap:6px; min-width:250px; max-width:270px; }
+.operator-editor { position:relative; display:grid; gap:6px; min-width:180px; max-width:230px; }
 .owner-combo { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; align-items:center; }
 .owner-input { min-width:0; }
 .owner-picker-toggle { height:34px; padding:0 10px; white-space:nowrap; }
@@ -376,11 +378,11 @@ td .link-input { min-width:220px; }
   background:#fffdf8;
   box-shadow:0 18px 44px rgba(39,33,24,.18);
 }
-.owner-editor.drop-up .owner-picker-panel {
+.owner-editor.drop-up .owner-picker-panel,.operator-editor.drop-up .owner-picker-panel {
   top:auto;
   bottom:40px;
 }
-.owner-editor.open .owner-picker-panel { display:grid; gap:4px; }
+.owner-editor.open .owner-picker-panel,.operator-editor.open .owner-picker-panel { display:grid; gap:4px; }
 .owner-option {
   display:flex;
   grid-template-columns:none;
@@ -485,7 +487,7 @@ td .link-input { min-width:220px; }
 .audit-id-list { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
 .audit-id-list code { padding:3px 6px; border:1px solid var(--line); border-radius:999px; background:#fffdf8; color:#6f6254; }
 .empty { color:var(--muted); }
-.admin-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.admin-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
 .admin-grid h3 { margin:0 0 8px; font-size:14px; color:#514638; }
 .admin-list { display:grid; gap:8px; }
 .admin-item { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; padding:9px 10px; border:1px solid var(--line); background:#fffaf1; }
@@ -560,7 +562,9 @@ td .link-input { min-width:220px; }
 .person-chip em { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-style:normal; font-size:12px; }
 .person-chip.placeholder { border-color:rgba(186,121,14,.28); background:#fff3db; color:#8a570c; }
 .pl-chip { display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(28,45,38,.18); background:#eef3ec; color:#1d3128; border-radius:999px; padding:3px 9px; font-weight:900; white-space:nowrap; }
+.operator-chip { display:inline-flex; align-items:center; justify-content:center; max-width:170px; margin:2px 4px 2px 0; border:1px solid rgba(41,52,46,.16); background:#f2eadb; color:#2f2a23; border-radius:999px; padding:3px 8px; font-size:12px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .owner-preview { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
+.operator-preview { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
 .operator-view { min-height:100%; height:100%; padding:12px; overflow-x:auto; overflow-y:scroll; scrollbar-gutter:stable; }
 .operator-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:12px; }
 .operator-card { border:1px solid var(--line); border-radius:16px; background:#fffaf1; overflow:hidden; }

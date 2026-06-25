@@ -56,9 +56,10 @@ const OPERATOR_OWNER_RULES = {
 const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "Pending"], ["delayed", "delay"], ["done", "done"]];
 const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟", "陈龙"];
 const DEFAULT_PL = PL_OPTIONS[0];
-const AUDIT_TASK_FIELDS = ["title", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "pr_link", "test_report", "notes"];
+const AUDIT_TASK_FIELDS = ["title", "operator_ids", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "pr_link", "test_report", "notes"];
 const AUDIT_FIELD_LABELS = {
   title: "事项",
+  operator_ids: "算子",
   owner: "责任人",
   risk: "风险",
   priority: "优先级",
@@ -76,6 +77,7 @@ const TABLE_SORT_LABELS = {
   risk: "风险",
   priority: "优先级",
   title: "事项",
+  operator_ids: "算子",
   owner: "责任人",
   owner_pl: "责任人分组",
   group_id: "转测迭代计划排期",
@@ -115,7 +117,7 @@ const state = {
   view: { start: "", end: "", total: 1 },
   timeline: { start: "", end: "", total: 1 },
   activePlanView: "timeline",
-  filters: { q: "", risk: "", priority: "", owner: [], pl: "", group_id: "", special_id: "", status: "" },
+  filters: { q: "", risk: "", priority: "", owner: [], pl: "", operator_id: "", group_id: "", special_id: "", status: "" },
   sort: { field: "risk", direction: "desc" },
   ownerFilterOpen: false,
   ownerFilterQuery: "",
@@ -152,6 +154,7 @@ async function load() {
       state.personBaselines.clear();
       state.audit = audit;
       state.prCatalog = prCatalog || { generatedAt: "", sourceRepo: "", total: 0, items: [] };
+      ensureOperatorCatalog();
       ensurePeopleCatalog();
       syncAllTaskDeliveryRules();
       render();
@@ -170,6 +173,7 @@ async function load() {
     state.dirtyPersonIds.clear();
     state.taskBaselines.clear();
     state.personBaselines.clear();
+    ensureOperatorCatalog();
     ensurePeopleCatalog();
     syncAllTaskDeliveryRules();
     render();
@@ -261,6 +265,7 @@ function formatAuditValue(field, value) {
   const text = normalizeAuditValue(value);
   if (!text) return "空";
   if (field === "status") return statusLabel(text);
+  if (field === "operator_ids") return operatorLabelsForIds(text).join(" / ") || "空";
   if (field === "group_id") return groupTitle(text) || text;
   if (field === "special_id") return specialTitle(text) || text;
   if (field === "segments") return formatAuditSegments(text);
@@ -287,11 +292,15 @@ function filteredTasks() {
     const ownerNames = taskOwnerNames(task);
     const ownerFilters = ownerFilterValues();
     const plNames = taskPlNames(task);
-    return (!q || [task.title, task.owner, task.scope, ownerNames.join(" "), plNames.join(" ")].some((value) => String(value || "").toLowerCase().includes(q)))
+    const operatorNames = taskOperators(task).map((operator) => operator.label).join(" ");
+    return (!q || [task.title, task.owner, task.scope, ownerNames.join(" "), plNames.join(" "), operatorNames].some((value) => String(value || "").toLowerCase().includes(q)))
       && (!state.filters.risk || task.risk === state.filters.risk)
       && (!state.filters.priority || task.priority === state.filters.priority)
       && (!ownerFilters.length || ownerFilters.some((name) => ownerNames.includes(name)))
       && (!state.filters.pl || plNames.includes(state.filters.pl))
+      && (!state.filters.operator_id || (state.filters.operator_id === "__none__"
+        ? !taskOperators(task).length
+        : taskOperators(task).some((operator) => operator.id === state.filters.operator_id)))
       && (!state.filters.group_id || task.group_id === state.filters.group_id)
       && (!state.filters.special_id || (state.filters.special_id === "__none__" ? !task.special_id : task.special_id === state.filters.special_id))
       && (!state.filters.status || task.status === state.filters.status);
@@ -324,6 +333,7 @@ function compareTaskByField(a, b, field) {
   }
   if (field === "group_id") return groupTitle(a.group_id).localeCompare(groupTitle(b.group_id), "zh-CN");
   if (field === "special_id") return specialTitle(a.special_id).localeCompare(specialTitle(b.special_id), "zh-CN");
+  if (field === "operator_ids") return taskOperatorLabelText(a).localeCompare(taskOperatorLabelText(b), "zh-CN");
   if (field === "owner") return taskOwnerNames(a).join("、").localeCompare(taskOwnerNames(b).join("、"), "zh-CN");
   if (field === "owner_pl") return taskPlNames(a).join("、").localeCompare(taskPlNames(b).join("、"), "zh-CN");
   if (field === "title") return displayTaskTitle(a).localeCompare(displayTaskTitle(b), "zh-CN");
@@ -454,12 +464,15 @@ function renderTableFilters() {
   const scopedTasks = visibleTasksForCurrentUser();
   const visibleGroupIds = new Set(scopedTasks.map((task) => task.group_id).filter(Boolean));
   const visibleSpecialIds = new Set(scopedTasks.map((task) => task.special_id).filter(Boolean));
+  const visibleOperatorIds = new Set(scopedTasks.flatMap((task) => taskOperators(task).map((operator) => operator.id)));
   const groups = isDeveloperEditMode() ? state.data.groups.filter((group) => visibleGroupIds.has(group.id)) : state.data.groups;
   const specials = isDeveloperEditMode() ? state.data.specials.filter((special) => visibleSpecialIds.has(special.id)) : state.data.specials;
+  const operators = isDeveloperEditMode() ? operatorCatalog().filter((operator) => visibleOperatorIds.has(operator.id)) : operatorCatalog();
   const columns = [
     tableFilterSelect("risk", [["", "全部"], ["高", "高"], ["中", "中"], ["低", "低"]]),
     tableFilterSelect("priority", [["", "全部"], ["P0", "P0"], ["P1", "P1"], ["P2", "P2"]]),
     `<th><input data-table-filter="q" type="search" placeholder="筛事项" value="${escapeAttr(state.filters.q)}"></th>`,
+    tableFilterSelect("operator_id", [["", "全部"], ["__none__", "未关联算子"], ...operators.map((operator) => [operator.id, operator.label])], "col-operator"),
     ownerFilterDropdown(),
     tableFilterSelect("pl", [["", "全部"], ...plFilterOptions().map((pl) => [pl, pl])], "col-pl"),
     tableFilterSelect("group_id", [["", "全部"], ...groups.map((group) => [group.id, group.title])], "col-group"),
@@ -636,7 +649,7 @@ function plFilterOptions() {
 }
 
 function operatorOwnerRuleNames() {
-  return uniqueStrings(Object.values(OPERATOR_OWNER_RULES).flat().map((rule) => rule.owner));
+  return uniqueStrings(operatorCatalog().flatMap((operator) => operator.owner_rules || []).map((rule) => rule.owner));
 }
 
 function isSelectableOwnerName(name) {
@@ -1247,6 +1260,17 @@ function taskChipHtml(task, segment = null) {
   </span>`;
 }
 
+function taskOperatorLabelText(task) {
+  return taskOperators(task).map((operator) => operator.label).join(" / ");
+}
+
+function operatorChipsHtml(task) {
+  const labels = taskOperators(task).map((operator) => operator.label);
+  return labels.length
+    ? labels.map((label) => `<span class="operator-chip">${escapeHtml(label)}</span>`).join("")
+    : `<span class="muted-cell">-</span>`;
+}
+
 function featureTitle(task, operator = taskOperators(task)[0]) {
   let title = task.title || "";
   if (title.includes("fwd_h 与 fwd_o")) title = title.replace("fwd_h 与 fwd_o", "");
@@ -1259,25 +1283,27 @@ function featureTitle(task, operator = taskOperators(task)[0]) {
 }
 
 function taskOperators(task) {
-  const title = task.title || "";
+  const explicitIds = parseOperatorIds(task?.operator_ids);
+  if (explicitIds.length) return explicitIds.map(operatorById).filter(Boolean);
+  const title = task?.title || "";
   if (/性能看板|一键编报|一键编包|ops\s*目录整改/i.test(title)) return [];
   if (title.startsWith("多算子")) {
     return ["chunk_fwd_o", "chunk_gated_delta_rule_fwd_h", "chunk_gated_delta_rule_bwd_dhu", "recompute_wu_fwd", "chunk_bwd_dv_local", "chunk_bwd_dqkwg"].map(operatorById).filter(Boolean);
   }
   const lower = title.toLowerCase();
   const matched = [];
-  OPERATOR_RULES.forEach((operator) => {
+  operatorCatalog().forEach((operator) => {
     if (operator.aliases.some((alias) => lower.includes(alias.toLowerCase()))) matched.push(operator);
   });
   return uniqueBy(matched, "id");
 }
 
 function operatorById(id) {
-  return OPERATOR_RULES.find((operator) => operator.id === id);
+  return operatorCatalog().find((operator) => operator.id === id);
 }
 
 function operatorOwnerName(operatorId, referenceDate) {
-  const rules = OPERATOR_OWNER_RULES[operatorId] || [];
+  const rules = operatorById(operatorId)?.owner_rules || OPERATOR_OWNER_RULES[operatorId] || [];
   if (!rules.length) return "";
   return (rules.find((rule) => !rule.until || !referenceDate || referenceDate <= rule.until) || rules[rules.length - 1]).owner || "";
 }
@@ -1294,11 +1320,113 @@ function ownerReferenceDates(task) {
   taskSegments(task).forEach((segment) => {
     if (segment.start_date) dates.push(segment.start_date);
     if (segment.end_date) dates.push(segment.end_date);
-    Object.values(OPERATOR_OWNER_RULES).flat().forEach((rule) => {
+    operatorCatalog().flatMap((operator) => operator.owner_rules || []).forEach((rule) => {
       if (rule.until && segment.start_date <= rule.until && segment.end_date > rule.until) dates.push(addDays(rule.until, 1));
     });
   });
   return uniqueStrings(dates.length ? dates : [task?.start_date || state.view.start]).filter(Boolean).sort();
+}
+
+function operatorCatalog() {
+  const source = Array.isArray(state.data?.operators) && state.data.operators.length ? state.data.operators : defaultOperators();
+  return source.map(normalizeOperator).filter((operator) => operator.active !== false);
+}
+
+function ensureOperatorCatalog() {
+  const source = Array.isArray(state.data?.operators) && state.data.operators.length ? state.data.operators : defaultOperators();
+  state.data.operators = source.map(normalizeOperator)
+    .sort((a, b) => Number(a.position || 0) - Number(b.position || 0) || a.label.localeCompare(b.label, "zh-CN"));
+}
+
+function defaultOperators() {
+  return OPERATOR_RULES.map((operator, index) => ({
+    ...operator,
+    owner_rules: OPERATOR_OWNER_RULES[operator.id] || [],
+    position: index,
+    active: true,
+  }));
+}
+
+function normalizeOperator(operator) {
+  return {
+    id: String(operator.id || "").trim(),
+    label: String(operator.label || operator.id || "").trim(),
+    aliases: normalizeOperatorAliases(operator.aliases || [operator.label || operator.id]),
+    owner_rules: normalizeOperatorOwnerRules(operator.owner_rules || operator.ownerRules || OPERATOR_OWNER_RULES[operator.id] || []),
+    position: Number.isFinite(Number(operator.position)) ? Number(operator.position) : 0,
+    active: operator.active === false || operator.active === 0 || operator.active === "0" ? false : true,
+  };
+}
+
+function normalizeOperatorAliases(value) {
+  const raw = Array.isArray(value) ? value : String(value || "").split(/[、,，;；\n]+/);
+  return uniqueStrings(raw.map((item) => String(item || "").trim()).filter(Boolean));
+}
+
+function normalizeOperatorOwnerRules(value) {
+  const raw = Array.isArray(value) ? value : parseJsonValue(value, []);
+  return raw.map((rule) => ({
+    ...(rule.until ? { until: String(rule.until).trim() } : {}),
+    owner: normalizeOwnerName(rule.owner || ""),
+  })).filter((rule) => rule.owner);
+}
+
+function parseOperatorIds(value) {
+  return uniqueStrings(String(value || "")
+    .split(/[、/,，;；\s]+/)
+    .map((item) => item.trim())
+    .filter(Boolean));
+}
+
+function normalizeOperatorIdsText(value) {
+  return parseOperatorIds(value).join("/");
+}
+
+function normalizeOperatorId(value) {
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g, "_")
+    .replace(/[^\w.-]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function operatorLabelsForIds(value) {
+  return parseOperatorIds(value).map((id) => operatorById(id)?.label || id).filter(Boolean);
+}
+
+function formatOperatorOwnerRules(rules) {
+  const normalized = normalizeOperatorOwnerRules(rules);
+  return normalized.length
+    ? normalized.map((rule) => `${rule.until ? `${rule.until} 前 ` : ""}${rule.owner}`).join("；")
+    : "未设置";
+}
+
+function operatorOwnerRulesInputText(rules) {
+  return normalizeOperatorOwnerRules(rules)
+    .map((rule) => `${rule.until || "*"}:${rule.owner}`)
+    .join(";");
+}
+
+function parseOperatorOwnerRulesInput(value) {
+  return String(value || "").split(/[;；\n]+/).map((chunk) => {
+    const text = chunk.trim();
+    if (!text) return null;
+    const match = text.match(/^(\d{4}-\d{2}-\d{2}|\*)\s*[:：]\s*(.+)$/);
+    if (!match) return { owner: normalizeOwnerName(text) };
+    const owner = normalizeOwnerName(match[2]);
+    return match[1] === "*" ? { owner } : { until: match[1], owner };
+  }).filter((rule) => rule?.owner);
+}
+
+function parseJsonValue(value, fallback) {
+  if (Array.isArray(value)) return value;
+  try {
+    const parsed = JSON.parse(String(value || ""));
+    return Array.isArray(parsed) ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 function displayTaskTitle(task) {
@@ -1493,6 +1621,30 @@ function ownerEditorHtml(task) {
   `;
 }
 
+function operatorEditorHtml(task) {
+  const selected = parseOperatorIds(task.operator_ids);
+  const selectedSet = new Set(selected);
+  const inferred = taskOperators({ ...task, operator_ids: "" }).map((operator) => operator.id);
+  const options = operatorCatalog().map((operator) => `
+    <label class="owner-option">
+      <input type="checkbox" data-operator-picker-value value="${escapeAttr(operator.id)}" ${selectedSet.has(operator.id) ? "checked" : ""}>
+      <span>${escapeHtml(operator.label)}</span>
+    </label>
+  `).join("");
+  const hint = selected.length
+    ? "已显式关联算子，可多选；不选则不强制关联"
+    : (inferred.length ? "未显式关联；当前按标题别名识别" : "未关联算子，可保持为空");
+  return `
+    <div class="operator-editor">
+      <input type="hidden" data-field="operator_ids" value="${escapeAttr(normalizeOperatorIdsText(task.operator_ids))}">
+      <button type="button" class="owner-picker-toggle" data-operator-picker-toggle>选择算子</button>
+      <div class="owner-picker-panel">${options}</div>
+      <div class="owner-hint">${escapeHtml(hint)}</div>
+      <div class="operator-preview">${operatorChipsHtml(task)}</div>
+    </div>
+  `;
+}
+
 function toggleOwnerPicker(button) {
   const editor = button.closest(".owner-editor");
   if (!editor) return;
@@ -1520,12 +1672,37 @@ function positionOwnerPicker(editor) {
 
 function closeOwnerPickers(event = null, except = null) {
   if (event?.target?.closest?.(".owner-picker-panel")) return;
-  document.querySelectorAll(".owner-editor.open").forEach((editor) => {
+  document.querySelectorAll(".owner-editor.open,.operator-editor.open").forEach((editor) => {
     if (editor === except) return;
     editor.classList.remove("open", "drop-up");
     const panel = editor.querySelector(".owner-picker-panel");
     if (panel) panel.style.maxHeight = "";
   });
+}
+
+function toggleOperatorPicker(button) {
+  const editor = button.closest(".operator-editor");
+  if (!editor) return;
+  const willOpen = !editor.classList.contains("open");
+  closeOwnerPickers(null, editor);
+  editor.classList.toggle("open", willOpen);
+  if (willOpen) positionOwnerPicker(editor);
+}
+
+function syncOperatorFromPicker(control) {
+  const row = control.closest("tr");
+  const input = row?.querySelector('[data-field="operator_ids"]');
+  if (!input) return;
+  const selected = [...row.querySelectorAll("[data-operator-picker-value]:checked")].map((option) => option.value).filter(Boolean);
+  input.value = selected.join("/");
+  markTaskDirty(input);
+  syncOperatorPreview(row);
+}
+
+function syncOperatorPreview(row) {
+  const task = state.data.tasks.find((item) => item.id === row?.dataset.taskId);
+  const preview = row?.querySelector(".operator-preview");
+  if (task && preview) preview.innerHTML = operatorChipsHtml(task);
 }
 
 function syncOwnerFromPicker(control) {
@@ -1879,6 +2056,7 @@ function readOnlyTaskRowHtml(task, className = "") {
       <td><span class="tag ${riskClass(task.risk)}">${escapeHtml(task.risk)}</span></td>
       <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
       <td>${escapeHtml(displayTaskTitle(task))}</td>
+      <td class="col-operator">${operatorChipsHtml(task)}</td>
       <td>${ownerChipsHtml(task)}</td>
       <td class="col-pl">${taskPlChipsHtml(task)}</td>
       <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
@@ -1906,6 +2084,7 @@ function developerTaskRowHtml(task) {
       <td><span class="tag ${riskClass(task.risk)}">${escapeHtml(task.risk)}</span></td>
       <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
       <td>${escapeHtml(displayTaskTitle(task))}</td>
+      <td class="col-operator">${operatorChipsHtml(task)}</td>
       <td>${ownerChipsHtml(task)}</td>
       <td class="col-pl">${taskPlChipsHtml(task)}</td>
       <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
@@ -1935,6 +2114,7 @@ function renderRows(tasks) {
         <td>${selectHtml("risk", [["高","高"],["中","中"],["低","低"]], task.risk)}</td>
         <td>${selectHtml("priority", [["P0","P0"],["P1","P1"],["P2","P2"]], task.priority)}</td>
         <td><input class="title-input" data-field="title" value="${escapeAttr(task.title)}"></td>
+        <td class="col-operator">${operatorEditorHtml(task)}</td>
         <td>${ownerEditorHtml(task)}</td>
         <td class="col-pl">${taskPlChipsHtml(task)}</td>
         <td class="col-group">${selectHtml("group_id", state.data.groups.map((g) => [g.id, g.title]), task.group_id)}</td>
@@ -1952,6 +2132,8 @@ function renderRows(tasks) {
   document.querySelectorAll('#rows [data-field="owner"]').forEach((control) => control.addEventListener("change", () => syncOwnerPickerFromInput(control)));
   document.querySelectorAll("#rows [data-owner-picker-toggle]").forEach((control) => control.addEventListener("click", () => toggleOwnerPicker(control)));
   document.querySelectorAll("#rows [data-owner-picker-value]").forEach((control) => control.addEventListener("change", () => syncOwnerFromPicker(control)));
+  document.querySelectorAll("#rows [data-operator-picker-toggle]").forEach((control) => control.addEventListener("click", () => toggleOperatorPicker(control)));
+  document.querySelectorAll("#rows [data-operator-picker-value]").forEach((control) => control.addEventListener("change", () => syncOperatorFromPicker(control)));
   document.querySelectorAll("#rows [data-pr-append]").forEach((control) => control.addEventListener("click", () => appendPrFromSearch(control)));
   document.querySelectorAll("#rows [data-pr-search]").forEach((control) => control.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
@@ -2055,6 +2237,7 @@ function renderAdmin() {
   if (!isAdminEditMode()) {
     $("#groupAdmin").innerHTML = "";
     $("#specialAdmin").innerHTML = "";
+    $("#operatorAdmin").innerHTML = "";
     $("#personAdmin").innerHTML = "";
     return;
   }
@@ -2070,6 +2253,17 @@ function renderAdmin() {
       <span class="ops"><button data-admin="edit-special">编辑</button><button class="danger" data-admin="delete-special">删除</button></span>
     </div>
   `).join("");
+  const operators = (state.data.operators || []).map(normalizeOperator);
+  $("#operatorAdmin").innerHTML = operators.length ? operators.map((operator) => `
+    <div class="admin-item" data-operator-id="${escapeAttr(operator.id)}">
+      <div>
+        <strong>${escapeHtml(operator.label)}</strong>
+        <small>别名：${escapeHtml(operator.aliases.join("、") || "-")}</small>
+        <small>责任人规则：${escapeHtml(formatOperatorOwnerRules(operator.owner_rules))}</small>
+      </div>
+      <span class="ops"><button data-admin="edit-operator">编辑</button><button class="danger" data-admin="delete-operator">删除</button></span>
+    </div>
+  `).join("") : `<p class="empty">暂无算子。只有管理员可以新增算子。</p>`;
   ensurePeopleCatalog();
   const editablePeople = state.data.people.filter((person) => !person.placeholder && !isPlaceholderOwner(person.name));
   $("#personAdmin").innerHTML = editablePeople.length ? editablePeople.map((person) => {
@@ -2168,7 +2362,7 @@ function applyRowToTask(row, normalizeSegments = true) {
   const task = state.data.tasks.find((item) => item.id === row.dataset.taskId);
   if (!task) return null;
   row.querySelectorAll("[data-field]").forEach((input) => {
-    task[input.dataset.field] = input.value.trim();
+    task[input.dataset.field] = input.dataset.field === "operator_ids" ? normalizeOperatorIdsText(input.value) : input.value.trim();
   });
   const changed = syncTaskDeliveryRules(task);
   if (changed.includes("risk")) {
@@ -2350,6 +2544,7 @@ async function addTask() {
     pr_link: "",
     test_report: "",
     notes: "",
+    operator_ids: "",
     position: state.data.tasks.length,
     created_at: nowIso(),
     updated_at: nowIso(),
@@ -2455,6 +2650,43 @@ async function addSpecial() {
     return;
   }
   await saveRepository(`新增专项：${title}`, "special.create", "special", special.id, { title });
+}
+
+async function addOperator() {
+  if (!isAdminEditMode()) return alert("只有管理员可以新增算子。");
+  const rawId = prompt("算子 ID / 全名：", "new_operator");
+  if (rawId === null) return;
+  const id = normalizeOperatorId(rawId);
+  if (!id) return alert("算子 ID 不能为空。");
+  ensureOperatorCatalog();
+  if ((state.data.operators || []).some((operator) => operator.id === id)) return alert("算子已存在。");
+  const rawLabel = prompt("页面显示名称：", id);
+  if (rawLabel === null) return;
+  const label = String(rawLabel || id).trim() || id;
+  const rawAliases = prompt("标题别名（逗号/顿号/换行分隔，可为空）：", label === id ? id : `${label},${id}`);
+  if (rawAliases === null) return;
+  const aliases = normalizeOperatorAliases(rawAliases || label);
+  const rawRules = prompt("责任人规则（可空；示例：2026-06-30:张三;*:李四）：", "");
+  if (rawRules === null) return;
+  const operator = {
+    id,
+    label,
+    aliases,
+    owner_rules: parseOperatorOwnerRulesInput(rawRules),
+    position: state.data.operators.length,
+    active: true,
+  };
+  state.data.operators.push(operator);
+  if (WORKER_API_BASE) {
+    const entry = cloudflareAuditEntry("operator.create", "operator", operator.id, `新增算子：${label}`, { id, label });
+    const result = await workerPost("/api/operators", { operator, auditEntry: entry });
+    if (result.operator) mergeEntityItem("operators", result.operator);
+    applyCloudflareMutationResult(result);
+    if (result.entry) state.audit.push(result.entry);
+    render();
+    return;
+  }
+  await saveRepository(`新增算子：${label}`, "operator.create", "operator", operator.id, { id, label });
 }
 
 async function addPerson() {
@@ -2582,6 +2814,7 @@ async function handleAdminAction(button) {
   const action = button.dataset.admin;
   const groupId = button.closest("[data-group-id]")?.dataset.groupId;
   const specialId = button.closest("[data-special-id]")?.dataset.specialId;
+  const operatorId = button.closest("[data-operator-id]")?.dataset.operatorId;
   const personId = button.closest("[data-person-id]")?.dataset.personId;
   if (action === "edit-group") {
     const group = state.data.groups.find((item) => item.id === groupId);
@@ -2661,6 +2894,54 @@ async function handleAdminAction(button) {
       return;
     }
     await saveRepository(`删除专项：${special.title}`, "special.delete", "special", special.id, { title: special.title });
+  }
+  if (action === "edit-operator") {
+    const operator = state.data.operators.find((item) => item.id === operatorId);
+    if (!operator) return;
+    const label = prompt("算子显示名称：", operator.label || operator.id);
+    if (!label) return;
+    const aliasesText = prompt("标题别名（逗号/顿号/换行分隔）：", normalizeOperatorAliases(operator.aliases).join(","));
+    if (aliasesText === null) return;
+    const ownerRulesText = prompt("责任人规则（可空；示例：2026-06-30:张三;*:李四）：", operatorOwnerRulesInputText(operator.owner_rules));
+    if (ownerRulesText === null) return;
+    const fields = {
+      label: label.trim(),
+      aliases: normalizeOperatorAliases(aliasesText),
+      owner_rules: parseOperatorOwnerRulesInput(ownerRulesText),
+      active: true,
+    };
+    Object.assign(operator, fields);
+    if (WORKER_API_BASE) {
+      const entry = cloudflareAuditEntry("operator.patch", "operator", operator.id, `更新算子：${fields.label}`, { id: operator.id, label: fields.label });
+      const result = await workerPatch(`/api/operators/${encodeURIComponent(operator.id)}`, { fields, auditEntry: entry });
+      if (result.operator) mergeEntityItem("operators", result.operator);
+      applyCloudflareMutationResult(result);
+      if (result.entry) state.audit.push(result.entry);
+      render();
+      return;
+    }
+    await saveRepository(`更新算子：${fields.label}`, "operator.update", "operator", operator.id, { id: operator.id });
+  }
+  if (action === "delete-operator") {
+    const operator = state.data.operators.find((item) => item.id === operatorId);
+    if (!operator) return;
+    const linkedCount = state.data.tasks.filter((task) => parseOperatorIds(task.operator_ids).includes(operator.id)).length;
+    if (!confirmHighRisk("确认删除算子", `算子：${operator.label || operator.id}\n不会删除任何任务；${linkedCount} 个显式关联任务会移除此算子字段。`)) return;
+    if (!(await ensureNoVersionConflict())) return;
+    state.data.tasks.forEach((task) => {
+      const next = parseOperatorIds(task.operator_ids).filter((id) => id !== operator.id).join("/");
+      if (next !== String(task.operator_ids || "")) task.operator_ids = next;
+    });
+    state.data.operators = state.data.operators.filter((item) => item.id !== operator.id);
+    if (WORKER_API_BASE) {
+      const entry = cloudflareAuditEntry("operator.delete", "operator", operator.id, `删除算子：${operator.label || operator.id}`, { id: operator.id });
+      const result = await workerDelete(`/api/operators/${encodeURIComponent(operator.id)}`, { auditEntry: entry });
+      applyCloudflareMutationResult(result);
+      if (result.entry) state.audit.push(result.entry);
+      render();
+      return;
+    }
+    await saveRepository(`删除算子：${operator.label || operator.id}`, "operator.delete", "operator", operator.id, { id: operator.id });
   }
   if (action === "edit-person") {
     const person = state.data.people.find((item) => item.id === personId);
@@ -2768,6 +3049,7 @@ function applyCloudflareMutationResult(result) {
 
 async function saveRepository(summary, action, entity, id, detail = {}) {
   requireToken();
+  ensureOperatorCatalog();
   ensurePeopleCatalog();
   syncAllTaskDeliveryRules();
   state.data.generatedAt = nowIso();
@@ -3111,6 +3393,7 @@ $("#addTask").addEventListener("click", () => addTask().catch(showError));
 $("#saveAll").addEventListener("click", () => saveAllTasks().catch(showError));
 $("#addGroup").addEventListener("click", () => addGroup().catch(showError));
 $("#addSpecial").addEventListener("click", () => addSpecial().catch(showError));
+$("#addOperator").addEventListener("click", () => addOperator().catch(showError));
 $("#addPerson").addEventListener("click", () => addPerson().catch(showError));
 document.addEventListener("click", (event) => {
   if (!state.ownerFilterOpen || event.target.closest("[data-owner-filter]")) return;
@@ -3118,7 +3401,7 @@ document.addEventListener("click", (event) => {
   renderTableFilters();
 });
 document.addEventListener("click", (event) => {
-  if (event.target.closest(".owner-editor")) return;
+  if (event.target.closest(".owner-editor,.operator-editor")) return;
   closeOwnerPickers(event);
 });
 document.addEventListener("click", (event) => {
