@@ -238,15 +238,15 @@ body.editing .bar:hover { box-shadow:0 0 0 2px rgba(32,37,31,.18); }
 .saved-segment small { color:var(--low); font-size:10px; font-weight:950; white-space:nowrap; }
 .recommit-marker {
   position:absolute;
-  top:-5px;
+  inset:0;
   z-index:8;
-  transform:translateX(-50%);
-  display:grid;
-  justify-items:center;
-  gap:1px;
   pointer-events:none;
 }
 .recommit-marker i {
+  position:absolute;
+  left:var(--x);
+  top:2px;
+  transform:translateX(-50%);
   width:10px;
   height:10px;
   border-radius:50%;
@@ -254,14 +254,20 @@ body.editing .bar:hover { box-shadow:0 0 0 2px rgba(32,37,31,.18); }
   box-shadow:0 0 0 4px rgba(207,61,50,.16), 0 5px 12px rgba(207,61,50,.32);
 }
 .recommit-marker small {
-  padding:0 5px;
-  border:1px solid rgba(207,61,50,.28);
-  border-radius:999px;
-  background:#fffdf8;
+  position:absolute;
+  left:clamp(18px,var(--x),calc(100% - 18px));
+  top:12px;
+  transform:translateX(-50%);
+  padding:1px 4px;
+  border:1px solid rgba(207,61,50,.22);
+  border-radius:7px;
+  background:rgba(255,253,248,.94);
   color:var(--high);
   font-size:9px;
   font-weight:950;
+  line-height:1.05;
   white-space:nowrap;
+  box-shadow:0 1px 4px rgba(207,61,50,.10);
 }
 .task-detail-panel { min-height:340px; }
 .table-wrap { overflow:auto; min-height:220px; max-height:58vh; background:#fffaf1; }

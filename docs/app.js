@@ -893,7 +893,7 @@ function taskRecommitMarkerHtml(task, start, total) {
   if (evaluateTaskDelivery(task).status !== "delayed" || !isYmd(task.recommit_date)) return "";
   if (task.recommit_date < start || task.recommit_date > addDays(start, total - 1)) return "";
   const left = slotCenterPct(daysBetween(start, task.recommit_date), total);
-  return `<span class="recommit-marker" style="left:${left}%" title="${escapeAttr(displayTaskTitle(task))}：延期承诺 ${escapeAttr(task.recommit_date)}"><i></i><small>${escapeHtml(formatMonthDay(task.recommit_date))}</small></span>`;
+  return `<span class="recommit-marker" style="--x:${left}%" title="${escapeAttr(displayTaskTitle(task))}：延期承诺 ${escapeAttr(task.recommit_date)}"><i></i><small>${escapeHtml(formatMonthDay(task.recommit_date))}</small></span>`;
 }
 
 function maxDelayedRenderEndDate() {
