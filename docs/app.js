@@ -478,8 +478,8 @@ function renderTableFilters() {
     tableFilterSelect("group_id", [["", "全部"], ...groups.map((group) => [group.id, group.title])], "col-group"),
     tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...specials.map((special) => [special.id, special.title])], "col-special"),
     `<th class="col-date"></th>`,
-    `<th></th>`,
-    `<th></th>`,
+    `<th class="col-pr"></th>`,
+    `<th class="col-report"></th>`,
     tableFilterSelect("status", [["", "全部"], ...STATUS_OPTIONS]),
     `<th class="edit-only"><button type="button" data-clear-filters>清空</button></th>`,
   ];
@@ -2073,8 +2073,8 @@ function readOnlyTaskRowHtml(task, className = "") {
       <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
       <td class="col-special">${escapeHtml(specialTitle(task.special_id))}</td>
       <td class="col-date">${taskDdlCountdownHtml(task)}</td>
-      <td>${linkListHtml(task.pr_link, "PR")}</td>
-      <td>${linkListHtml(task.test_report, "报告")}</td>
+      <td class="col-pr">${linkListHtml(task.pr_link, "PR")}</td>
+      <td class="col-report">${linkListHtml(task.test_report, "报告")}</td>
       <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
       <td class="edit-only"></td>
     </tr>
@@ -2101,8 +2101,8 @@ function developerTaskRowHtml(task) {
       <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
       <td class="col-special">${escapeHtml(specialTitle(task.special_id))}</td>
       <td class="col-date">${taskDdlCountdownHtml(task)}</td>
-      <td>${prLinkEditorHtml(task)}</td>
-      <td><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
+      <td class="col-pr">${prLinkEditorHtml(task)}</td>
+      <td class="col-report"><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
       <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
       <td class="edit-only">${taskActionButtonsHtml(task)}</td>
     </tr>
@@ -2134,8 +2134,8 @@ function renderRows(tasks) {
           <div class="date-edit-row"><input type="date" data-field="start_date" value="${escapeAttr(task.start_date)}"> ~ <input type="date" data-field="end_date" value="${escapeAttr(task.end_date)}"></div>
           ${taskDdlCountdownHtml(task)}
         </td>
-        <td>${prLinkEditorHtml(task)}</td>
-        <td><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
+        <td class="col-pr">${prLinkEditorHtml(task)}</td>
+        <td class="col-report"><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
         <td>${selectHtml("status", STATUS_OPTIONS, task.status)}</td>
         <td class="edit-only">${taskActionButtonsHtml(task)}</td>
       </tr>
