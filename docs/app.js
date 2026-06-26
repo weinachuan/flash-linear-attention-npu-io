@@ -1510,6 +1510,14 @@ function peopleForTasks(tasks) {
       .filter((person) => selected.has(person.name))
       .sort(comparePeople);
   }
+  if (state.filters.pl) {
+    const selectedPl = normalizePl(state.filters.pl);
+    const people = uniqueBy([
+      ...(state.data.people || []).filter((person) => normalizePl(person.pl) === selectedPl),
+      ...tasks.flatMap(taskPeople).filter((person) => normalizePl(person.pl) === selectedPl),
+    ], "id");
+    return people.sort((a, b) => comparePeopleForView(a, b, tasks));
+  }
   const basePeople = isDeveloperEditMode() ? [] : (state.data.people || []);
   const people = uniqueBy([
     ...basePeople,
