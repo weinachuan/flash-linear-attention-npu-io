@@ -287,8 +287,8 @@ async function replaceState(env, state) {
       `INSERT INTO tasks(
         id, title, scope, target, owner, status, risk, priority, group_id, special_id,
         start_date, end_date, evidence, dependencies, pr_link, test_report, notes,
-        operator_ids, position, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        recommit_date, done_date, operator_ids, position, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       task.id,
       task.title || "未命名任务",
@@ -307,6 +307,8 @@ async function replaceState(env, state) {
       task.pr_link || "",
       task.test_report || "",
       task.notes || "",
+      task.recommit_date || "",
+      task.done_date || "",
       normalizeOperatorIdsText(task.operator_ids),
       numberOr(task.position, index),
       task.created_at || nowIso(),
@@ -364,7 +366,7 @@ async function syncPrCatalog(env, catalog) {
 }
 
 async function syncTaskDeliveryRulesFromCatalog(env, catalogItems) {
-  const tasks = await selectAll(env, "SELECT id, title, owner, status, risk, start_date, end_date, pr_link, test_report FROM tasks ORDER BY position, start_date, title");
+  const tasks = await selectAll(env, "SELECT id, title, owner, status, risk, start_date, end_date, pr_link, test_report, done_date FROM tasks ORDER BY position, start_date, title");
   const changed = [];
   const statements = [];
   const now = nowIso();
@@ -377,27 +379,33 @@ async function syncTaskDeliveryRulesFromCatalog(env, catalogItems) {
     if (task.status !== next.status) {
       diff.status = { from: task.status, to: next.status };
     }
+    const nextDoneDate = taskNextDoneDate(task, next.status);
+    if ((task.done_date || "") !== nextDoneDate) {
+      diff.done_date = { from: task.done_date || "", to: nextDoneDate };
+    }
     if (!Object.keys(diff).length) continue;
     changed.push({ id: task.id, title: task.title, changes: diff });
     statements.push(env.DB.prepare(
-      "UPDATE tasks SET risk = ?, status = ?, updated_at = ? WHERE id = ?"
-    ).bind(next.risk, next.status, now, task.id));
+      "UPDATE tasks SET risk = ?, status = ?, done_date = ?, updated_at = ? WHERE id = ?"
+    ).bind(next.risk, next.status, nextDoneDate, now, task.id));
   }
   if (statements.length) await env.DB.batch(statements);
   return changed;
 }
 
 async function syncTaskDeliveryRuleForTask(env, taskId, catalogItems) {
-  const task = await env.DB.prepare("SELECT id, title, owner, status, risk, start_date, end_date, pr_link, test_report FROM tasks WHERE id = ?").bind(taskId).first();
+  const task = await env.DB.prepare("SELECT id, title, owner, status, risk, start_date, end_date, pr_link, test_report, done_date FROM tasks WHERE id = ?").bind(taskId).first();
   if (!task) return null;
   const next = evaluateTaskDelivery(task, catalogItems);
   const diff = {};
   if (task.risk !== next.risk) diff.risk = { from: task.risk, to: next.risk };
   if (task.status !== next.status) diff.status = { from: task.status, to: next.status };
+  const nextDoneDate = taskNextDoneDate(task, next.status);
+  if ((task.done_date || "") !== nextDoneDate) diff.done_date = { from: task.done_date || "", to: nextDoneDate };
   if (!Object.keys(diff).length) return null;
   await env.DB.prepare(
-    "UPDATE tasks SET risk = ?, status = ?, updated_at = ? WHERE id = ?"
-  ).bind(next.risk, next.status, nowIso(), task.id).run();
+    "UPDATE tasks SET risk = ?, status = ?, done_date = ?, updated_at = ? WHERE id = ?"
+  ).bind(next.risk, next.status, nextDoneDate, nowIso(), task.id).run();
   return { id: task.id, title: task.title, changes: diff };
 }
 
@@ -406,6 +414,11 @@ function evaluateTaskDelivery(task, catalogItems) {
     risk: evaluateTaskRisk(task, catalogItems),
     status: evaluateTaskStatus(task, catalogItems),
   };
+}
+
+function taskNextDoneDate(task, nextStatus) {
+  if (nextStatus !== "done") return task.done_date || "";
+  return isYmd(task.done_date) ? task.done_date : todayBjYmd();
 }
 
 function evaluateTaskRisk(task, catalogItems) {
@@ -1131,7 +1144,7 @@ async function changePassword(request, env) {
 const TASK_PATCH_FIELDS = new Set([
   "title", "scope", "target", "owner", "status", "risk", "priority", "group_id", "special_id",
   "start_date", "end_date", "evidence", "dependencies", "pr_link", "test_report", "notes",
-  "operator_ids", "position", "segments",
+  "recommit_date", "done_date", "operator_ids", "position", "segments",
 ]);
 const TASK_JSON_PATCH_FIELDS = new Set(["evidence", "dependencies"]);
 
@@ -1216,6 +1229,7 @@ function normalizePatchValue(field, value) {
   if (TASK_JSON_PATCH_FIELDS.has(field)) return Array.isArray(value) ? value : [];
   if (field === "special_id") return value || null;
   if (field === "operator_ids") return normalizeOperatorIdsText(value);
+  if (field === "recommit_date" || field === "done_date") return isYmd(value) ? value : "";
   if (field === "position") return numberOr(value, 0);
   return String(value ?? "").trim();
 }
@@ -1305,6 +1319,8 @@ function normalizeTaskForInsert(task) {
     pr_link: String(task.pr_link || ""),
     test_report: String(task.test_report || ""),
     notes: String(task.notes || ""),
+    recommit_date: isYmd(task.recommit_date) ? task.recommit_date : "",
+    done_date: isYmd(task.done_date) ? task.done_date : "",
     operator_ids: normalizeOperatorIdsText(task.operator_ids),
     position: numberOr(task.position, 0),
     created_at: task.created_at || now,
@@ -1319,8 +1335,8 @@ async function insertTask(env, task) {
     `INSERT INTO tasks(
       id, title, scope, target, owner, status, risk, priority, group_id, special_id,
       start_date, end_date, evidence, dependencies, pr_link, test_report, notes,
-      operator_ids, position, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      recommit_date, done_date, operator_ids, position, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     task.id,
     task.title,
@@ -1339,6 +1355,8 @@ async function insertTask(env, task) {
     task.pr_link,
     task.test_report,
     task.notes,
+    task.recommit_date,
+    task.done_date,
     task.operator_ids,
     task.position,
     task.created_at,

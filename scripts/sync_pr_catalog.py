@@ -223,7 +223,11 @@ def evaluate_task_delivery(task, catalog_items):
     elif status in ("done", "delayed"):
         status = "todo"
 
-    return {"risk": risk, "status": status}
+    done_date = task.get("done_date") or ""
+    if status == "done" and not done_date:
+        done_date = today_bj().isoformat()
+
+    return {"risk": risk, "status": status, "done_date": done_date}
 
 
 def sync_state_delivery(catalog):
@@ -241,6 +245,9 @@ def sync_state_delivery(catalog):
         if task.get("status") != next_values["status"]:
             diff["status"] = {"from": task.get("status"), "to": next_values["status"]}
             task["status"] = next_values["status"]
+        if (task.get("done_date") or "") != next_values["done_date"]:
+            diff["done_date"] = {"from": task.get("done_date") or "", "to": next_values["done_date"]}
+            task["done_date"] = next_values["done_date"]
         if not diff:
             continue
         changed.append({

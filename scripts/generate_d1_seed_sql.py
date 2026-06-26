@@ -127,7 +127,7 @@ def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, An
         lines.append(insert("tasks", [
             "id", "title", "scope", "target", "owner", "status", "risk", "priority",
             "group_id", "special_id", "start_date", "end_date", "evidence", "dependencies",
-            "pr_link", "test_report", "notes", "position", "created_at", "updated_at",
+            "pr_link", "test_report", "notes", "recommit_date", "done_date", "position", "created_at", "updated_at",
         ], [
             task.get("id"),
             task.get("title") or "未命名任务",
@@ -146,6 +146,8 @@ def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, An
             task.get("pr_link") or "",
             task.get("test_report") or "",
             task.get("notes") or "",
+            task.get("recommit_date") or "",
+            task.get("done_date") or "",
             RawSql(sql_int(task.get("position"), index)),
             task.get("created_at") or now_iso(),
             task.get("updated_at") or now_iso(),

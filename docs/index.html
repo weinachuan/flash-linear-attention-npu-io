@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>flash-linear-attention-npu 项目看板</title>
-  <link rel="stylesheet" href="./styles.css?v=20260626-pl-people-filter">
+  <link rel="stylesheet" href="./styles.css?v=20260626-delivery-stats">
 </head>
 <body>
   <main class="shell">
@@ -16,6 +16,7 @@
         <nav class="hero-links" aria-label="项目文档">
           <a href="./user-guide.html">使用说明</a>
           <a href="./design-diagrams.html">设计图</a>
+          <a href="./delivery-stats.html">提前完成统计</a>
         </nav>
       </div>
       <div class="summary" id="summary"></div>
@@ -118,6 +119,8 @@
               <th class="col-group"><button type="button" class="sort-button" data-sort-field="group_id">转测迭代计划排期 <span data-sort-indicator>↕</span></button></th>
               <th class="col-special"><button type="button" class="sort-button" data-sort-field="special_id">专项 <span data-sort-indicator>↕</span></button></th>
               <th class="col-date"><button type="button" class="sort-button" data-sort-field="date">距 DDL 工作日 <span data-sort-indicator>↕</span></button></th>
+              <th class="col-commit"><button type="button" class="sort-button" data-sort-field="recommit_date">延期承诺 <span data-sort-indicator>↕</span></button></th>
+              <th class="col-done-date"><button type="button" class="sort-button" data-sort-field="done_date">完成日期 <span data-sort-indicator>↕</span></button></th>
               <th class="col-pr"><button type="button" class="sort-button" data-sort-field="pr_link">PR 链接 <span data-sort-indicator>↕</span></button></th>
               <th class="col-report"><button type="button" class="sort-button" data-sort-field="test_report">转测报告 <span data-sort-indicator>↕</span></button></th>
               <th><button type="button" class="sort-button" data-sort-field="status">状态 <span data-sort-indicator>↕</span></button></th>
@@ -157,7 +160,7 @@
       <div id="audit" class="audit"></div>
     </section>
   </main>
-  <script src="./config.js?v=20260626-pl-people-filter"></script>
-  <script src="./app.js?v=20260626-pl-people-filter"></script>
+  <script src="./config.js?v=20260626-delivery-stats"></script>
+  <script src="./app.js?v=20260626-delivery-stats"></script>
 </body>
 </html>

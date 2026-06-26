@@ -56,7 +56,7 @@ const OPERATOR_OWNER_RULES = {
 const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "Pending"], ["delayed", "delay"], ["done", "done"]];
 const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟", "陈龙"];
 const DEFAULT_PL = PL_OPTIONS[0];
-const AUDIT_TASK_FIELDS = ["title", "operator_ids", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "pr_link", "test_report", "notes"];
+const AUDIT_TASK_FIELDS = ["title", "operator_ids", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "recommit_date", "done_date", "pr_link", "test_report", "notes"];
 const AUDIT_FIELD_LABELS = {
   title: "事项",
   operator_ids: "算子",
@@ -68,6 +68,8 @@ const AUDIT_FIELD_LABELS = {
   special_id: "专项",
   start_date: "开始日期",
   end_date: "结束日期",
+  recommit_date: "延期承诺",
+  done_date: "完成日期",
   pr_link: "PR 链接",
   test_report: "转测报告",
   notes: "备注",
@@ -83,6 +85,8 @@ const TABLE_SORT_LABELS = {
   group_id: "转测迭代计划排期",
   special_id: "专项",
   date: "距 DDL 工作日",
+  recommit_date: "延期承诺",
+  done_date: "完成日期",
   pr_link: "PR 链接",
   test_report: "转测报告",
   status: "状态",
@@ -331,6 +335,7 @@ function compareTaskByField(a, b, field) {
     return String(taskSortDdl(a)).localeCompare(String(taskSortDdl(b)))
       || String(taskSortStart(a)).localeCompare(String(taskSortStart(b)));
   }
+  if (field === "recommit_date" || field === "done_date") return String(a[field] || "").localeCompare(String(b[field] || ""));
   if (field === "group_id") return groupTitle(a.group_id).localeCompare(groupTitle(b.group_id), "zh-CN");
   if (field === "special_id") return specialTitle(a.special_id).localeCompare(specialTitle(b.special_id), "zh-CN");
   if (field === "operator_ids") return taskOperatorLabelText(a).localeCompare(taskOperatorLabelText(b), "zh-CN");
@@ -478,6 +483,8 @@ function renderTableFilters() {
     tableFilterSelect("group_id", [["", "全部"], ...groups.map((group) => [group.id, group.title])], "col-group"),
     tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...specials.map((special) => [special.id, special.title])], "col-special"),
     `<th class="col-date"></th>`,
+    `<th class="col-commit"></th>`,
+    `<th class="col-done-date"></th>`,
     `<th class="col-pr"></th>`,
     `<th class="col-report"></th>`,
     tableFilterSelect("status", [["", "全部"], ...STATUS_OPTIONS]),
@@ -757,6 +764,8 @@ function computeTimelineRange() {
 function computeDataTimelineRange() {
   const dates = [];
   (state.data?.tasks || []).forEach((task) => {
+    if (isYmd(task.recommit_date)) dates.push(task.recommit_date);
+    if (isYmd(task.done_date)) dates.push(task.done_date);
     taskRenderSegments(task).forEach((segment) => {
       if (segment.start_date) dates.push(segment.start_date);
       if (segment.end_date) dates.push(segment.end_date);
@@ -791,6 +800,8 @@ function latestPlannedCompletionDate() {
   const taskDates = [];
   (state.data?.tasks || []).forEach((task) => {
     if (isYmd(task.end_date)) taskDates.push(task.end_date);
+    if (isYmd(task.recommit_date)) taskDates.push(task.recommit_date);
+    if (isYmd(task.done_date)) taskDates.push(task.done_date);
     taskSegments(task).forEach((segment) => {
       if (isYmd(segment.end_date)) taskDates.push(segment.end_date);
     });
@@ -860,6 +871,29 @@ function taskRenderSegments(task) {
     });
   }
   return segments;
+}
+
+function taskEarlySavedSegments(task) {
+  if (evaluateTaskDelivery(task).status !== "done" || !isYmd(task.done_date)) return [];
+  return taskSegments(task).flatMap((segment, index) => {
+    if (!isYmd(segment.end_date) || task.done_date >= segment.end_date) return [];
+    const start = maxDate(addDays(task.done_date, 1), segment.start_date);
+    const end = segment.end_date;
+    return start <= end ? [{
+      id: `saved-${segment.id || index}`,
+      start_date: start,
+      end_date: end,
+      source_index: index,
+      saved: true,
+    }] : [];
+  });
+}
+
+function taskRecommitMarkerHtml(task, start, total) {
+  if (evaluateTaskDelivery(task).status !== "delayed" || !isYmd(task.recommit_date)) return "";
+  if (task.recommit_date < start || task.recommit_date > addDays(start, total - 1)) return "";
+  const left = slotCenterPct(daysBetween(start, task.recommit_date), total);
+  return `<span class="recommit-marker" style="left:${left}%" title="${escapeAttr(displayTaskTitle(task))}：延期承诺 ${escapeAttr(task.recommit_date)}"><i></i><small>${escapeHtml(formatMonthDay(task.recommit_date))}</small></span>`;
 }
 
 function maxDelayedRenderEndDate() {
@@ -1096,7 +1130,16 @@ function renderGantt(tasks) {
       const titleSuffix = segment.auto_extended ? "；自动延长至今日，交付件完备后停止延长" : "；编辑模式下拖动移动，边缘拉伸";
       return `<span class="bar" data-risk="${task.risk}" data-status="${statusClass(evaluateTaskDelivery(task).status)}" data-auto-extended="${segment.auto_extended ? "true" : "false"}" data-task-id="${escapeAttr(task.id)}" data-segment-index="${segment.source_index ?? index}" style="left:${left}%;width:${width}%" title="${escapeHtml(displayTaskTitle(task))}：${escapeHtml(segment.start_date)} ~ ${escapeHtml(segment.end_date)}${titleSuffix}"><small>${escapeHtml(formatMonthDay(segment.end_date))}</small></span>`;
     }).join("");
-    return `<div class="gantt-row"><div class="gantt-title">${escapeHtml(displayTaskTitle(task))}</div><div class="track">${bars}</div></div>`;
+    const saved = taskEarlySavedSegments(task).map((segment) => {
+      if (!datesOverlap(segment.start_date, segment.end_date, start, end)) return "";
+      const clippedStart = maxDate(segment.start_date, start);
+      const clippedEnd = minDate(segment.end_date, end);
+      const left = daysBetween(start, clippedStart) / total * 100;
+      const width = Math.max(1.2, (daysBetween(clippedStart, clippedEnd) + 1) / total * 100);
+      return `<span class="saved-segment" style="left:${left}%;width:${width}%" title="${escapeAttr(displayTaskTitle(task))}：提前完成释放 ${escapeAttr(segment.start_date)} ~ ${escapeAttr(segment.end_date)}"><small>${escapeHtml(formatMonthDay(segment.end_date))}</small></span>`;
+    }).join("");
+    const marker = taskRecommitMarkerHtml(task, start, total);
+    return `<div class="gantt-row"><div class="gantt-title">${escapeHtml(displayTaskTitle(task))}</div><div class="track">${bars}${saved}${marker}</div></div>`;
   }).join("");
   document.querySelectorAll(".bar").forEach((bar) => {
     bar.addEventListener("dblclick", () => {
@@ -1792,6 +1835,12 @@ function weekdayName(value) {
   return ["日", "一", "二", "三", "四", "五", "六"][dateFromYmd(value).getUTCDay()];
 }
 
+function dateCellHtml(value) {
+  return isYmd(value)
+    ? `<span class="date-pill">${escapeHtml(value)}</span>`
+    : `<span class="muted-cell">-</span>`;
+}
+
 function linkListHtml(value, label) {
   if (label === "PR") return prLinkPillsHtml(value);
   const links = parseLinks(value);
@@ -1924,6 +1973,10 @@ function syncTaskDeliveryRules(task) {
   if (task.status !== next.status) {
     changed.push("status");
     task.status = next.status;
+  }
+  if (next.status === "done" && !isYmd(task.done_date)) {
+    changed.push("done_date");
+    task.done_date = todayBjYmd();
   }
   return changed;
 }
@@ -2081,6 +2134,8 @@ function readOnlyTaskRowHtml(task, className = "") {
       <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
       <td class="col-special">${escapeHtml(specialTitle(task.special_id))}</td>
       <td class="col-date">${taskDdlCountdownHtml(task)}</td>
+      <td class="col-commit">${dateCellHtml(task.recommit_date)}</td>
+      <td class="col-done-date">${dateCellHtml(task.done_date)}</td>
       <td class="col-pr">${linkListHtml(task.pr_link, "PR")}</td>
       <td class="col-report">${linkListHtml(task.test_report, "报告")}</td>
       <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
@@ -2109,6 +2164,8 @@ function developerTaskRowHtml(task) {
       <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
       <td class="col-special">${escapeHtml(specialTitle(task.special_id))}</td>
       <td class="col-date">${taskDdlCountdownHtml(task)}</td>
+      <td class="col-commit">${dateCellHtml(task.recommit_date)}</td>
+      <td class="col-done-date">${dateCellHtml(task.done_date)}</td>
       <td class="col-pr">${prLinkEditorHtml(task)}</td>
       <td class="col-report"><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
       <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
@@ -2142,6 +2199,8 @@ function renderRows(tasks) {
           <div class="date-edit-row"><input type="date" data-field="start_date" value="${escapeAttr(task.start_date)}"> ~ <input type="date" data-field="end_date" value="${escapeAttr(task.end_date)}"></div>
           ${taskDdlCountdownHtml(task)}
         </td>
+        <td class="col-commit"><input type="date" data-field="recommit_date" value="${escapeAttr(task.recommit_date || "")}"></td>
+        <td class="col-done-date"><input type="date" data-field="done_date" value="${escapeAttr(task.done_date || "")}"></td>
         <td class="col-pr">${prLinkEditorHtml(task)}</td>
         <td class="col-report"><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
         <td>${selectHtml("status", STATUS_OPTIONS, task.status)}</td>
@@ -2538,7 +2597,7 @@ async function saveTaskRows(extraRows = []) {
 function taskPatchFieldsFromChange(task, change) {
   const fields = {};
   Object.keys(change.changes || {}).forEach((field) => {
-    if (isDeveloperEditMode() && (field === "risk" || field === "status")) return;
+    if (isDeveloperEditMode() && (field === "risk" || field === "status" || field === "done_date")) return;
     fields[field] = field === "segments" ? (task.segments || []) : task[field];
   });
   return fields;
@@ -2566,6 +2625,8 @@ async function addTask() {
     pr_link: "",
     test_report: "",
     notes: "",
+    recommit_date: "",
+    done_date: "",
     operator_ids: "",
     position: state.data.tasks.length,
     created_at: nowIso(),
