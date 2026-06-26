@@ -1,7 +1,7 @@
 {
   "storageVersion": 2,
-  "generatedAt": "2026-06-26T17:24:40+08:00",
-  "version": "2026-06-25T19:36:32+00:00",
+  "generatedAt": "2026-06-26T19:49:51.413Z",
+  "version": "2026-06-26T09:47:45.603Z",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -631,6 +631,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_gated_delta_rule_fwd_h",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-ad6ef8526b",
@@ -663,6 +665,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_fwd_o",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-9f801d9dcb",
@@ -695,6 +699,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "recompute_wu_fwd",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-0801e04687",
@@ -727,6 +733,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_bwd_dv_local",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-4d160c57ee",
@@ -759,6 +767,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_bwd_dqkwg",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-71650b131f",
@@ -791,6 +801,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "prepare_wy_repr_bwd_da",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-5ebbafe401",
@@ -821,8 +833,10 @@
       "notes": "",
       "position": 6,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "prepare_wy_repr_bwd_full",
+      "recommit_date": "",
+      "done_date": "2026-06-18",
       "segments": [
         {
           "id": "seg-9b4561eff2",
@@ -855,6 +869,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "prepare_wy_repr_bwd_full",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-5063433fe7",
@@ -887,6 +903,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_bwd_dv_local",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-f6b0d1664a",
@@ -919,6 +937,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_gated_delta_rule_fwd_h/chunk_fwd_o",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-dcd9523a43",
@@ -951,6 +971,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "causal_conv1d_fwd",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-ba848d33d5",
@@ -981,8 +1003,10 @@
       "notes": "",
       "position": 11,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-17T01:00:54+08:00",
+      "updated_at": "2026-06-26T13:10:42+08:00",
       "operator_ids": "",
+      "recommit_date": "",
+      "done_date": "2026-05-28",
       "segments": [
         {
           "id": "seg-3f969da999",
@@ -1015,6 +1039,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_fwd_o",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-15b69a8629",
@@ -1047,6 +1073,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_bwd_dv_local",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-c0b280b344",
@@ -1079,6 +1107,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "prepare_wy_repr_bwd_full",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-4783e662-d",
@@ -1109,8 +1139,10 @@
       "notes": "",
       "position": 15,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "chunk_gated_delta_rule_bwd_dhu",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-7f49a81021",
@@ -1141,8 +1173,10 @@
       "notes": "",
       "position": 16,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-26T17:24:40+08:00",
+      "updated_at": "2026-06-26T03:47:08.348Z",
       "operator_ids": "chunk_gated_delta_rule_fwd_h",
+      "recommit_date": "2026-06-27",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-21513d9491",
@@ -1173,8 +1207,10 @@
       "notes": "",
       "position": 17,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-26T17:24:40+08:00",
+      "updated_at": "2026-06-26T03:47:07.633Z",
       "operator_ids": "chunk_fwd_o",
+      "recommit_date": "2026-06-27",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-d973d56d97",
@@ -1205,8 +1241,10 @@
       "notes": "",
       "position": 18,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:34:48+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "solve_tril",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-057cf6f872",
@@ -1237,8 +1275,10 @@
       "notes": "",
       "position": 19,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-26T17:24:40+08:00",
+      "updated_at": "2026-06-26T03:47:09.995Z",
       "operator_ids": "solve_tril",
+      "recommit_date": "2026-07-01",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-2015742518",
@@ -1269,8 +1309,10 @@
       "notes": "",
       "position": 20,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "causal_conv1d_bwd",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-46f78664fa",
@@ -1301,8 +1343,10 @@
       "notes": "",
       "position": 21,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-26T17:24:40+08:00",
+      "updated_at": "2026-06-26T03:47:06.914Z",
       "operator_ids": "chunk_bwd_dqkwg",
+      "recommit_date": "2026-07-03",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-d1bde83de6",
@@ -1335,6 +1379,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_gated_delta_rule_fwd_h",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-c065d374c1",
@@ -1367,6 +1413,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T13:57:04.500Z",
       "operator_ids": "",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-dfff37876c",
@@ -1399,6 +1447,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-24T03:51:56.094Z",
       "operator_ids": "",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-3e03d6ffc0",
@@ -1429,8 +1479,10 @@
       "notes": "",
       "position": 25,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "chunk_gated_delta_rule_fwd_h",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-a627326868",
@@ -1461,8 +1513,10 @@
       "notes": "",
       "position": 26,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "chunk_fwd_o",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-91bb5dea40",
@@ -1493,8 +1547,10 @@
       "notes": "",
       "position": 27,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "recompute_wu_fwd",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-23fd52047e",
@@ -1527,6 +1583,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_bwd_dv_local",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-a767a20051",
@@ -1557,8 +1615,10 @@
       "notes": "",
       "position": 29,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "chunk_bwd_dqkwg",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-3ec22781b8",
@@ -1589,8 +1649,10 @@
       "notes": "",
       "position": 30,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "chunk_gated_delta_rule_bwd_dhu",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-017bc195b5",
@@ -1621,8 +1683,10 @@
       "notes": "",
       "position": 31,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "prepare_wy_repr_bwd_da",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-c40d713206",
@@ -1653,8 +1717,10 @@
       "notes": "",
       "position": 32,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "prepare_wy_repr_bwd_full",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-10b0afbaaa",
@@ -1685,8 +1751,10 @@
       "notes": "",
       "position": 33,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "chunk_gated_delta_rule_fwd_h",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-ef7acb84aa",
@@ -1717,8 +1785,10 @@
       "notes": "",
       "position": 34,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "recompute_wu_fwd",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-31d82f9f10",
@@ -1749,8 +1819,10 @@
       "notes": "",
       "position": 35,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "chunk_bwd_dqkwg",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-23a092ebd3",
@@ -1767,7 +1839,7 @@
       "scope": "",
       "target": "",
       "owner": "方梓阳",
-      "status": "doing",
+      "status": "done",
       "risk": "低",
       "priority": "P1",
       "group_id": "M-2026-07-15",
@@ -1777,12 +1849,14 @@
       "evidence": [],
       "dependencies": [],
       "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/84",
-      "test_report": "",
+      "test_report": "https://wiki.huawei.com/domains/68949/wiki/232736/WIKI2026062511594298",
       "notes": "6.25号开始执行，工作时间三天",
       "position": 36,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-26T17:24:40+08:00",
+      "updated_at": "2026-06-26T09:47:45.426Z",
       "operator_ids": "chunk_gated_delta_rule_bwd_dhu",
+      "recommit_date": "",
+      "done_date": "2026-06-26",
       "segments": [
         {
           "id": "seg-797e0353b8",
@@ -1813,8 +1887,10 @@
       "notes": "",
       "position": 37,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "prepare_wy_repr_bwd_da",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-709935c665",
@@ -1845,8 +1921,10 @@
       "notes": "",
       "position": 38,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "prepare_wy_repr_bwd_full",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-9c104cb6fd",
@@ -1877,8 +1955,10 @@
       "notes": "",
       "position": 39,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-26T17:24:40+08:00",
+      "updated_at": "2026-06-26T03:47:09.098Z",
       "operator_ids": "chunk_bwd_dqkwg",
+      "recommit_date": "2026-07-15",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-t42-dqkwg-regbase",
@@ -1909,8 +1989,10 @@
       "notes": "",
       "position": 40,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "chunk_bwd_dv_local",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-t42-dv-local-regbase",
@@ -1941,8 +2023,10 @@
       "notes": "",
       "position": 41,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-06-26T13:00:12+08:00",
       "operator_ids": "prepare_wy_repr_bwd_da",
+      "recommit_date": "",
+      "done_date": "2026-06-25",
       "segments": [
         {
           "id": "seg-t42-wy-da-regbase",
@@ -1975,6 +2059,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_gated_delta_rule_fwd_h",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-t42-fwd-h-regbase",
@@ -2007,6 +2093,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_fwd_o",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-t42-fwd-o-regbase",
@@ -2039,6 +2127,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "chunk_gated_delta_rule_bwd_dhu",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-t42-dhu-regbase",
@@ -2071,6 +2161,8 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "recompute_wu_fwd",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-t42-recompute-regbase",
@@ -2103,12 +2195,48 @@
       "created_at": "2026-06-16T09:22:27+08:00",
       "updated_at": "2026-06-25T19:29:23+00:00",
       "operator_ids": "kimi_delta_attention_triton",
+      "recommit_date": "",
+      "done_date": "",
       "segments": [
         {
           "id": "seg-4e2c4c818c",
           "start_date": "2026-06-26",
           "end_date": "2026-07-15",
           "reason": "",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "task-99783b7d-9",
+      "title": "GDNv26.6.0版本性能信息统计",
+      "scope": "",
+      "target": "",
+      "owner": "魏纳川/吴雨舒/周云飞",
+      "status": "doing",
+      "risk": "中",
+      "priority": "P0",
+      "group_id": "M-2026-07-15",
+      "special_id": null,
+      "start_date": "2026-06-26",
+      "end_date": "2026-07-15",
+      "evidence": [],
+      "dependencies": [],
+      "pr_link": "",
+      "test_report": "",
+      "notes": "6-26下发 预期2周工作量",
+      "position": 47,
+      "created_at": "2026-06-26T06:19:52+08:00",
+      "updated_at": "2026-06-26T06:22:28.375Z",
+      "operator_ids": "",
+      "recommit_date": "",
+      "done_date": "",
+      "segments": [
+        {
+          "id": "seg-f553264a-c",
+          "start_date": "2026-06-26",
+          "end_date": "2026-07-15",
+          "reason": "6-26下发 预期2周工作量",
           "position": 0
         }
       ]
