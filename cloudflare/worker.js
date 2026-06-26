@@ -417,8 +417,9 @@ function evaluateTaskDelivery(task, catalogItems) {
 }
 
 function taskNextDoneDate(task, nextStatus) {
-  if (nextStatus !== "done") return task.done_date || "";
-  return isYmd(task.done_date) ? task.done_date : todayBjYmd();
+  if (nextStatus !== "done") return "";
+  if (isYmd(task.done_date)) return task.done_date;
+  return task.status === "done" ? "" : todayBjYmd();
 }
 
 function evaluateTaskRisk(task, catalogItems) {

@@ -224,7 +224,9 @@ def evaluate_task_delivery(task, catalog_items):
         status = "todo"
 
     done_date = task.get("done_date") or ""
-    if status == "done" and not done_date:
+    if status != "done":
+        done_date = ""
+    elif task.get("status") != "done" and not done_date:
         done_date = today_bj().isoformat()
 
     return {"risk": risk, "status": status, "done_date": done_date}

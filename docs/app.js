@@ -1964,6 +1964,7 @@ function evaluateTaskDelivery(task) {
 }
 
 function syncTaskDeliveryRules(task) {
+  const previousStatus = task.status;
   const next = evaluateTaskDelivery(task);
   const changed = [];
   if (task.risk !== next.risk) {
@@ -1974,7 +1975,10 @@ function syncTaskDeliveryRules(task) {
     changed.push("status");
     task.status = next.status;
   }
-  if (next.status === "done" && !isYmd(task.done_date)) {
+  if (next.status !== "done" && task.done_date) {
+    changed.push("done_date");
+    task.done_date = "";
+  } else if (next.status === "done" && previousStatus !== "done" && !isYmd(task.done_date)) {
     changed.push("done_date");
     task.done_date = todayBjYmd();
   }
