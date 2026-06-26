@@ -282,6 +282,7 @@ th { position:sticky; top:0; background:#fff6e8; font-size:12px; z-index:30; }
 .task-table .col-pl { min-width:118px; }
 .task-table .col-group { min-width:168px; }
 .task-table .col-special { min-width:150px; }
+.task-table .col-date { min-width:156px; }
 .task-table th.col-group .sort-button { white-space:nowrap; }
 .check-filter { position:relative; min-width:116px; }
 .check-filter-trigger {
@@ -470,6 +471,37 @@ td .link-input { min-width:220px; }
 .status-pill.blocked { border-color:#8a857a; background:#f2efe8; color:#5f5a52; }
 .status-pill.doing { border-color:#d99814; background:#fffdf8; color:#9b6508; }
 .status-pill.todo { border-color:#2f73c8; background:#f7fbff; color:#235a9f; }
+.ddl-countdown {
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-width:132px;
+  width:max-content;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(42,120,99,.24);
+  background:#eaf4ef;
+  color:#1d6a56;
+  font-weight:950;
+  white-space:nowrap;
+}
+.ddl-countdown strong { font-size:12px; }
+.ddl-countdown small { color:inherit; opacity:.76; font-size:11px; font-weight:900; }
+.ddl-countdown.today { border-color:rgba(203,126,5,.35); background:#fff6df; color:#9b6508; }
+.ddl-countdown.overdue {
+  border-color:var(--high);
+  background:#fffdf8;
+  color:var(--high);
+  box-shadow:inset 0 0 0 1px rgba(207,61,50,.28);
+}
+.date-edit-row {
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-bottom:6px;
+  white-space:nowrap;
+}
+.date-edit-row input[type="date"] { width:130px; }
 .audit { display:grid; gap:8px; }
 .audit-item { display:grid; grid-template-columns:190px 1fr; gap:10px; padding:9px 10px; border:1px solid var(--line); background:#fffaf1; }
 .audit-item time { color:var(--muted); font-size:12px; }

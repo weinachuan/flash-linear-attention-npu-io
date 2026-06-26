@@ -82,7 +82,7 @@ const TABLE_SORT_LABELS = {
   owner_pl: "责任人分组",
   group_id: "转测迭代计划排期",
   special_id: "专项",
-  date: "计划日期",
+  date: "距 DDL 工作日",
   pr_link: "PR 链接",
   test_report: "转测报告",
   status: "状态",
@@ -477,7 +477,7 @@ function renderTableFilters() {
     tableFilterSelect("pl", [["", "全部"], ...plFilterOptions().map((pl) => [pl, pl])], "col-pl"),
     tableFilterSelect("group_id", [["", "全部"], ...groups.map((group) => [group.id, group.title])], "col-group"),
     tableFilterSelect("special_id", [["", "全部"], ["__none__", "普通事项"], ...specials.map((special) => [special.id, special.title])], "col-special"),
-    `<th></th>`,
+    `<th class="col-date"></th>`,
     `<th></th>`,
     `<th></th>`,
     tableFilterSelect("status", [["", "全部"], ...STATUS_OPTIONS]),
@@ -1834,6 +1834,29 @@ function taskWorkdaysUntilDdl(task) {
   return workdaysUntil(todayBjYmd(), taskDdl(task));
 }
 
+function taskDdlWorkdayDelta(task) {
+  const today = todayBjYmd();
+  const ddl = taskDdl(task);
+  if (evaluateTaskStatus(task) === "delayed") {
+    return -Math.max(1, workdaysUntil(ddl, today));
+  }
+  return workdaysUntil(today, ddl);
+}
+
+function taskDdlCountdownHtml(task) {
+  const ddl = taskDdl(task);
+  const delta = taskDdlWorkdayDelta(task);
+  const stateClass = delta < 0 ? "overdue" : (delta === 0 ? "today" : "upcoming");
+  const label = `${delta > 0 ? "+" : ""}${delta} 工作日`;
+  const title = `DDL：${ddl}；今天：${todayBjYmd()}；按中国法定节假日、调休工作日和周末计算`;
+  return `
+    <span class="ddl-countdown ${stateClass}" title="${escapeAttr(title)}">
+      <strong>${escapeHtml(label)}</strong>
+      <small>DDL ${escapeHtml(formatMonthDay(ddl))}</small>
+    </span>
+  `;
+}
+
 function taskPastDdlMidnight(task) {
   return todayBjYmd() > taskDdl(task);
 }
@@ -2049,7 +2072,7 @@ function readOnlyTaskRowHtml(task, className = "") {
       <td class="col-pl">${taskPlChipsHtml(task)}</td>
       <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
       <td class="col-special">${escapeHtml(specialTitle(task.special_id))}</td>
-      <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
+      <td class="col-date">${taskDdlCountdownHtml(task)}</td>
       <td>${linkListHtml(task.pr_link, "PR")}</td>
       <td>${linkListHtml(task.test_report, "报告")}</td>
       <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
@@ -2077,7 +2100,7 @@ function developerTaskRowHtml(task) {
       <td class="col-pl">${taskPlChipsHtml(task)}</td>
       <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
       <td class="col-special">${escapeHtml(specialTitle(task.special_id))}</td>
-      <td>${escapeHtml(task.start_date)} ~ ${escapeHtml(task.end_date)}</td>
+      <td class="col-date">${taskDdlCountdownHtml(task)}</td>
       <td>${prLinkEditorHtml(task)}</td>
       <td><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
       <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
@@ -2107,7 +2130,10 @@ function renderRows(tasks) {
         <td class="col-pl">${taskPlChipsHtml(task)}</td>
         <td class="col-group">${selectHtml("group_id", state.data.groups.map((g) => [g.id, g.title]), task.group_id)}</td>
         <td class="col-special">${selectHtml("special_id", [["","普通事项"], ...state.data.specials.map((s) => [s.id, s.title])], task.special_id || "")}</td>
-        <td><input type="date" data-field="start_date" value="${escapeAttr(task.start_date)}"> ~ <input type="date" data-field="end_date" value="${escapeAttr(task.end_date)}"></td>
+        <td class="col-date">
+          <div class="date-edit-row"><input type="date" data-field="start_date" value="${escapeAttr(task.start_date)}"> ~ <input type="date" data-field="end_date" value="${escapeAttr(task.end_date)}"></div>
+          ${taskDdlCountdownHtml(task)}
+        </td>
         <td>${prLinkEditorHtml(task)}</td>
         <td><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
         <td>${selectHtml("status", STATUS_OPTIONS, task.status)}</td>
