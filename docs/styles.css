@@ -329,6 +329,7 @@ th { position:sticky; top:0; background:#fff6e8; font-size:12px; z-index:30; }
 .task-table tbody td { background:#fffdf8; }
 .task-table th:last-child,.task-table td:last-child { min-width:132px; }
 .task-table .col-operator { min-width:230px; }
+.task-table .col-owner { min-width:190px; }
 .task-table .col-pl { min-width:118px; }
 .task-table .col-group { min-width:168px; }
 .task-table .col-special { min-width:150px; }
@@ -668,7 +669,9 @@ td .link-input { min-width:220px; }
 }
 .work-chip.delay-chip em { color:#9f2c26; opacity:.82; }
 .work-chip.delay-chip b { color:var(--high); }
-.person-chip { display:inline-flex; align-items:center; max-width:100%; padding:4px 10px; border-radius:999px; border:1px solid rgba(39,117,96,.22); background:#ecf6f1; color:#174f41; font-weight:900; }
+.owner-chip-list { display:flex; align-items:center; gap:4px; flex-wrap:nowrap; max-width:190px; overflow:hidden; }
+.owner-preview .owner-chip-list { max-width:none; flex-wrap:wrap; overflow:visible; }
+.person-chip { display:inline-flex; align-items:center; max-width:100%; min-width:0; padding:3px 8px; border-radius:999px; border:1px solid rgba(39,117,96,.22); background:#ecf6f1; color:#174f41; font-weight:900; line-height:1.15; }
 .person-chip em { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-style:normal; font-size:12px; }
 .person-chip.placeholder { border-color:rgba(186,121,14,.28); background:#fff3db; color:#8a570c; }
 .pl-chip { display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(28,45,38,.18); background:#eef3ec; color:#1d3128; border-radius:999px; padding:3px 9px; font-weight:900; white-space:nowrap; }

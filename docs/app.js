@@ -1595,7 +1595,8 @@ function personChipHtml(person) {
 }
 
 function ownerChipsHtml(task) {
-  return taskPeople(task).map(personChipHtml).join("");
+  const chips = taskPeople(task).map(personChipHtml).join("");
+  return `<span class="owner-chip-list">${chips}</span>`;
 }
 
 function normalizePl(value) {
@@ -2133,7 +2134,7 @@ function readOnlyTaskRowHtml(task, className = "") {
       <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
       <td>${escapeHtml(displayTaskTitle(task))}</td>
       <td class="col-operator">${operatorChipsHtml(task)}</td>
-      <td>${ownerChipsHtml(task)}</td>
+      <td class="col-owner">${ownerChipsHtml(task)}</td>
       <td class="col-pl">${taskPlChipsHtml(task)}</td>
       <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
       <td class="col-special">${escapeHtml(specialTitle(task.special_id))}</td>
@@ -2163,7 +2164,7 @@ function developerTaskRowHtml(task) {
       <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
       <td>${escapeHtml(displayTaskTitle(task))}</td>
       <td class="col-operator">${operatorChipsHtml(task)}</td>
-      <td>${ownerChipsHtml(task)}</td>
+      <td class="col-owner">${ownerChipsHtml(task)}</td>
       <td class="col-pl">${taskPlChipsHtml(task)}</td>
       <td class="col-group">${escapeHtml(groupTitle(task.group_id))}</td>
       <td class="col-special">${escapeHtml(specialTitle(task.special_id))}</td>
@@ -2195,7 +2196,7 @@ function renderRows(tasks) {
         <td>${selectHtml("priority", [["P0","P0"],["P1","P1"],["P2","P2"]], task.priority)}</td>
         <td><input class="title-input" data-field="title" value="${escapeAttr(task.title)}"></td>
         <td class="col-operator">${operatorEditorHtml(task)}</td>
-        <td>${ownerEditorHtml(task)}</td>
+        <td class="col-owner">${ownerEditorHtml(task)}</td>
         <td class="col-pl">${taskPlChipsHtml(task)}</td>
         <td class="col-group">${selectHtml("group_id", state.data.groups.map((g) => [g.id, g.title]), task.group_id)}</td>
         <td class="col-special">${selectHtml("special_id", [["","普通事项"], ...state.data.specials.map((s) => [s.id, s.title])], task.special_id || "")}</td>
