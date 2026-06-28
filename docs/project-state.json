@@ -1,6 +1,6 @@
 {
   "storageVersion": 2,
-  "generatedAt": "2026-06-27T19:22:17.737Z",
+  "generatedAt": "2026-06-28T16:50:11+08:00",
   "version": "2026-06-26T09:47:45.603Z",
   "project": {
     "name": "flash-linear-attention-npu",
@@ -1194,7 +1194,7 @@
       "target": "",
       "owner": "刘福疆",
       "status": "delayed",
-      "risk": "高",
+      "risk": "中",
       "priority": "P0",
       "group_id": "M-2026-06-25",
       "special_id": null,
@@ -1207,7 +1207,7 @@
       "notes": "",
       "position": 17,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-27T15:31:38.733Z",
+      "updated_at": "2026-06-28T16:50:11+08:00",
       "operator_ids": "chunk_fwd_o",
       "recommit_date": "2026-06-27",
       "done_date": "",

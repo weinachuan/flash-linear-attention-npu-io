@@ -1,19 +1,31 @@
 {
-  "generatedAt": "2026-06-27T16:34:48+08:00",
+  "generatedAt": "2026-06-28T16:50:11+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 70,
+  "total": 71,
   "items": [
     {
-      "number": 95,
-      "title": "[codex] Optimize chunk_bwd_dqkwg CV fusion workspace",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/95",
+      "number": 97,
+      "title": "chore: remove ops-transformer leftovers and stale test scripts",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/97",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-27T07:53:16Z",
-      "createdAt": "2026-06-27T07:53:16Z",
-      "headRef": "codex/dqkwg-cv-fusion-workspace",
+      "updatedAt": "2026-06-27T10:45:53Z",
+      "createdAt": "2026-06-27T10:45:38Z",
+      "headRef": "chore/remove-ops-transformer-leftovers",
+      "labels": []
+    },
+    {
+      "number": 96,
+      "title": "Optimize chunk_bwd_dqkwg CV fusion workspace",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/96",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-28T05:09:20Z",
+      "createdAt": "2026-06-27T08:52:34Z",
+      "headRef": "dqkwg-cv-fusion-workspace",
       "labels": []
     },
     {
@@ -23,7 +35,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-27T07:43:13Z",
+      "updatedAt": "2026-06-27T14:21:11Z",
       "createdAt": "2026-06-26T18:36:52Z",
       "headRef": "codex/kda-fwd-bwd-operator",
       "labels": []
@@ -83,7 +95,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-27T08:04:19Z",
+      "updatedAt": "2026-06-28T06:37:11Z",
       "createdAt": "2026-06-24T00:49:31Z",
       "headRef": "sync-github",
       "labels": []
