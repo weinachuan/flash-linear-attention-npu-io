@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-06-28T16:50:11+08:00",
+  "generatedAt": "2026-06-29T18:57:39+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
   "total": 71,
   "items": [
+    {
+      "number": 98,
+      "title": "A5 Solve-tril Mch",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/98",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-29T02:07:24Z",
+      "createdAt": "2026-06-29T02:07:15Z",
+      "headRef": "solve-tril",
+      "labels": []
+    },
     {
       "number": 97,
       "title": "chore: remove ops-transformer leftovers and stale test scripts",
@@ -11,19 +23,19 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-27T10:45:53Z",
+      "updatedAt": "2026-06-29T02:01:03Z",
       "createdAt": "2026-06-27T10:45:38Z",
       "headRef": "chore/remove-ops-transformer-leftovers",
       "labels": []
     },
     {
       "number": 96,
-      "title": "Optimize chunk_bwd_dqkwg CV fusion workspace",
+      "title": "perf(dqkwg): optimize CV fusion workspace",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/96",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-28T05:09:20Z",
+      "updatedAt": "2026-06-29T10:40:46Z",
       "createdAt": "2026-06-27T08:52:34Z",
       "headRef": "dqkwg-cv-fusion-workspace",
       "labels": []
@@ -95,7 +107,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-28T06:37:11Z",
+      "updatedAt": "2026-06-29T02:40:03Z",
       "createdAt": "2026-06-24T00:49:31Z",
       "headRef": "sync-github",
       "labels": []
@@ -119,7 +131,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-26T03:17:27Z",
+      "updatedAt": "2026-06-29T09:58:07Z",
       "createdAt": "2026-06-13T06:33:24Z",
       "headRef": "main",
       "labels": []
@@ -158,18 +170,6 @@
       "updatedAt": "2026-06-10T02:23:02Z",
       "createdAt": "2026-06-09T03:43:30Z",
       "headRef": "codex/fix-triton-l2norm-cache",
-      "labels": []
-    },
-    {
-      "number": 36,
-      "title": "support recompute_wu_fwd GVA and VDIM256",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/36",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-08T13:10:19Z",
-      "createdAt": "2026-06-08T03:54:28Z",
-      "headRef": "feat/recompute-gva-vdim256",
       "labels": []
     },
     {
