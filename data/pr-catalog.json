@@ -1,9 +1,45 @@
 {
-  "generatedAt": "2026-06-29T18:57:39+08:00",
+  "generatedAt": "2026-06-30T17:33:45+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 71,
+  "total": 74,
   "items": [
+    {
+      "number": 101,
+      "title": "update prepare_wy_repr_bwd_da test",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/101",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-30T09:18:55Z",
+      "createdAt": "2026-06-30T09:18:47Z",
+      "headRef": "test_da_double",
+      "labels": []
+    },
+    {
+      "number": 100,
+      "title": "Add chunk local cumsum AscendC op",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/100",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-30T08:48:16Z",
+      "createdAt": "2026-06-30T08:48:08Z",
+      "headRef": "asc_cumsum",
+      "labels": []
+    },
+    {
+      "number": 99,
+      "title": "gdn call aclnn_causal_conv1d",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/99",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-06-29T14:46:32Z",
+      "createdAt": "2026-06-29T14:14:56Z",
+      "headRef": "main",
+      "labels": []
+    },
     {
       "number": 98,
       "title": "A5 Solve-tril Mch",
@@ -17,25 +53,13 @@
       "labels": []
     },
     {
-      "number": 97,
-      "title": "chore: remove ops-transformer leftovers and stale test scripts",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/97",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-29T02:01:03Z",
-      "createdAt": "2026-06-27T10:45:38Z",
-      "headRef": "chore/remove-ops-transformer-leftovers",
-      "labels": []
-    },
-    {
       "number": 96,
       "title": "perf(dqkwg): optimize CV fusion workspace",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/96",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-29T10:40:46Z",
+      "updatedAt": "2026-06-30T01:02:04Z",
       "createdAt": "2026-06-27T08:52:34Z",
       "headRef": "dqkwg-cv-fusion-workspace",
       "labels": []
@@ -65,39 +89,15 @@
       "labels": []
     },
     {
-      "number": 92,
-      "title": "feat(recurrent_gated_delta_rule): recurrent_gated_delta_rule 支持<<<>>>",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/92",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-27T03:45:43Z",
-      "createdAt": "2026-06-25T12:59:30Z",
-      "headRef": "rrr",
-      "labels": []
-    },
-    {
       "number": 91,
       "title": "gdn一键编包",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/91",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-26T03:13:17Z",
+      "updatedAt": "2026-06-30T03:12:25Z",
       "createdAt": "2026-06-25T12:40:19Z",
       "headRef": "feature/gdn-one-click-package",
-      "labels": []
-    },
-    {
-      "number": 90,
-      "title": "chunk_bwd_dv_local tiling代码合并",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/90",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-25T17:11:03Z",
-      "createdAt": "2026-06-25T10:19:34Z",
-      "headRef": "cs-dev",
       "labels": []
     },
     {
@@ -107,7 +107,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-29T02:40:03Z",
+      "updatedAt": "2026-06-30T07:20:37Z",
       "createdAt": "2026-06-24T00:49:31Z",
       "headRef": "sync-github",
       "labels": []
@@ -131,7 +131,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-29T09:58:07Z",
+      "updatedAt": "2026-06-30T03:51:50Z",
       "createdAt": "2026-06-13T06:33:24Z",
       "headRef": "main",
       "labels": []
@@ -194,6 +194,42 @@
       "updatedAt": "2026-06-15T07:32:12Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 97,
+      "title": "chore: remove ops-transformer leftovers and stale test scripts",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/97",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-30T08:07:57Z",
+      "updatedAt": "2026-06-30T08:07:57Z",
+      "createdAt": "2026-06-27T10:45:38Z",
+      "headRef": "chore/remove-ops-transformer-leftovers",
+      "labels": []
+    },
+    {
+      "number": 92,
+      "title": "feat(recurrent_gated_delta_rule): recurrent_gated_delta_rule 支持<<<>>>",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/92",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-30T07:37:26Z",
+      "updatedAt": "2026-06-30T07:37:26Z",
+      "createdAt": "2026-06-25T12:59:30Z",
+      "headRef": "rrr",
+      "labels": []
+    },
+    {
+      "number": 90,
+      "title": "chunk_bwd_dv_local tiling代码合并",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/90",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-06-30T07:13:51Z",
+      "updatedAt": "2026-06-30T07:13:51Z",
+      "createdAt": "2026-06-25T10:19:34Z",
+      "headRef": "cs-dev",
       "labels": []
     },
     {
