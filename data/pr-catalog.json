@@ -1,9 +1,45 @@
 {
-  "generatedAt": "2026-07-01T17:43:24+08:00",
+  "generatedAt": "2026-07-02T16:54:34+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 78,
+  "total": 80,
   "items": [
+    {
+      "number": 110,
+      "title": "fix causal_conv1d",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/110",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-02T08:35:20Z",
+      "createdAt": "2026-07-02T08:35:11Z",
+      "headRef": "v26.6.0",
+      "labels": []
+    },
+    {
+      "number": 109,
+      "title": "ChunkGatedDeltaRuleFwdH support gk",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/109",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-02T07:56:51Z",
+      "createdAt": "2026-07-02T07:53:17Z",
+      "headRef": "main",
+      "labels": []
+    },
+    {
+      "number": 108,
+      "title": "fix conv1d test",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/108",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-02T07:40:33Z",
+      "createdAt": "2026-07-02T07:25:47Z",
+      "headRef": "fix_conv1d",
+      "labels": []
+    },
     {
       "number": 107,
       "title": "add ops solve_tril (ascend950) new",
@@ -11,21 +47,9 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-01T09:09:58Z",
+      "updatedAt": "2026-07-02T08:40:57Z",
       "createdAt": "2026-07-01T09:09:48Z",
       "headRef": "solve_tril_950_new",
-      "labels": []
-    },
-    {
-      "number": 106,
-      "title": "fix(dqkwg): correct GVA key-head gradients",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/106",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-01T09:25:47Z",
-      "createdAt": "2026-07-01T08:31:45Z",
-      "headRef": "gva-hk-semantics-fix",
       "labels": []
     },
     {
@@ -35,7 +59,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-30T20:44:02Z",
+      "updatedAt": "2026-07-02T04:15:25Z",
       "createdAt": "2026-06-30T09:18:47Z",
       "headRef": "test_da_double",
       "labels": []
@@ -47,21 +71,9 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-30T20:38:47Z",
+      "updatedAt": "2026-07-02T07:19:09Z",
       "createdAt": "2026-06-30T08:48:08Z",
       "headRef": "asc_cumsum",
-      "labels": []
-    },
-    {
-      "number": 99,
-      "title": "gdn call aclnn_causal_conv1d",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/99",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-30T20:38:49Z",
-      "createdAt": "2026-06-29T14:14:56Z",
-      "headRef": "main",
       "labels": []
     },
     {
@@ -71,7 +83,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-06-30T20:38:52Z",
+      "updatedAt": "2026-07-02T06:16:47Z",
       "createdAt": "2026-06-29T02:07:15Z",
       "headRef": "solve-tril",
       "labels": []
@@ -107,7 +119,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-01T09:30:23Z",
+      "updatedAt": "2026-07-02T01:23:02Z",
       "createdAt": "2026-06-25T12:40:19Z",
       "headRef": "feature/gdn-one-click-package",
       "labels": []
@@ -194,6 +206,18 @@
       "updatedAt": "2026-06-30T20:39:09Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 106,
+      "title": "fix(dqkwg): correct GVA key-head gradients",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/106",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-02T06:53:35Z",
+      "updatedAt": "2026-07-02T06:53:35Z",
+      "createdAt": "2026-07-01T08:31:45Z",
+      "headRef": "gva-hk-semantics-fix",
       "labels": []
     },
     {
