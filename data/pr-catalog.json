@@ -1,9 +1,45 @@
 {
-  "generatedAt": "2026-07-02T16:54:34+08:00",
+  "generatedAt": "2026-07-03T17:16:29+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 80,
+  "total": 85,
   "items": [
+    {
+      "number": 118,
+      "title": "add gva sum",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/118",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-03T08:13:54Z",
+      "createdAt": "2026-07-03T08:09:22Z",
+      "headRef": "0701-26.6.0-dqkwg-sum",
+      "labels": []
+    },
+    {
+      "number": 114,
+      "title": "feat: add forward KDA AscendC operator",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/114",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-03T08:32:09Z",
+      "createdAt": "2026-07-03T03:16:04Z",
+      "headRef": "codex/kda-fwd-forward-only",
+      "labels": []
+    },
+    {
+      "number": 111,
+      "title": "prepare_wy_repr_bwd_full算子 dw KH 修改为VH",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/111",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-03T07:40:55Z",
+      "createdAt": "2026-07-03T01:53:24Z",
+      "headRef": "main",
+      "labels": []
+    },
     {
       "number": 110,
       "title": "fix causal_conv1d",
@@ -11,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-02T08:35:20Z",
+      "updatedAt": "2026-07-02T09:29:35Z",
       "createdAt": "2026-07-02T08:35:11Z",
       "headRef": "v26.6.0",
       "labels": []
@@ -23,7 +59,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-02T07:56:51Z",
+      "updatedAt": "2026-07-03T09:12:58Z",
       "createdAt": "2026-07-02T07:53:17Z",
       "headRef": "main",
       "labels": []
@@ -47,7 +83,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-02T08:40:57Z",
+      "updatedAt": "2026-07-03T07:42:26Z",
       "createdAt": "2026-07-01T09:09:48Z",
       "headRef": "solve_tril_950_new",
       "labels": []
@@ -59,7 +95,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-02T04:15:25Z",
+      "updatedAt": "2026-07-03T04:03:50Z",
       "createdAt": "2026-06-30T09:18:47Z",
       "headRef": "test_da_double",
       "labels": []
@@ -86,18 +122,6 @@
       "updatedAt": "2026-07-02T06:16:47Z",
       "createdAt": "2026-06-29T02:07:15Z",
       "headRef": "solve-tril",
-      "labels": []
-    },
-    {
-      "number": 94,
-      "title": "feat: add native AscendC KDA fused operators",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/94",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-30T16:42:08Z",
-      "createdAt": "2026-06-26T18:36:52Z",
-      "headRef": "codex/kda-fwd-bwd-operator",
       "labels": []
     },
     {
@@ -206,6 +230,42 @@
       "updatedAt": "2026-06-30T20:39:09Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 117,
+      "title": "full算子dw KH修改为VH",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/117",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-03T07:40:08Z",
+      "updatedAt": "2026-07-03T07:40:09Z",
+      "createdAt": "2026-07-03T07:32:25Z",
+      "headRef": "v26.6.0",
+      "labels": []
+    },
+    {
+      "number": 115,
+      "title": "feat: add support for ascend950 in causal_conv1d_bwd operator",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/115",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-03T06:35:11Z",
+      "updatedAt": "2026-07-03T06:35:11Z",
+      "createdAt": "2026-07-03T06:28:52Z",
+      "headRef": "v26.6.0",
+      "labels": []
+    },
+    {
+      "number": 112,
+      "title": "feat: add support for ascend950 in causal_conv1d_bwd operator",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/112",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-03T06:23:53Z",
+      "updatedAt": "2026-07-03T06:23:53Z",
+      "createdAt": "2026-07-03T02:48:18Z",
+      "headRef": "causal_conv1d_bwd_950",
       "labels": []
     },
     {
