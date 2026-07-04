@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-07-04T10:49:13+08:00",
+  "generatedAt": "2026-07-04T16:35:12+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 87,
+  "total": 92,
   "items": [
+    {
+      "number": 122,
+      "title": "fwd_o&fwd_h适配vdim=256",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/122",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-04T06:07:43Z",
+      "createdAt": "2026-07-04T04:12:29Z",
+      "headRef": "v26.6.0-liufujiang-gdn",
+      "labels": []
+    },
     {
       "number": 120,
       "title": "perf: improve causal_conv1d_bwd op",
@@ -53,18 +65,6 @@
       "labels": []
     },
     {
-      "number": 111,
-      "title": "prepare_wy_repr_bwd_full算子 dw KH 修改为VH",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/111",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-03T07:40:55Z",
-      "createdAt": "2026-07-03T01:53:24Z",
-      "headRef": "main",
-      "labels": []
-    },
-    {
       "number": 110,
       "title": "fix causal_conv1d",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/110",
@@ -95,7 +95,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-03T07:42:26Z",
+      "updatedAt": "2026-07-04T08:28:37Z",
       "createdAt": "2026-07-01T09:09:48Z",
       "headRef": "solve_tril_950_new",
       "labels": []
@@ -146,18 +146,6 @@
       "updatedAt": "2026-06-30T20:38:54Z",
       "createdAt": "2026-06-26T03:31:18Z",
       "headRef": "docs/causal-conv1d",
-      "labels": []
-    },
-    {
-      "number": 91,
-      "title": "gdn一键编包",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/91",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-02T01:23:02Z",
-      "createdAt": "2026-06-25T12:40:19Z",
-      "headRef": "feature/gdn-one-click-package",
       "labels": []
     },
     {
@@ -245,6 +233,54 @@
       "labels": []
     },
     {
+      "number": 127,
+      "title": "ci: sync v26.6.0 workflows with main",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/127",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T07:38:08Z",
+      "updatedAt": "2026-07-04T07:38:08Z",
+      "createdAt": "2026-07-04T07:37:07Z",
+      "headRef": "codex/sync-v266-ci",
+      "labels": []
+    },
+    {
+      "number": 125,
+      "title": "update prepare_wy_repr_bwd_da readme",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/125",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T07:12:54Z",
+      "updatedAt": "2026-07-04T07:12:54Z",
+      "createdAt": "2026-07-04T07:08:46Z",
+      "headRef": "da_readme",
+      "labels": []
+    },
+    {
+      "number": 124,
+      "title": "fix: complete wheel packaging runtime compatibility",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/124",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T06:46:44Z",
+      "updatedAt": "2026-07-04T06:46:44Z",
+      "createdAt": "2026-07-04T05:28:17Z",
+      "headRef": "codex/pr91-wheel-api-fixes",
+      "labels": []
+    },
+    {
+      "number": 121,
+      "title": "fix gva and deep fusion",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/121",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T06:37:34Z",
+      "updatedAt": "2026-07-04T06:37:34Z",
+      "createdAt": "2026-07-04T03:00:04Z",
+      "headRef": "0704-26.6.0",
+      "labels": []
+    },
+    {
       "number": 117,
       "title": "full算子dw KH修改为VH",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/117",
@@ -278,6 +314,18 @@
       "updatedAt": "2026-07-03T06:23:53Z",
       "createdAt": "2026-07-03T02:48:18Z",
       "headRef": "causal_conv1d_bwd_950",
+      "labels": []
+    },
+    {
+      "number": 111,
+      "title": "prepare_wy_repr_bwd_full算子 dw KH 修改为VH",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/111",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T06:30:45Z",
+      "updatedAt": "2026-07-04T06:30:46Z",
+      "createdAt": "2026-07-03T01:53:24Z",
+      "headRef": "main",
       "labels": []
     },
     {
@@ -362,6 +410,18 @@
       "updatedAt": "2026-06-30T07:37:26Z",
       "createdAt": "2026-06-25T12:59:30Z",
       "headRef": "rrr",
+      "labels": []
+    },
+    {
+      "number": 91,
+      "title": "gdn一键编包",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/91",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T06:46:46Z",
+      "updatedAt": "2026-07-04T06:46:46Z",
+      "createdAt": "2026-06-25T12:40:19Z",
+      "headRef": "feature/gdn-one-click-package",
       "labels": []
     },
     {
