@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-04T16:35:12+08:00",
+  "generatedAt": "2026-07-04T10:39:38.441Z",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 92,
+  "total": 91,
   "items": [
     {
       "number": 122,
@@ -89,18 +89,6 @@
       "labels": []
     },
     {
-      "number": 107,
-      "title": "add ops solve_tril (ascend950) new",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/107",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-04T08:28:37Z",
-      "createdAt": "2026-07-01T09:09:48Z",
-      "headRef": "solve_tril_950_new",
-      "labels": []
-    },
-    {
       "number": 101,
       "title": "update prepare_wy_repr_bwd_da test",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/101",
@@ -158,18 +146,6 @@
       "updatedAt": "2026-06-30T20:39:00Z",
       "createdAt": "2026-06-17T08:56:31Z",
       "headRef": "test",
-      "labels": []
-    },
-    {
-      "number": 54,
-      "title": "add ops solve_tril (ascend950)",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/54",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-01T01:28:49Z",
-      "createdAt": "2026-06-13T06:33:24Z",
-      "headRef": "main",
       "labels": []
     },
     {
@@ -338,6 +314,18 @@
       "updatedAt": "2026-07-03T09:56:22Z",
       "createdAt": "2026-07-02T07:53:17Z",
       "headRef": "main",
+      "labels": []
+    },
+    {
+      "number": 107,
+      "title": "add ops solve_tril (ascend950) new",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/107",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T09:57:18Z",
+      "updatedAt": "2026-07-04T09:57:18Z",
+      "createdAt": "2026-07-01T09:09:48Z",
+      "headRef": "solve_tril_950_new",
       "labels": []
     },
     {
