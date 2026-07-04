@@ -1,9 +1,33 @@
 {
-  "generatedAt": "2026-07-03T17:16:29+08:00",
+  "generatedAt": "2026-07-04T10:49:13+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 85,
+  "total": 87,
   "items": [
+    {
+      "number": 120,
+      "title": "perf: improve causal_conv1d_bwd op",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/120",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-03T09:55:12Z",
+      "createdAt": "2026-07-03T09:40:04Z",
+      "headRef": "causal_conv1d_bwd_950",
+      "labels": []
+    },
+    {
+      "number": 119,
+      "title": "0703 26.6.0 dqkwg deep",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/119",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-03T09:35:22Z",
+      "createdAt": "2026-07-03T09:35:11Z",
+      "headRef": "0703-26.6.0-dqkwg-deep",
+      "labels": []
+    },
     {
       "number": 118,
       "title": "add gva sum",
@@ -53,18 +77,6 @@
       "labels": []
     },
     {
-      "number": 109,
-      "title": "ChunkGatedDeltaRuleFwdH support gk",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/109",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-03T09:12:58Z",
-      "createdAt": "2026-07-02T07:53:17Z",
-      "headRef": "main",
-      "labels": []
-    },
-    {
       "number": 108,
       "title": "fix conv1d test",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/108",
@@ -95,7 +107,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-03T04:03:50Z",
+      "updatedAt": "2026-07-03T14:20:02Z",
       "createdAt": "2026-06-30T09:18:47Z",
       "headRef": "test_da_double",
       "labels": []
@@ -266,6 +278,18 @@
       "updatedAt": "2026-07-03T06:23:53Z",
       "createdAt": "2026-07-03T02:48:18Z",
       "headRef": "causal_conv1d_bwd_950",
+      "labels": []
+    },
+    {
+      "number": 109,
+      "title": "ChunkGatedDeltaRuleFwdH support gk",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/109",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-03T09:56:22Z",
+      "updatedAt": "2026-07-03T09:56:22Z",
+      "createdAt": "2026-07-02T07:53:17Z",
+      "headRef": "main",
       "labels": []
     },
     {
