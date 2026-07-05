@@ -1,19 +1,31 @@
 {
-  "generatedAt": "2026-07-04T10:39:38.441Z",
+  "generatedAt": "2026-07-05T11:18:43+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 91,
+  "total": 103,
   "items": [
     {
-      "number": 122,
-      "title": "fwd_o&fwd_h适配vdim=256",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/122",
+      "number": 145,
+      "title": "fix: fallback solve_tri example path on A5",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/145",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-04T06:07:43Z",
-      "createdAt": "2026-07-04T04:12:29Z",
-      "headRef": "v26.6.0-liufujiang-gdn",
+      "updatedAt": "2026-07-05T03:07:35Z",
+      "createdAt": "2026-07-05T02:08:40Z",
+      "headRef": "codex/v26.6.0-solve-tri-probe",
+      "labels": []
+    },
+    {
+      "number": 139,
+      "title": "Solve-tril pipeline optimization",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/139",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-04T14:06:01Z",
+      "createdAt": "2026-07-04T14:05:38Z",
+      "headRef": "solve-tril-new",
       "labels": []
     },
     {
@@ -95,7 +107,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-03T14:20:02Z",
+      "updatedAt": "2026-07-04T10:02:02Z",
       "createdAt": "2026-06-30T09:18:47Z",
       "headRef": "test_da_double",
       "labels": []
@@ -110,18 +122,6 @@
       "updatedAt": "2026-07-02T07:19:09Z",
       "createdAt": "2026-06-30T08:48:08Z",
       "headRef": "asc_cumsum",
-      "labels": []
-    },
-    {
-      "number": 98,
-      "title": "A5 Solve-tril Mch",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/98",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-02T06:16:47Z",
-      "createdAt": "2026-06-29T02:07:15Z",
-      "headRef": "solve-tril",
       "labels": []
     },
     {
@@ -209,6 +209,138 @@
       "labels": []
     },
     {
+      "number": 143,
+      "title": "docs: clarify mixed licensing for CANN-derived code",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/143",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T17:16:34Z",
+      "updatedAt": "2026-07-04T17:16:34Z",
+      "createdAt": "2026-07-04T17:07:31Z",
+      "headRef": "codex/cann-license-compliance",
+      "labels": []
+    },
+    {
+      "number": 142,
+      "title": "build: add main wheel source tags",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/142",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T17:00:12Z",
+      "updatedAt": "2026-07-04T17:00:12Z",
+      "createdAt": "2026-07-04T16:59:17Z",
+      "headRef": "codex/main-wheel-build-tags",
+      "labels": []
+    },
+    {
+      "number": 140,
+      "title": "build: refine v26.6.0 wheel build tags",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/140",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T17:00:34Z",
+      "updatedAt": "2026-07-04T17:00:35Z",
+      "createdAt": "2026-07-04T16:18:29Z",
+      "headRef": "codex/v26.6.0-wheel-build-tags",
+      "labels": []
+    },
+    {
+      "number": 138,
+      "title": "ci: sync live merge history probing to v26.6.0",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/138",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T12:33:53Z",
+      "updatedAt": "2026-07-04T12:33:53Z",
+      "createdAt": "2026-07-04T12:32:40Z",
+      "headRef": "codex/fix-v266-npu-ci-merge-depth",
+      "labels": []
+    },
+    {
+      "number": 137,
+      "title": "ci: probe history before live PR merge",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/137",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T12:34:03Z",
+      "updatedAt": "2026-07-04T12:34:03Z",
+      "createdAt": "2026-07-04T12:32:37Z",
+      "headRef": "codex/fix-npu-ci-merge-depth",
+      "labels": []
+    },
+    {
+      "number": 136,
+      "title": "ci: sync v26.6.0 NPU CI cases and merge flow",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/136",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T11:51:33Z",
+      "updatedAt": "2026-07-04T11:51:33Z",
+      "createdAt": "2026-07-04T11:25:03Z",
+      "headRef": "codex/fix-v266-ci-cases-live-merge",
+      "labels": []
+    },
+    {
+      "number": 135,
+      "title": "ci: avoid stale PR merge refs in NPU CI",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/135",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T11:51:21Z",
+      "updatedAt": "2026-07-04T11:51:21Z",
+      "createdAt": "2026-07-04T11:25:00Z",
+      "headRef": "codex/fix-npu-ci-live-merge",
+      "labels": []
+    },
+    {
+      "number": 133,
+      "title": "fix: sync wheel packaging runtime compatibility to v26.6.0",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/133",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T13:05:19Z",
+      "updatedAt": "2026-07-04T13:05:19Z",
+      "createdAt": "2026-07-04T11:06:51Z",
+      "headRef": "codex/v26.6.0-wheel-packaging",
+      "labels": []
+    },
+    {
+      "number": 131,
+      "title": "ci: sync NPU CI rerun fix to v26.6.0",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/131",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T09:48:46Z",
+      "updatedAt": "2026-07-04T09:48:46Z",
+      "createdAt": "2026-07-04T09:44:53Z",
+      "headRef": "codex/fix-v266-npu-ci-accuracy-rerun",
+      "labels": []
+    },
+    {
+      "number": 130,
+      "title": "update prepare_wy_repr_bwd_da readme",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/130",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T09:47:23Z",
+      "updatedAt": "2026-07-04T09:47:24Z",
+      "createdAt": "2026-07-04T09:31:24Z",
+      "headRef": "v26.6.0-da_readme",
+      "labels": []
+    },
+    {
+      "number": 129,
+      "title": "ci: require accuracy status before skipping NPU reruns",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/129",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T09:40:19Z",
+      "updatedAt": "2026-07-04T09:40:19Z",
+      "createdAt": "2026-07-04T09:18:46Z",
+      "headRef": "codex/fix-npu-ci-accuracy-rerun",
+      "labels": []
+    },
+    {
       "number": 127,
       "title": "ci: sync v26.6.0 workflows with main",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/127",
@@ -242,6 +374,18 @@
       "updatedAt": "2026-07-04T06:46:44Z",
       "createdAt": "2026-07-04T05:28:17Z",
       "headRef": "codex/pr91-wheel-api-fixes",
+      "labels": []
+    },
+    {
+      "number": 122,
+      "title": "fwd_o&fwd_h适配vdim=256",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/122",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-04T11:34:03Z",
+      "updatedAt": "2026-07-04T11:34:03Z",
+      "createdAt": "2026-07-04T04:12:29Z",
+      "headRef": "v26.6.0-liufujiang-gdn",
       "labels": []
     },
     {
