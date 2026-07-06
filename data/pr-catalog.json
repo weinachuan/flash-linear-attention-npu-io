@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-07-05T16:51:06+08:00",
+  "generatedAt": "2026-07-06T11:26:33+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 104,
+  "total": 105,
   "items": [
+    {
+      "number": 148,
+      "title": "build: speed up multi-soc wheel packaging",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/148",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-05T16:51:06Z",
+      "createdAt": "2026-07-05T16:00:56Z",
+      "headRef": "codex/reuse-torch-custom-wheel-build",
+      "labels": []
+    },
     {
       "number": 139,
       "title": "Solve-tril pipeline optimization",
@@ -11,21 +23,9 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-04T14:06:01Z",
+      "updatedAt": "2026-07-06T02:42:30Z",
       "createdAt": "2026-07-04T14:05:38Z",
       "headRef": "solve-tril-new",
-      "labels": []
-    },
-    {
-      "number": 120,
-      "title": "perf: improve causal_conv1d_bwd op",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/120",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-03T09:55:12Z",
-      "createdAt": "2026-07-03T09:40:04Z",
-      "headRef": "causal_conv1d_bwd_950",
       "labels": []
     },
     {
@@ -62,30 +62,6 @@
       "updatedAt": "2026-07-03T08:32:09Z",
       "createdAt": "2026-07-03T03:16:04Z",
       "headRef": "codex/kda-fwd-forward-only",
-      "labels": []
-    },
-    {
-      "number": 110,
-      "title": "fix causal_conv1d",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/110",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-02T09:29:35Z",
-      "createdAt": "2026-07-02T08:35:11Z",
-      "headRef": "v26.6.0",
-      "labels": []
-    },
-    {
-      "number": 108,
-      "title": "fix conv1d test",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/108",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-02T07:40:33Z",
-      "createdAt": "2026-07-02T07:25:47Z",
-      "headRef": "fix_conv1d",
       "labels": []
     },
     {
@@ -413,6 +389,18 @@
       "labels": []
     },
     {
+      "number": 120,
+      "title": "perf: improve causal_conv1d_bwd op",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/120",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-06T01:14:52Z",
+      "updatedAt": "2026-07-06T01:14:52Z",
+      "createdAt": "2026-07-03T09:40:04Z",
+      "headRef": "causal_conv1d_bwd_950",
+      "labels": []
+    },
+    {
       "number": 117,
       "title": "full算子dw KH修改为VH",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/117",
@@ -461,6 +449,18 @@
       "labels": []
     },
     {
+      "number": 110,
+      "title": "fix causal_conv1d",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/110",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-06T03:01:36Z",
+      "updatedAt": "2026-07-06T03:01:36Z",
+      "createdAt": "2026-07-02T08:35:11Z",
+      "headRef": "v26.6.0",
+      "labels": []
+    },
+    {
       "number": 109,
       "title": "ChunkGatedDeltaRuleFwdH support gk",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/109",
@@ -470,6 +470,18 @@
       "updatedAt": "2026-07-03T09:56:22Z",
       "createdAt": "2026-07-02T07:53:17Z",
       "headRef": "main",
+      "labels": []
+    },
+    {
+      "number": 108,
+      "title": "fix conv1d test",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/108",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-06T03:01:58Z",
+      "updatedAt": "2026-07-06T03:01:58Z",
+      "createdAt": "2026-07-02T07:25:47Z",
+      "headRef": "fix_conv1d",
       "labels": []
     },
     {
@@ -515,7 +527,7 @@
       "status": "merged",
       "statusText": "已合入",
       "mergedAt": "2026-06-30T20:28:14Z",
-      "updatedAt": "2026-06-30T20:28:14Z",
+      "updatedAt": "2026-07-06T01:46:13Z",
       "createdAt": "2026-06-30T11:49:32Z",
       "headRef": "codex/gdr-ascendc-causal-solve",
       "labels": []
