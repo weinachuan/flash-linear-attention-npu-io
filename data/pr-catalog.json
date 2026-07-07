@@ -1,9 +1,81 @@
 {
-  "generatedAt": "2026-07-06T18:19:03+08:00",
+  "generatedAt": "2026-07-07T17:39:00+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 105,
+  "total": 111,
   "items": [
+    {
+      "number": 156,
+      "title": "fix: 修复 chunk_bwd_dv_local GVA-FIX4 超时",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/156",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-07T09:37:59Z",
+      "createdAt": "2026-07-07T09:11:29Z",
+      "headRef": "20260616_235015_update-chunk-bwd-dv-local-docs",
+      "labels": []
+    },
+    {
+      "number": 154,
+      "title": "OP->OP_MODULE_ID适配",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/154",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-07T08:35:15Z",
+      "createdAt": "2026-07-07T08:24:14Z",
+      "headRef": "7_7",
+      "labels": []
+    },
+    {
+      "number": 153,
+      "title": "fix:dqkwg支持gva",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/153",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-07T09:38:14Z",
+      "createdAt": "2026-07-07T07:05:45Z",
+      "headRef": "0707-old-gva-fix",
+      "labels": []
+    },
+    {
+      "number": 152,
+      "title": "perf: optimize KDA forward tail block path with MCH solve validation",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/152",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-07T07:50:41Z",
+      "createdAt": "2026-07-06T18:42:32Z",
+      "headRef": "codex/kda-tail-block-mch2-validation",
+      "labels": []
+    },
+    {
+      "number": 151,
+      "title": "perf: optimize KDA forward tail block path with regression validation",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/151",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-06T18:35:42Z",
+      "createdAt": "2026-07-06T18:35:07Z",
+      "headRef": "codex/kda-tail-block-cube-forward-regression",
+      "labels": []
+    },
+    {
+      "number": 150,
+      "title": "perf: optimize KDA forward tail block path",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/150",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-06T18:20:33Z",
+      "createdAt": "2026-07-06T17:47:40Z",
+      "headRef": "codex/kda-tail-block-cube-forward",
+      "labels": []
+    },
     {
       "number": 148,
       "title": "build: speed up multi-soc wheel packaging",
@@ -23,7 +95,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-06T03:52:19Z",
+      "updatedAt": "2026-07-06T12:22:19Z",
       "createdAt": "2026-07-04T14:05:38Z",
       "headRef": "solve-tril-new",
       "labels": []
