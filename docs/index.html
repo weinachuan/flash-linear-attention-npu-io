@@ -57,7 +57,7 @@
           <h3>状态</h3>
           <ul>
             <li><span class="status-pill delayed">delay</span><span>超过 DDL，且交付件未完备。</span></li>
-            <li><span class="status-pill done">done</span><span>交付件完备。</span></li>
+            <li><span class="status-pill done">done</span><span>交付件完备；“仅报告”任务只要求转测报告。</span></li>
             <li><span class="status-pill doing">doing</span><span>未超过 DDL，且已规定起始闭环时间、正在推进。</span></li>
             <li><span class="status-pill todo">todo</span><span>待排人力，或只有事项但未规定闭环时间。</span></li>
             <li><span class="status-pill blocked">Pending</span><span>更高优先级事项插入，导致任务因人力问题挂起。</span></li>
@@ -66,9 +66,9 @@
         <article class="rule-card">
           <h3>风险</h3>
           <ul>
-            <li><span class="tag low">低</span><span>PR 已合入；或有未合入 PR 且距离 DDL 大于 3 个工作日。</span></li>
-            <li><span class="tag medium">中</span><span>有未合入 PR 且距离 DDL 小于等于 3 个工作日；或无 PR 但距离 DDL 大于 6 个工作日。</span></li>
-            <li><span class="tag high">高</span><span>无 PR 且距离 DDL 小于等于 6 个工作日；或责任人为待排人力/待填写。</span></li>
+            <li><span class="tag low">低</span><span>PR 已合入；或有未合入 PR 且距离 DDL 大于 3 个工作日；或“仅报告”任务已提交报告。</span></li>
+            <li><span class="tag medium">中</span><span>有未合入 PR 且距离 DDL 小于等于 3 个工作日；或缺少必需交付件且距离 DDL 大于 6 个工作日。</span></li>
+            <li><span class="tag high">高</span><span>缺少必需交付件且距离 DDL 小于等于 6 个工作日；或责任人为待排人力/待填写。</span></li>
             <li class="rule-footnote">工作日按中国法定节假日、调休工作日和周末计算。</li>
           </ul>
         </article>
@@ -121,6 +121,7 @@
               <th class="col-date"><button type="button" class="sort-button" data-sort-field="date">距 DDL 工作日 <span data-sort-indicator>↕</span></button></th>
               <th class="col-commit"><button type="button" class="sort-button" data-sort-field="recommit_date">延期承诺 <span data-sort-indicator>↕</span></button></th>
               <th class="col-done-date"><button type="button" class="sort-button" data-sort-field="done_date">完成日期 <span data-sort-indicator>↕</span></button></th>
+              <th class="col-pr-required"><button type="button" class="sort-button" data-sort-field="pr_required">PR 要求 <span data-sort-indicator>↕</span></button></th>
               <th class="col-pr"><button type="button" class="sort-button" data-sort-field="pr_link">PR 链接 <span data-sort-indicator>↕</span></button></th>
               <th class="col-report"><button type="button" class="sort-button" data-sort-field="test_report">转测报告 <span data-sort-indicator>↕</span></button></th>
               <th><button type="button" class="sort-button" data-sort-field="status">状态 <span data-sort-indicator>↕</span></button></th>

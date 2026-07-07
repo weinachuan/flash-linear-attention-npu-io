@@ -56,7 +56,7 @@ const OPERATOR_OWNER_RULES = {
 const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "Pending"], ["delayed", "delay"], ["done", "done"]];
 const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟", "陈龙"];
 const DEFAULT_PL = PL_OPTIONS[0];
-const AUDIT_TASK_FIELDS = ["title", "operator_ids", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "recommit_date", "done_date", "pr_link", "test_report", "notes"];
+const AUDIT_TASK_FIELDS = ["title", "operator_ids", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "recommit_date", "done_date", "pr_required", "pr_link", "test_report", "notes"];
 const AUDIT_FIELD_LABELS = {
   title: "事项",
   operator_ids: "算子",
@@ -70,6 +70,7 @@ const AUDIT_FIELD_LABELS = {
   end_date: "结束日期",
   recommit_date: "延期承诺",
   done_date: "完成日期",
+  pr_required: "PR 要求",
   pr_link: "PR 链接",
   test_report: "转测报告",
   notes: "备注",
@@ -87,6 +88,7 @@ const TABLE_SORT_LABELS = {
   date: "距 DDL 工作日",
   recommit_date: "延期承诺",
   done_date: "完成日期",
+  pr_required: "PR 要求",
   pr_link: "PR 链接",
   test_report: "转测报告",
   status: "状态",
@@ -269,6 +271,7 @@ function formatAuditValue(field, value) {
   const text = normalizeAuditValue(value);
   if (!text) return "空";
   if (field === "status") return statusLabel(text);
+  if (field === "pr_required") return taskRequiresPr({ pr_required: text }) ? "需 PR" : "仅报告";
   if (field === "operator_ids") return operatorLabelsForIds(text).join(" / ") || "空";
   if (field === "group_id") return groupTitle(text) || text;
   if (field === "special_id") return specialTitle(text) || text;
@@ -336,6 +339,7 @@ function compareTaskByField(a, b, field) {
       || String(taskSortStart(a)).localeCompare(String(taskSortStart(b)));
   }
   if (field === "recommit_date" || field === "done_date") return String(a[field] || "").localeCompare(String(b[field] || ""));
+  if (field === "pr_required") return numberCompare(normalizeBooleanFlag(b.pr_required, true), normalizeBooleanFlag(a.pr_required, true));
   if (field === "group_id") return groupTitle(a.group_id).localeCompare(groupTitle(b.group_id), "zh-CN");
   if (field === "special_id") return specialTitle(a.special_id).localeCompare(specialTitle(b.special_id), "zh-CN");
   if (field === "operator_ids") return taskOperatorLabelText(a).localeCompare(taskOperatorLabelText(b), "zh-CN");
@@ -356,6 +360,16 @@ function taskSortStart(task) {
 
 function numberCompare(a, b) {
   return Number(a) - Number(b);
+}
+
+function normalizeBooleanFlag(value, fallback = false) {
+  if (value === undefined || value === null || value === "") return fallback ? 1 : 0;
+  if (value === true || value === 1) return 1;
+  if (value === false || value === 0) return 0;
+  const text = String(value).trim().toLowerCase();
+  if (["1", "true", "yes", "y", "on"].includes(text)) return 1;
+  if (["0", "false", "no", "n", "off"].includes(text)) return 0;
+  return fallback ? 1 : 0;
 }
 
 function ownerFilterValues() {
@@ -485,6 +499,7 @@ function renderTableFilters() {
     `<th class="col-date"></th>`,
     `<th class="col-commit"></th>`,
     `<th class="col-done-date"></th>`,
+    `<th class="col-pr-required"></th>`,
     `<th class="col-pr"></th>`,
     `<th class="col-report"></th>`,
     tableFilterSelect("status", [["", "全部"], ...STATUS_OPTIONS]),
@@ -1876,6 +1891,10 @@ function taskHasReport(task) {
   return Boolean(String(task.test_report || "").trim());
 }
 
+function taskRequiresPr(task) {
+  return normalizeBooleanFlag(task?.pr_required, true) === 1;
+}
+
 function taskIsCompletionOverride(task) {
   return /ops\s*目录整改/i.test(String(task.title || ""));
 }
@@ -1933,6 +1952,9 @@ function evaluateTaskRisk(task) {
   if (taskHasWaitingOwner(task)) {
     return "高";
   }
+  if (!taskRequiresPr(task)) {
+    return taskHasReport(task) ? "低" : (workdaysUntilDdl <= 6 ? "高" : "中");
+  }
   if (pr.allMerged) {
     return "低";
   }
@@ -1944,7 +1966,7 @@ function evaluateTaskRisk(task) {
 
 function evaluateTaskStatus(task) {
   const pr = prLinkSummary(task.pr_link);
-  const completed = taskIsCompletionOverride(task) || (pr.allMerged && taskHasReport(task));
+  const completed = taskIsCompletionOverride(task) || (taskHasReport(task) && (!taskRequiresPr(task) || pr.allMerged));
   if (completed) {
     return "done";
   }
@@ -2141,6 +2163,7 @@ function readOnlyTaskRowHtml(task, className = "") {
       <td class="col-date">${taskDdlCountdownHtml(task)}</td>
       <td class="col-commit">${dateCellHtml(task.recommit_date)}</td>
       <td class="col-done-date">${dateCellHtml(task.done_date)}</td>
+      <td class="col-pr-required">${prRequirementPillHtml(task)}</td>
       <td class="col-pr">${linkListHtml(task.pr_link, "PR")}</td>
       <td class="col-report">${linkListHtml(task.test_report, "报告")}</td>
       <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
@@ -2157,6 +2180,12 @@ function taskActionButtonsHtml() {
   return `<span class="ops"><button data-action="save">保存</button><button data-action="split">切分</button>${deleteButton}</span>`;
 }
 
+function prRequirementPillHtml(task) {
+  return taskRequiresPr(task)
+    ? `<span class="requirement-pill required">需 PR</span>`
+    : `<span class="requirement-pill report-only">仅报告</span>`;
+}
+
 function developerTaskRowHtml(task) {
   return `
     <tr data-task-id="${escapeAttr(task.id)}" class="${state.dirtyTaskIds.has(task.id) ? "dirty" : ""}">
@@ -2171,6 +2200,7 @@ function developerTaskRowHtml(task) {
       <td class="col-date">${taskDdlCountdownHtml(task)}</td>
       <td class="col-commit">${dateCellHtml(task.recommit_date)}</td>
       <td class="col-done-date">${dateCellHtml(task.done_date)}</td>
+      <td class="col-pr-required">${prRequirementPillHtml(task)}</td>
       <td class="col-pr">${prLinkEditorHtml(task)}</td>
       <td class="col-report"><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
       <td><span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span></td>
@@ -2206,6 +2236,7 @@ function renderRows(tasks) {
         </td>
         <td class="col-commit"><input type="date" data-field="recommit_date" value="${escapeAttr(task.recommit_date || "")}"></td>
         <td class="col-done-date"><input type="date" data-field="done_date" value="${escapeAttr(task.done_date || "")}"></td>
+        <td class="col-pr-required">${selectHtml("pr_required", [[1, "需 PR"], [0, "仅报告"]], normalizeBooleanFlag(task.pr_required, true))}</td>
         <td class="col-pr">${prLinkEditorHtml(task)}</td>
         <td class="col-report"><input class="link-input" data-field="test_report" placeholder="报告 URL" value="${escapeAttr(task.test_report || "")}"></td>
         <td>${selectHtml("status", STATUS_OPTIONS, task.status)}</td>
@@ -2602,7 +2633,7 @@ async function saveTaskRows(extraRows = []) {
 function taskPatchFieldsFromChange(task, change) {
   const fields = {};
   Object.keys(change.changes || {}).forEach((field) => {
-    if (isDeveloperEditMode() && (field === "risk" || field === "status" || field === "done_date")) return;
+    if (isDeveloperEditMode() && (field === "risk" || field === "status" || field === "done_date" || field === "pr_required")) return;
     fields[field] = field === "segments" ? (task.segments || []) : task[field];
   });
   return fields;
@@ -2627,6 +2658,7 @@ async function addTask() {
     end_date: firstGroup?.due_date || "2026-06-25",
     evidence: [],
     dependencies: [],
+    pr_required: 1,
     pr_link: "",
     test_report: "",
     notes: "",
@@ -3364,7 +3396,8 @@ function syncAllTaskDeliveryRules() {
 }
 
 function selectHtml(field, options, value) {
-  return `<select data-field="${field}">${options.map(([id, label]) => `<option value="${escapeAttr(id)}" ${id === value ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>`;
+  const selected = String(value ?? "");
+  return `<select data-field="${field}">${options.map(([id, label]) => `<option value="${escapeAttr(id)}" ${String(id) === selected ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>`;
 }
 
 function groupTitle(id) {

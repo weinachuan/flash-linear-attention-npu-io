@@ -63,6 +63,21 @@ def sql_int(value: Any, default: int = 0) -> str:
         return str(default)
 
 
+def sql_bool_flag(value: Any, default: bool = False) -> str:
+    if value is None or value == "":
+        return "1" if default else "0"
+    if value is True or value == 1:
+        return "1"
+    if value is False or value == 0:
+        return "0"
+    text = str(value).strip().lower()
+    if text in ("1", "true", "yes", "y", "on"):
+        return "1"
+    if text in ("0", "false", "no", "n", "off"):
+        return "0"
+    return "1" if default else "0"
+
+
 def json_text(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
@@ -127,7 +142,7 @@ def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, An
         lines.append(insert("tasks", [
             "id", "title", "scope", "target", "owner", "status", "risk", "priority",
             "group_id", "special_id", "start_date", "end_date", "evidence", "dependencies",
-            "pr_link", "test_report", "notes", "recommit_date", "done_date", "position", "created_at", "updated_at",
+            "pr_required", "pr_link", "test_report", "notes", "recommit_date", "done_date", "position", "created_at", "updated_at",
         ], [
             task.get("id"),
             task.get("title") or "未命名任务",
@@ -143,6 +158,7 @@ def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, An
             task.get("end_date") or task.get("start_date") or "2026-06-25",
             json_text(task.get("evidence") or []),
             json_text(task.get("dependencies") or []),
+            RawSql(sql_bool_flag(task.get("pr_required"), True)),
             task.get("pr_link") or "",
             task.get("test_report") or "",
             task.get("notes") or "",

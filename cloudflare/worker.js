@@ -286,9 +286,9 @@ async function replaceState(env, state) {
     statements.push(env.DB.prepare(
       `INSERT INTO tasks(
         id, title, scope, target, owner, status, risk, priority, group_id, special_id,
-        start_date, end_date, evidence, dependencies, pr_link, test_report, notes,
+        start_date, end_date, evidence, dependencies, pr_required, pr_link, test_report, notes,
         recommit_date, done_date, operator_ids, position, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       task.id,
       task.title || "未命名任务",
@@ -304,6 +304,7 @@ async function replaceState(env, state) {
       task.end_date || task.start_date || "2026-06-25",
       toJson(task.evidence || []),
       toJson(task.dependencies || []),
+      normalizeBooleanFlag(task.pr_required, true),
       task.pr_link || "",
       task.test_report || "",
       task.notes || "",
@@ -366,7 +367,7 @@ async function syncPrCatalog(env, catalog) {
 }
 
 async function syncTaskDeliveryRulesFromCatalog(env, catalogItems) {
-  const tasks = await selectAll(env, "SELECT id, title, owner, status, risk, start_date, end_date, pr_link, test_report, done_date FROM tasks ORDER BY position, start_date, title");
+  const tasks = await selectAll(env, "SELECT id, title, owner, status, risk, start_date, end_date, pr_required, pr_link, test_report, done_date FROM tasks ORDER BY position, start_date, title");
   const changed = [];
   const statements = [];
   const now = nowIso();
@@ -394,7 +395,7 @@ async function syncTaskDeliveryRulesFromCatalog(env, catalogItems) {
 }
 
 async function syncTaskDeliveryRuleForTask(env, taskId, catalogItems) {
-  const task = await env.DB.prepare("SELECT id, title, owner, status, risk, start_date, end_date, pr_link, test_report, done_date FROM tasks WHERE id = ?").bind(taskId).first();
+  const task = await env.DB.prepare("SELECT id, title, owner, status, risk, start_date, end_date, pr_required, pr_link, test_report, done_date FROM tasks WHERE id = ?").bind(taskId).first();
   if (!task) return null;
   const next = evaluateTaskDelivery(task, catalogItems);
   const diff = {};
@@ -426,6 +427,7 @@ function evaluateTaskRisk(task, catalogItems) {
   const pr = prLinkSummary(task.pr_link, catalogItems);
   const workdaysUntilDdl = workdaysUntil(todayBjYmd(), taskDdl(task));
   if (taskHasWaitingOwner(task)) return "高";
+  if (!taskRequiresPr(task)) return taskHasReport(task) ? "低" : (workdaysUntilDdl <= 6 ? "高" : "中");
   if (pr.allMerged) return "低";
   if (pr.hasOpen) return workdaysUntilDdl <= 3 ? "中" : "低";
   return workdaysUntilDdl <= 6 ? "高" : "中";
@@ -433,7 +435,7 @@ function evaluateTaskRisk(task, catalogItems) {
 
 function evaluateTaskStatus(task, catalogItems) {
   const pr = prLinkSummary(task.pr_link, catalogItems);
-  const completed = taskIsCompletionOverride(task) || (pr.allMerged && taskHasReport(task));
+  const completed = taskIsCompletionOverride(task) || (taskHasReport(task) && (!taskRequiresPr(task) || pr.allMerged));
   if (completed) return "done";
   if (todayBjYmd() > taskDdl(task)) return "delayed";
   if (task.status === "blocked") return "blocked";
@@ -485,6 +487,10 @@ function prOptionLabel(pr) {
 
 function taskHasReport(task) {
   return Boolean(String(task.test_report || "").trim());
+}
+
+function taskRequiresPr(task) {
+  return normalizeBooleanFlag(task?.pr_required, true) === 1;
 }
 
 function taskIsCompletionOverride(task) {
@@ -1144,7 +1150,7 @@ async function changePassword(request, env) {
 
 const TASK_PATCH_FIELDS = new Set([
   "title", "scope", "target", "owner", "status", "risk", "priority", "group_id", "special_id",
-  "start_date", "end_date", "evidence", "dependencies", "pr_link", "test_report", "notes",
+  "start_date", "end_date", "evidence", "dependencies", "pr_required", "pr_link", "test_report", "notes",
   "recommit_date", "done_date", "operator_ids", "position", "segments",
 ]);
 const TASK_JSON_PATCH_FIELDS = new Set(["evidence", "dependencies"]);
@@ -1230,6 +1236,7 @@ function normalizePatchValue(field, value) {
   if (TASK_JSON_PATCH_FIELDS.has(field)) return Array.isArray(value) ? value : [];
   if (field === "special_id") return value || null;
   if (field === "operator_ids") return normalizeOperatorIdsText(value);
+  if (field === "pr_required") return normalizeBooleanFlag(value, true);
   if (field === "recommit_date" || field === "done_date") return isYmd(value) ? value : "";
   if (field === "position") return numberOr(value, 0);
   return String(value ?? "").trim();
@@ -1317,6 +1324,7 @@ function normalizeTaskForInsert(task) {
     end_date: endDate < startDate ? startDate : endDate,
     evidence: Array.isArray(task.evidence) ? task.evidence : [],
     dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
+    pr_required: normalizeBooleanFlag(task.pr_required, true),
     pr_link: String(task.pr_link || ""),
     test_report: String(task.test_report || ""),
     notes: String(task.notes || ""),
@@ -1335,9 +1343,9 @@ async function insertTask(env, task) {
   await env.DB.prepare(
     `INSERT INTO tasks(
       id, title, scope, target, owner, status, risk, priority, group_id, special_id,
-      start_date, end_date, evidence, dependencies, pr_link, test_report, notes,
+      start_date, end_date, evidence, dependencies, pr_required, pr_link, test_report, notes,
       recommit_date, done_date, operator_ids, position, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     task.id,
     task.title,
@@ -1353,6 +1361,7 @@ async function insertTask(env, task) {
     task.end_date,
     toJson(task.evidence),
     toJson(task.dependencies),
+    task.pr_required,
     task.pr_link,
     task.test_report,
     task.notes,
@@ -1950,6 +1959,16 @@ function nowIso() {
 function numberOr(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+}
+
+function normalizeBooleanFlag(value, fallback = false) {
+  if (value === undefined || value === null || value === "") return fallback ? 1 : 0;
+  if (value === true || value === 1) return 1;
+  if (value === false || value === 0) return 0;
+  const text = String(value).trim().toLowerCase();
+  if (["1", "true", "yes", "y", "on"].includes(text)) return 1;
+  if (["0", "false", "no", "n", "off"].includes(text)) return 0;
+  return fallback ? 1 : 0;
 }
 
 function normalizePl(value) {

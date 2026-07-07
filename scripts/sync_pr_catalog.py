@@ -186,6 +186,25 @@ def has_report(task):
     return bool(str(task.get("test_report") or "").strip())
 
 
+def bool_flag(value, default=False):
+    if value is None or value == "":
+        return bool(default)
+    if value is True or value == 1:
+        return True
+    if value is False or value == 0:
+        return False
+    text = str(value).strip().lower()
+    if text in ("1", "true", "yes", "y", "on"):
+        return True
+    if text in ("0", "false", "no", "n", "off"):
+        return False
+    return bool(default)
+
+
+def task_requires_pr(task):
+    return bool_flag(task.get("pr_required"), True)
+
+
 def completion_override(task):
     return bool(re.search(r"ops\s*目录整改", str(task.get("title") or ""), re.I))
 
@@ -203,11 +222,14 @@ def evaluate_task_delivery(task, catalog_items):
     ddl = task_ddl(task)
     workdays_until_ddl = workdays_until(today_bj(), ddl)
     report = has_report(task)
-    completed = completion_override(task) or (pr["allMerged"] and report)
+    requires_pr = task_requires_pr(task)
+    completed = completion_override(task) or (report and (not requires_pr or pr["allMerged"]))
     delayed = not completed and today_bj() > ddl
 
     if has_waiting_owner(task):
         risk = "高"
+    elif not requires_pr:
+        risk = "低" if report else ("高" if workdays_until_ddl <= 6 else "中")
     elif pr["allMerged"]:
         risk = "低"
     elif pr["hasOpen"]:
