@@ -1,9 +1,45 @@
 {
-  "generatedAt": "2026-07-08T16:26:00+08:00",
+  "generatedAt": "2026-07-09T10:53:55+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 119,
+  "total": 120,
   "items": [
+    {
+      "number": 168,
+      "title": "add a5 compile to ci",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/168",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-09T02:48:17Z",
+      "createdAt": "2026-07-09T02:48:09Z",
+      "headRef": "0708-ci",
+      "labels": []
+    },
+    {
+      "number": 167,
+      "title": "perf: pipeline KDA stage1 chunk preparation",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/167",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-09T01:31:29Z",
+      "createdAt": "2026-07-08T19:35:13Z",
+      "headRef": "codex/kda-stage1-cv-pipeline",
+      "labels": []
+    },
+    {
+      "number": 166,
+      "title": "perf: add KDA MXR solve-tri path",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/166",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-08T13:28:35Z",
+      "createdAt": "2026-07-08T13:28:23Z",
+      "headRef": "codex/kda-mxr-solve-tri",
+      "labels": []
+    },
     {
       "number": 164,
       "title": "Fix the issue of build fail in A5",
@@ -23,7 +59,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-08T06:03:31Z",
+      "updatedAt": "2026-07-08T09:29:01Z",
       "createdAt": "2026-07-08T06:03:30Z",
       "headRef": "codex/kda-stage-dependency-precision-fix",
       "labels": []
@@ -35,7 +71,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-08T01:54:25Z",
+      "updatedAt": "2026-07-09T01:51:24Z",
       "createdAt": "2026-07-08T01:54:15Z",
       "headRef": "asc_kkt",
       "labels": []
@@ -59,7 +95,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-07T18:32:43Z",
+      "updatedAt": "2026-07-08T18:04:57Z",
       "createdAt": "2026-07-07T14:35:53Z",
       "headRef": "dqkwg-cv-fusion-workspace",
       "labels": []
@@ -218,30 +254,6 @@
       "updatedAt": "2026-06-30T20:39:04Z",
       "createdAt": "2026-06-11T14:58:13Z",
       "headRef": "kda_merge_zcc_v2",
-      "labels": []
-    },
-    {
-      "number": 52,
-      "title": "ci: avoid stalled NPU validation runs",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/52",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-30T16:42:09Z",
-      "createdAt": "2026-06-11T14:06:27Z",
-      "headRef": "codex/fix-npu-ci-hang",
-      "labels": []
-    },
-    {
-      "number": 42,
-      "title": "fix: avoid Triton L2Norm recompiles for dynamic lengths",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/42",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-06-30T16:42:09Z",
-      "createdAt": "2026-06-09T03:43:30Z",
-      "headRef": "codex/fix-triton-l2norm-cache",
       "labels": []
     },
     {
