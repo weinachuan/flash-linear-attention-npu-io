@@ -1,9 +1,45 @@
 {
-  "generatedAt": "2026-07-09T10:53:55+08:00",
+  "generatedAt": "2026-07-09T17:37:12+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 120,
+  "total": 123,
   "items": [
+    {
+      "number": 172,
+      "title": "perf:causal_conv1d_bwd regbase support",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/172",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-09T09:21:58Z",
+      "createdAt": "2026-07-09T09:02:45Z",
+      "headRef": "causal_conv1d_bwd_950",
+      "labels": []
+    },
+    {
+      "number": 170,
+      "title": "gdn_op",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/170",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-09T07:17:42Z",
+      "createdAt": "2026-07-09T07:07:26Z",
+      "headRef": "gdn_op",
+      "labels": []
+    },
+    {
+      "number": 169,
+      "title": "fix: keep KDA stage2 outputs in fp32 workspace",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/169",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-09T06:37:14Z",
+      "createdAt": "2026-07-09T06:37:04Z",
+      "headRef": "codex/kda-stage2-fp32-workspace",
+      "labels": []
+    },
     {
       "number": 168,
       "title": "add a5 compile to ci",
@@ -11,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-09T02:48:17Z",
+      "updatedAt": "2026-07-09T02:57:10Z",
       "createdAt": "2026-07-09T02:48:09Z",
       "headRef": "0708-ci",
       "labels": []
