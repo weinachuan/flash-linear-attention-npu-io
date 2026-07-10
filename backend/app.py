@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -12,6 +13,8 @@ try:
         DB_PATH,
         ROOT,
         add_perf_model,
+        apply_imported_perf_data,
+        complete_perf_run,
         connect,
         export_all,
         init_db,
@@ -23,15 +26,19 @@ try:
         seed_if_empty,
         task_to_dict,
         trigger_perf_run,
+        update_perf_run,
         update_task,
         upsert_task,
     )
+    from .perf_runner import execute as execute_perf_test, runner_status
     from .repo_store import persist_change
 except ImportError:
     from db import (  # type: ignore
         DB_PATH,
         ROOT,
         add_perf_model,
+        apply_imported_perf_data,
+        complete_perf_run,
         connect,
         export_all,
         init_db,
@@ -43,9 +50,11 @@ except ImportError:
         seed_if_empty,
         task_to_dict,
         trigger_perf_run,
+        update_perf_run,
         update_task,
         upsert_task,
     )
+    from perf_runner import execute as execute_perf_test, runner_status  # type: ignore
     from repo_store import persist_change  # type: ignore
 
 
@@ -88,6 +97,11 @@ class Handler(BaseHTTPRequestHandler):
     def do_DELETE(self) -> None:
         self.handle_write("DELETE")
 
+    def do_OPTIONS(self) -> None:
+        self.send_response(204)
+        self._send_cors_headers()
+        self.end_headers()
+
     def log_message(self, fmt: str, *args: object) -> None:
         print("%s - %s" % (self.address_string(), fmt % args))
 
@@ -112,6 +126,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json([dict(row) for row in rows])
             elif path == "/api/perf":
                 self.send_json(load_perf_data(conn))
+            elif path == "/api/perf/runner":
+                self.send_json(runner_status())
             elif path == "/api/tasks":
                 self.send_json(list_tasks(conn, query))
             elif path.startswith("/api/tasks/"):
@@ -154,6 +170,13 @@ class Handler(BaseHTTPRequestHandler):
                 elif path == "/api/perf/runs" and method == "POST":
                     result = trigger_perf_run(conn, payload, created_by="local")
                     conn.commit()
+                    run = result.get("run") or {}
+                    if run.get("status") == "queued":
+                        threading.Thread(
+                            target=execute_perf_run_job,
+                            args=(run["id"], payload),
+                            daemon=True,
+                        ).start()
                     self.send_json({"ok": True, **result}, status=201)
                 elif path == "/api/groups" and method == "POST":
                     self.create_group(conn, payload)
@@ -354,11 +377,22 @@ class Handler(BaseHTTPRequestHandler):
             return {}
         return json.loads(self.rfile.read(length).decode("utf-8"))
 
+    def _send_cors_headers(self) -> None:
+        origin = self.headers.get("Origin")
+        if origin:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+        else:
+            self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
     def send_json(self, data, status: int = 200) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
+        self._send_cors_headers()
         self.end_headers()
         self.wfile.write(body)
 
@@ -406,6 +440,51 @@ def next_day(value: str) -> str:
     from datetime import date, timedelta
 
     return (date.fromisoformat(value) + timedelta(days=1)).isoformat()
+
+
+def execute_perf_run_job(run_id: str, payload: dict) -> None:
+    try:
+        from .db import now_iso
+    except ImportError:
+        from db import now_iso  # type: ignore
+
+    conn = connect()
+    try:
+        init_db(conn)
+        update_perf_run(conn, run_id, status="running", message="正在执行 msprof…")
+        conn.commit()
+        result = execute_perf_test(payload)
+        if result.get("dry_run"):
+            update_perf_run(
+                conn,
+                run_id,
+                status="done",
+                finished_at=now_iso(),
+                message=result.get("message", "dry-run"),
+                command=result.get("command", ""),
+            )
+            conn.commit()
+            return
+        apply_imported_perf_data(conn, result["data"])
+        complete_perf_run(
+            conn,
+            run_id,
+            snapshot=result["snapshot"],
+            command=result.get("command", ""),
+            message=result.get("message", "测试执行完成"),
+        )
+        conn.commit()
+    except Exception as exc:
+        update_perf_run(
+            conn,
+            run_id,
+            status="failed",
+            finished_at=now_iso(),
+            message=str(exc),
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def main() -> None:
