@@ -1,9 +1,45 @@
 {
-  "generatedAt": "2026-07-10T10:56:13+08:00",
+  "generatedAt": "2026-07-10T17:33:02+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 128,
+  "total": 132,
   "items": [
+    {
+      "number": 184,
+      "title": "feat:RGDR、CausalConv1d支持非连续",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/184",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-10T09:25:13Z",
+      "createdAt": "2026-07-10T08:08:08Z",
+      "headRef": "main",
+      "labels": []
+    },
+    {
+      "number": 183,
+      "title": "docs: 增加 AI agent 开发指南",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/183",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-10T07:42:09Z",
+      "createdAt": "2026-07-10T07:38:18Z",
+      "headRef": "codex/ai-agent-guides",
+      "labels": []
+    },
+    {
+      "number": 181,
+      "title": "fix: 补齐 KDA fp16 fwd_h split 中间量路径",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/181",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-10T07:53:47Z",
+      "createdAt": "2026-07-10T06:45:24Z",
+      "headRef": "codex/kda-fwdh-fp16-intermediate",
+      "labels": []
+    },
     {
       "number": 179,
       "title": "feat: 解耦 fla_npu 导入与 legacy torch ops 加载",
@@ -11,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T02:26:07Z",
+      "updatedAt": "2026-07-10T07:05:19Z",
       "createdAt": "2026-07-10T02:25:59Z",
       "headRef": "codex/decouple-legacy-torch-ops",
       "labels": []
@@ -23,7 +59,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T02:07:45Z",
+      "updatedAt": "2026-07-10T08:44:49Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -47,7 +83,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T02:47:40Z",
+      "updatedAt": "2026-07-10T07:41:33Z",
       "createdAt": "2026-07-09T11:51:53Z",
       "headRef": "add-disabled-gdr-st-cases",
       "labels": []
@@ -62,18 +98,6 @@
       "updatedAt": "2026-07-09T16:15:01Z",
       "createdAt": "2026-07-09T10:09:22Z",
       "headRef": "codex/kda-refgate-score-stability",
-      "labels": []
-    },
-    {
-      "number": 172,
-      "title": "perf:causal_conv1d_bwd regbase support",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/172",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-10T02:51:40Z",
-      "createdAt": "2026-07-09T09:02:45Z",
-      "headRef": "causal_conv1d_bwd_950",
       "labels": []
     },
     {
@@ -107,7 +131,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-09T02:57:10Z",
+      "updatedAt": "2026-07-10T07:19:51Z",
       "createdAt": "2026-07-09T02:48:09Z",
       "headRef": "0708-ci",
       "labels": []
@@ -167,7 +191,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T02:32:41Z",
+      "updatedAt": "2026-07-10T04:05:57Z",
       "createdAt": "2026-07-08T01:54:15Z",
       "headRef": "asc_kkt",
       "labels": []
@@ -311,7 +335,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-09T11:48:45Z",
+      "updatedAt": "2026-07-10T03:57:59Z",
       "createdAt": "2026-06-30T08:48:08Z",
       "headRef": "asc_cumsum",
       "labels": []
@@ -374,6 +398,30 @@
       "updatedAt": "2026-06-30T20:39:09Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 180,
+      "title": "perf: improve causal_conv1d_bwd op",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/180",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-10T07:12:58Z",
+      "updatedAt": "2026-07-10T07:12:58Z",
+      "createdAt": "2026-07-10T03:54:23Z",
+      "headRef": "v26.6.0",
+      "labels": []
+    },
+    {
+      "number": 172,
+      "title": "perf:causal_conv1d_bwd regbase support",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/172",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-10T07:13:00Z",
+      "updatedAt": "2026-07-10T07:13:00Z",
+      "createdAt": "2026-07-09T09:02:45Z",
+      "headRef": "causal_conv1d_bwd_950",
       "labels": []
     },
     {
