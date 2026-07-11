@@ -1,9 +1,35 @@
 {
-  "generatedAt": "2026-07-11T10:33:16+08:00",
+  "generatedAt": "2026-07-11T15:53:55+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 133,
+  "total": 135,
   "items": [
+    {
+      "number": 191,
+      "title": "fix: stabilize A5 GDN BSND backward kernels",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/191",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-11T05:26:53Z",
+      "createdAt": "2026-07-11T03:38:13Z",
+      "headRef": "codex/gdn-kernel-a5-rootfix",
+      "labels": [
+        "bug"
+      ]
+    },
+    {
+      "number": 190,
+      "title": "feat: 新增 PrepareWyReprBwd 独立算子",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/190",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-11T07:23:37Z",
+      "createdAt": "2026-07-11T03:36:48Z",
+      "headRef": "codex/prepare-wy-repr-bwd-fused",
+      "labels": []
+    },
     {
       "number": 186,
       "title": "fix: use chunk size for cumsum BT",
@@ -71,7 +97,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T18:28:24Z",
+      "updatedAt": "2026-07-11T06:14:57Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -95,7 +121,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-11T02:18:50Z",
+      "updatedAt": "2026-07-11T03:08:00Z",
       "createdAt": "2026-07-09T11:51:53Z",
       "headRef": "add-disabled-gdr-st-cases",
       "labels": []
