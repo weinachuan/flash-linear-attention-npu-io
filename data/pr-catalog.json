@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-07-10T17:33:02+08:00",
+  "generatedAt": "2026-07-11T10:33:16+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 132,
+  "total": 133,
   "items": [
+    {
+      "number": 186,
+      "title": "fix: use chunk size for cumsum BT",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/186",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-11T02:18:59Z",
+      "createdAt": "2026-07-10T15:26:15Z",
+      "headRef": "v26.6.0-cumsum-bt-cases",
+      "labels": []
+    },
     {
       "number": 184,
       "title": "feat:RGDR、CausalConv1d支持非连续",
@@ -11,7 +23,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T09:25:13Z",
+      "updatedAt": "2026-07-10T10:11:54Z",
       "createdAt": "2026-07-10T08:08:08Z",
       "headRef": "main",
       "labels": []
@@ -59,7 +71,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T08:44:49Z",
+      "updatedAt": "2026-07-10T18:28:24Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -71,7 +83,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-09T19:46:45Z",
+      "updatedAt": "2026-07-11T01:53:04Z",
       "createdAt": "2026-07-09T12:59:47Z",
       "headRef": "fix-dqkwg-gva-accum",
       "labels": []
@@ -83,7 +95,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T07:41:33Z",
+      "updatedAt": "2026-07-11T02:18:50Z",
       "createdAt": "2026-07-09T11:51:53Z",
       "headRef": "add-disabled-gdr-st-cases",
       "labels": []
@@ -131,7 +143,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T07:19:51Z",
+      "updatedAt": "2026-07-10T10:44:01Z",
       "createdAt": "2026-07-09T02:48:09Z",
       "headRef": "0708-ci",
       "labels": []
