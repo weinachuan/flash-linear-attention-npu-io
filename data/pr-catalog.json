@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T10:39:16+08:00",
+  "generatedAt": "2026-07-12T16:15:09+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
   "total": 137,
@@ -25,7 +25,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-11T13:24:15Z",
+      "updatedAt": "2026-07-12T07:35:42Z",
       "createdAt": "2026-07-11T03:36:48Z",
       "headRef": "codex/prepare-wy-repr-bwd-fused",
       "labels": []
