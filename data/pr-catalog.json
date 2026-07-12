@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-11T15:53:55+08:00",
+  "generatedAt": "2026-07-12T10:39:16+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 135,
+  "total": 137,
   "items": [
     {
       "number": 191,
@@ -11,7 +11,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-11T05:26:53Z",
+      "updatedAt": "2026-07-11T12:35:24Z",
       "createdAt": "2026-07-11T03:38:13Z",
       "headRef": "codex/gdn-kernel-a5-rootfix",
       "labels": [
@@ -25,7 +25,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-11T07:23:37Z",
+      "updatedAt": "2026-07-11T13:24:15Z",
       "createdAt": "2026-07-11T03:36:48Z",
       "headRef": "codex/prepare-wy-repr-bwd-fused",
       "labels": []
@@ -97,7 +97,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-11T06:14:57Z",
+      "updatedAt": "2026-07-11T09:09:13Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -436,6 +436,30 @@
       "updatedAt": "2026-06-30T20:39:09Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 195,
+      "title": "fix: stabilize A5 GDN fwd_h arch35 workspace and sync lifecycle",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/195",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-11T10:00:07Z",
+      "updatedAt": "2026-07-11T10:00:07Z",
+      "createdAt": "2026-07-11T09:42:55Z",
+      "headRef": "fix/a5-gdn-fwd-h-arch35-workspace-main",
+      "labels": []
+    },
+    {
+      "number": 194,
+      "title": "fix: stabilize A5 GDN fwd_h arch35 workspace and sync lifecycle",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/194",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-11T09:54:58Z",
+      "updatedAt": "2026-07-11T09:54:58Z",
+      "createdAt": "2026-07-11T09:42:07Z",
+      "headRef": "fix/a5-gdn-fwd-h-arch35-workspace",
       "labels": []
     },
     {
