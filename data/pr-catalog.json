@@ -1,9 +1,33 @@
 {
-  "generatedAt": "2026-07-13T10:41:01+08:00",
+  "generatedAt": "2026-07-13T17:24:25+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 137,
+  "total": 139,
   "items": [
+    {
+      "number": 197,
+      "title": "Feat/example ascendc cumsum kkt v26.6.0",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/197",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-13T07:59:49Z",
+      "createdAt": "2026-07-13T07:59:39Z",
+      "headRef": "feat/example-ascendc-cumsum-kkt-v26.6.0",
+      "labels": []
+    },
+    {
+      "number": 196,
+      "title": "feat(example): use AscendC chunk_local_cumsum and chunk_scaled_dot_kkt",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/196",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-13T06:48:30Z",
+      "createdAt": "2026-07-13T06:48:29Z",
+      "headRef": "feat/example-ascendc-cumsum-kkt",
+      "labels": []
+    },
     {
       "number": 191,
       "title": "fix: stabilize A5 GDN BSND backward kernels",
@@ -25,21 +49,9 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-12T10:06:11Z",
+      "updatedAt": "2026-07-13T09:11:53Z",
       "createdAt": "2026-07-11T03:36:48Z",
       "headRef": "codex/prepare-wy-repr-bwd-fused",
-      "labels": []
-    },
-    {
-      "number": 186,
-      "title": "fix: use chunk size for cumsum BT",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/186",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-11T02:18:59Z",
-      "createdAt": "2026-07-10T15:26:15Z",
-      "headRef": "v26.6.0-cumsum-bt-cases",
       "labels": []
     },
     {
@@ -85,7 +97,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-13T02:33:22Z",
+      "updatedAt": "2026-07-13T09:20:40Z",
       "createdAt": "2026-07-10T02:25:59Z",
       "headRef": "codex/decouple-legacy-torch-ops",
       "labels": []
@@ -97,7 +109,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-11T09:09:13Z",
+      "updatedAt": "2026-07-13T08:27:56Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -112,18 +124,6 @@
       "updatedAt": "2026-07-11T01:53:04Z",
       "createdAt": "2026-07-09T12:59:47Z",
       "headRef": "fix-dqkwg-gva-accum",
-      "labels": []
-    },
-    {
-      "number": 176,
-      "title": "test: add disabled long GDR ST cases",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/176",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-11T03:08:00Z",
-      "createdAt": "2026-07-09T11:51:53Z",
-      "headRef": "add-disabled-gdr-st-cases",
       "labels": []
     },
     {
@@ -205,7 +205,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T01:38:43Z",
+      "updatedAt": "2026-07-13T09:12:20Z",
       "createdAt": "2026-07-08T08:17:26Z",
       "headRef": "fix",
       "labels": []
@@ -220,18 +220,6 @@
       "updatedAt": "2026-07-08T09:29:01Z",
       "createdAt": "2026-07-08T06:03:30Z",
       "headRef": "codex/kda-stage-dependency-precision-fix",
-      "labels": []
-    },
-    {
-      "number": 161,
-      "title": "Asc kkt",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/161",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-10T04:05:57Z",
-      "createdAt": "2026-07-08T01:54:15Z",
-      "headRef": "asc_kkt",
       "labels": []
     },
     {
@@ -367,18 +355,6 @@
       "labels": []
     },
     {
-      "number": 100,
-      "title": "Add chunk local cumsum AscendC op",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/100",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-10T03:57:59Z",
-      "createdAt": "2026-06-30T08:48:08Z",
-      "headRef": "asc_cumsum",
-      "labels": []
-    },
-    {
       "number": 93,
       "title": "docs: Clarify CausalConv1d initialStateMode usage, update README.md and aclnn docs",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/93",
@@ -463,6 +439,18 @@
       "labels": []
     },
     {
+      "number": 186,
+      "title": "fix: use chunk size for cumsum BT",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/186",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-13T02:58:31Z",
+      "updatedAt": "2026-07-13T02:58:31Z",
+      "createdAt": "2026-07-10T15:26:15Z",
+      "headRef": "v26.6.0-cumsum-bt-cases",
+      "labels": []
+    },
+    {
       "number": 180,
       "title": "perf: improve causal_conv1d_bwd op",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/180",
@@ -472,6 +460,18 @@
       "updatedAt": "2026-07-10T07:12:58Z",
       "createdAt": "2026-07-10T03:54:23Z",
       "headRef": "v26.6.0",
+      "labels": []
+    },
+    {
+      "number": 176,
+      "title": "test: add disabled long GDR ST cases",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/176",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-13T02:58:23Z",
+      "updatedAt": "2026-07-13T02:58:23Z",
+      "createdAt": "2026-07-09T11:51:53Z",
+      "headRef": "add-disabled-gdr-st-cases",
       "labels": []
     },
     {
@@ -496,6 +496,18 @@
       "updatedAt": "2026-07-08T06:24:04Z",
       "createdAt": "2026-07-08T02:07:16Z",
       "headRef": "7_7_26",
+      "labels": []
+    },
+    {
+      "number": 161,
+      "title": "Add chunk scale dot kkt AscendC op",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/161",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-13T03:39:06Z",
+      "updatedAt": "2026-07-13T03:39:06Z",
+      "createdAt": "2026-07-08T01:54:15Z",
+      "headRef": "asc_kkt",
       "labels": []
     },
     {
@@ -916,6 +928,18 @@
       "updatedAt": "2026-07-06T01:46:13Z",
       "createdAt": "2026-06-30T11:49:32Z",
       "headRef": "codex/gdr-ascendc-causal-solve",
+      "labels": []
+    },
+    {
+      "number": 100,
+      "title": "Add chunk local cumsum AscendC op",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/100",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-13T03:02:54Z",
+      "updatedAt": "2026-07-13T03:02:54Z",
+      "createdAt": "2026-06-30T08:48:08Z",
+      "headRef": "asc_cumsum",
       "labels": []
     },
     {
