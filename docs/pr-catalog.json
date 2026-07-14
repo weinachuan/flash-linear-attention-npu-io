@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T10:24:32+08:00",
+  "generatedAt": "2026-07-14T16:02:19+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
   "total": 143,
@@ -11,7 +11,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T02:21:41Z",
+      "updatedAt": "2026-07-14T02:32:25Z",
       "createdAt": "2026-07-14T02:20:24Z",
       "headRef": "causal_conv1d_bwd_arch32",
       "labels": []
@@ -23,7 +23,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T02:22:20Z",
+      "updatedAt": "2026-07-14T02:32:33Z",
       "createdAt": "2026-07-14T02:20:06Z",
       "headRef": "v26.6.0",
       "labels": []
@@ -35,7 +35,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T01:51:49Z",
+      "updatedAt": "2026-07-14T07:31:27Z",
       "createdAt": "2026-07-14T01:51:39Z",
       "headRef": "kkt_cu",
       "labels": []
@@ -47,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T02:09:02Z",
+      "updatedAt": "2026-07-14T07:59:58Z",
       "createdAt": "2026-07-13T14:13:40Z",
       "headRef": "codex/torch-custom-standalone-wheel-run",
       "labels": []
@@ -97,7 +97,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T01:26:29Z",
+      "updatedAt": "2026-07-14T06:34:33Z",
       "createdAt": "2026-07-11T03:36:48Z",
       "headRef": "codex/prepare-wy-repr-bwd-fused",
       "labels": []
@@ -109,21 +109,9 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T10:11:54Z",
+      "updatedAt": "2026-07-14T07:17:04Z",
       "createdAt": "2026-07-10T08:08:08Z",
       "headRef": "main",
-      "labels": []
-    },
-    {
-      "number": 183,
-      "title": "docs: 增加 AI agent 开发指南",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/183",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-10T07:42:09Z",
-      "createdAt": "2026-07-10T07:38:18Z",
-      "headRef": "codex/ai-agent-guides",
       "labels": []
     },
     {
@@ -145,7 +133,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T02:11:29Z",
+      "updatedAt": "2026-07-14T04:09:13Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -205,7 +193,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-10T10:44:01Z",
+      "updatedAt": "2026-07-14T02:57:56Z",
       "createdAt": "2026-07-09T02:48:09Z",
       "headRef": "0708-ci",
       "labels": []
@@ -472,6 +460,18 @@
       "updatedAt": "2026-07-13T02:58:31Z",
       "createdAt": "2026-07-10T15:26:15Z",
       "headRef": "v26.6.0-cumsum-bt-cases",
+      "labels": []
+    },
+    {
+      "number": 183,
+      "title": "docs: 增加 AI agent 开发指南",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/183",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-14T06:50:24Z",
+      "updatedAt": "2026-07-14T06:50:24Z",
+      "createdAt": "2026-07-10T07:38:18Z",
+      "headRef": "codex/ai-agent-guides",
       "labels": []
     },
     {
