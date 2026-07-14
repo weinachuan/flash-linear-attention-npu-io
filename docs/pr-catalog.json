@@ -1,9 +1,57 @@
 {
-  "generatedAt": "2026-07-13T17:24:25+08:00",
+  "generatedAt": "2026-07-14T10:24:32+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 139,
+  "total": 143,
   "items": [
+    {
+      "number": 201,
+      "title": "perf: improve causal_conv1d_bwd arch32",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/201",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-14T02:21:41Z",
+      "createdAt": "2026-07-14T02:20:24Z",
+      "headRef": "causal_conv1d_bwd_arch32",
+      "labels": []
+    },
+    {
+      "number": 200,
+      "title": "perf: improve causal_conv1d_bwd arch32",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/200",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-14T02:22:20Z",
+      "createdAt": "2026-07-14T02:20:06Z",
+      "headRef": "v26.6.0",
+      "labels": []
+    },
+    {
+      "number": 199,
+      "title": "feat: support varlen chunk scaled dot kkt",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/199",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-14T01:51:49Z",
+      "createdAt": "2026-07-14T01:51:39Z",
+      "headRef": "kkt_cu",
+      "labels": []
+    },
+    {
+      "number": 198,
+      "title": "feat: 对齐 standalone fla_npu wheel 与 run 包 OPP 安装布局",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/198",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-14T02:09:02Z",
+      "createdAt": "2026-07-13T14:13:40Z",
+      "headRef": "codex/torch-custom-standalone-wheel-run",
+      "labels": []
+    },
     {
       "number": 197,
       "title": "Feat/example ascendc cumsum kkt v26.6.0",
@@ -49,7 +97,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-13T09:11:53Z",
+      "updatedAt": "2026-07-14T01:26:29Z",
       "createdAt": "2026-07-11T03:36:48Z",
       "headRef": "codex/prepare-wy-repr-bwd-fused",
       "labels": []
@@ -91,25 +139,13 @@
       "labels": []
     },
     {
-      "number": 179,
-      "title": "feat: 解耦 fla_npu 导入与 legacy torch ops 加载",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/179",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-13T09:20:40Z",
-      "createdAt": "2026-07-10T02:25:59Z",
-      "headRef": "codex/decouple-legacy-torch-ops",
-      "labels": []
-    },
-    {
       "number": 178,
       "title": "fix: specialize KDA gate cumsum safe path",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/178",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-13T08:27:56Z",
+      "updatedAt": "2026-07-14T02:11:29Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -196,18 +232,6 @@
       "updatedAt": "2026-07-08T13:28:35Z",
       "createdAt": "2026-07-08T13:28:23Z",
       "headRef": "codex/kda-mxr-solve-tri",
-      "labels": []
-    },
-    {
-      "number": 164,
-      "title": "Fix the issue of build fail in A5",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/164",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-13T09:12:20Z",
-      "createdAt": "2026-07-08T08:17:26Z",
-      "headRef": "fix",
       "labels": []
     },
     {
@@ -463,6 +487,18 @@
       "labels": []
     },
     {
+      "number": 179,
+      "title": "feat: 解耦 fla_npu 导入与 legacy torch ops 加载",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/179",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-13T11:26:52Z",
+      "updatedAt": "2026-07-13T11:26:53Z",
+      "createdAt": "2026-07-10T02:25:59Z",
+      "headRef": "codex/decouple-legacy-torch-ops",
+      "labels": []
+    },
+    {
       "number": 176,
       "title": "test: add disabled long GDR ST cases",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/176",
@@ -484,6 +520,18 @@
       "updatedAt": "2026-07-10T07:13:00Z",
       "createdAt": "2026-07-09T09:02:45Z",
       "headRef": "causal_conv1d_bwd_950",
+      "labels": []
+    },
+    {
+      "number": 164,
+      "title": "Fix the issue of build fail in A5",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/164",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-14T01:49:40Z",
+      "updatedAt": "2026-07-14T01:49:40Z",
+      "createdAt": "2026-07-08T08:17:26Z",
+      "headRef": "fix",
       "labels": []
     },
     {
