@@ -1,7 +1,7 @@
 {
   "storageVersion": 2,
-  "generatedAt": "2026-07-14T10:24:32+08:00",
-  "version": "2026-07-13T09:24:25.483Z",
+  "generatedAt": "2026-07-14T19:21:29.666Z",
+  "version": "2026-07-14T08:02:19.949Z",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -255,9 +255,54 @@
       "start_date": "2026-07-07",
       "end_date": "2026-07-07",
       "position": 3
+    },
+    {
+      "id": "group-cdd987b4-9",
+      "title": "07-30转测",
+      "due_date": "2026-07-30",
+      "start_date": "2026-07-30",
+      "end_date": "2026-07-30",
+      "position": 4
+    },
+    {
+      "id": "group-0917b887-5",
+      "title": "08-30转测",
+      "due_date": "2026-08-30",
+      "start_date": "2026-08-30",
+      "end_date": "2026-08-30",
+      "position": 5
+    },
+    {
+      "id": "group-946fc4c0-2",
+      "title": "09-30转测",
+      "due_date": "2026-09-30",
+      "start_date": "2026-09-30",
+      "end_date": "2026-09-30",
+      "position": 6
     }
   ],
   "specials": [
+    {
+      "id": "special-7a669648-4",
+      "title": "A5小算子CV通路使能",
+      "group_id": "M-2026-06-18",
+      "position": 2,
+      "collapsed": 0
+    },
+    {
+      "id": "special-d81ecad0-e",
+      "title": "大融合算子KDA/GDN/GDN2",
+      "group_id": "M-2026-06-18",
+      "position": 3,
+      "collapsed": 0
+    },
+    {
+      "id": "special-59771e71-9",
+      "title": "regbase改写",
+      "group_id": "M-2026-06-18",
+      "position": 4,
+      "collapsed": 0
+    },
     {
       "id": "docs",
       "title": "专项：对应场景文档更新",
@@ -458,6 +503,60 @@
       "owner_rules": [],
       "position": 11,
       "active": true
+    },
+    {
+      "id": "chunk_kda_fwd",
+      "label": "chunk_kda_fwd",
+      "aliases": [
+        "chunk_kda_fwd",
+        "kda_fwd"
+      ],
+      "owner_rules": [
+        {
+          "owner": "魏纳川"
+        }
+      ],
+      "position": 12,
+      "active": true
+    },
+    {
+      "id": "chunk_kda_bwd",
+      "label": "chunk_kda_bwd",
+      "aliases": [
+        "chunk_kda_bwd",
+        "kda_bwd"
+      ],
+      "owner_rules": [
+        {
+          "owner": "方梓阳"
+        }
+      ],
+      "position": 13,
+      "active": true
+    },
+    {
+      "id": "chunk_gdr_fwd",
+      "label": "chunk_gdr_fwd",
+      "aliases": [
+        "chunk_gdr_fwd",
+        "gdr_fwd",
+        "gdn_fwd"
+      ],
+      "owner_rules": [],
+      "position": 14,
+      "active": true
+    },
+    {
+      "id": "chunk_gdr_bwd",
+      "label": "chunk_gdr_bwd",
+      "aliases": [
+        "chunk_gdr_bwd",
+        "gdr_bwd",
+        "gdn_bwd"
+      ],
+      "owner_rules": [],
+      "position": 15,
+      "active": true
     }
   ],
   "people": [
@@ -473,42 +572,42 @@
       "name": "方梓阳",
       "position": 1,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "陈琳鑫"
     },
     {
       "id": "P02",
       "name": "吴雨舒",
       "position": 2,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "陈琳鑫"
     },
     {
       "id": "P03",
       "name": "陈琳鑫",
       "position": 3,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "陈琳鑫"
     },
     {
       "id": "P04",
       "name": "叶倩雯",
       "position": 4,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "陈琳鑫"
     },
     {
       "id": "P05",
       "name": "黄浚哲",
       "position": 5,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "陈琳鑫"
     },
     {
       "id": "P06",
       "name": "杨子奇",
       "position": 6,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "陈琳鑫"
     },
     {
       "id": "P07",
@@ -578,14 +677,14 @@
       "name": "张硕累",
       "position": 16,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "陈琳鑫"
     },
     {
       "id": "P18",
       "name": "法振尧",
       "position": 17,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "陈琳鑫"
     },
     {
       "id": "P19",
@@ -613,7 +712,7 @@
       "name": "魏纳川",
       "position": 21,
       "placeholder": false,
-      "pl": "赵臣臣"
+      "pl": "陈琳鑫"
     },
     {
       "id": "person-ef56b0c7-5",
@@ -1449,7 +1548,7 @@
       "notes": "7-04下发需求，预期两周工作量",
       "position": 23,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-07-14T10:24:32+08:00",
+      "updated_at": "2026-07-14T02:24:32.671Z",
       "operator_ids": "",
       "recommit_date": "",
       "done_date": "",
@@ -1999,7 +2098,7 @@
       "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-06-25",
-      "special_id": null,
+      "special_id": "special-59771e71-9",
       "start_date": "2026-05-28",
       "end_date": "2026-06-25",
       "evidence": [],
@@ -2009,7 +2108,7 @@
       "notes": "",
       "position": 39,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-26T03:47:09.098Z",
+      "updated_at": "2026-07-14T03:08:38.298Z",
       "operator_ids": "chunk_bwd_dqkwg",
       "recommit_date": "2026-07-15",
       "done_date": "",
@@ -2104,7 +2203,7 @@
       "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-07-15",
-      "special_id": null,
+      "special_id": "special-59771e71-9",
       "start_date": "2026-06-25",
       "end_date": "2026-07-15",
       "evidence": [],
@@ -2114,7 +2213,7 @@
       "notes": "",
       "position": 42,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-07-07T09:39:00.552Z",
+      "updated_at": "2026-07-14T03:08:46.387Z",
       "operator_ids": "chunk_gated_delta_rule_fwd_h",
       "recommit_date": "",
       "done_date": "",
@@ -2139,7 +2238,7 @@
       "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-07-15",
-      "special_id": null,
+      "special_id": "special-59771e71-9",
       "start_date": "2026-06-25",
       "end_date": "2026-07-15",
       "evidence": [],
@@ -2149,7 +2248,7 @@
       "notes": "",
       "position": 43,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-07-07T09:39:00.552Z",
+      "updated_at": "2026-07-14T03:08:40.995Z",
       "operator_ids": "chunk_fwd_o",
       "recommit_date": "",
       "done_date": "",
@@ -2174,7 +2273,7 @@
       "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-07-15",
-      "special_id": null,
+      "special_id": "special-59771e71-9",
       "start_date": "2026-06-25",
       "end_date": "2026-07-15",
       "evidence": [],
@@ -2184,7 +2283,7 @@
       "notes": "",
       "position": 44,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-07-14T03:08:43.690Z",
       "operator_ids": "chunk_gated_delta_rule_bwd_dhu",
       "recommit_date": "",
       "done_date": "",
@@ -2209,7 +2308,7 @@
       "risk": "高",
       "priority": "P1",
       "group_id": "M-2026-07-15",
-      "special_id": null,
+      "special_id": "special-59771e71-9",
       "start_date": "2026-06-25",
       "end_date": "2026-07-15",
       "evidence": [],
@@ -2219,7 +2318,7 @@
       "notes": "",
       "position": 45,
       "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-06-25T19:29:23+00:00",
+      "updated_at": "2026-07-14T03:08:49.075Z",
       "operator_ids": "recompute_wu_fwd",
       "recommit_date": "",
       "done_date": "",
@@ -2285,15 +2384,15 @@
       "evidence": [],
       "dependencies": [],
       "pr_link": "",
-      "test_report": "",
+      "test_report": "https://clouddocs.huawei.com/wapp/share/01d1c435-4ac5-42c7-b877-09ad906fc5e3",
       "notes": "6-26下发 预期2周工作量",
       "position": 47,
       "created_at": "2026-06-26T06:19:52+08:00",
-      "updated_at": "2026-07-07T09:39:00.552Z",
+      "updated_at": "2026-07-14T09:16:43.971Z",
       "operator_ids": "",
       "recommit_date": "",
       "done_date": "",
-      "pr_required": 1,
+      "pr_required": 0,
       "segments": [
         {
           "id": "seg-f553264a-c",
@@ -2475,6 +2574,286 @@
           "start_date": "2026-06-30",
           "end_date": "2026-07-07",
           "reason": "6-30下发 5人天",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "task-3f99a94a-1",
+      "title": "dv_local A5 cv通路使能",
+      "scope": "",
+      "target": "",
+      "owner": "待排人力",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P1",
+      "group_id": "group-cdd987b4-9",
+      "special_id": "special-7a669648-4",
+      "start_date": "2026-07-14",
+      "end_date": "2026-07-31",
+      "evidence": [],
+      "dependencies": [],
+      "pr_link": "",
+      "test_report": "",
+      "notes": "任务初始下发",
+      "position": 53,
+      "created_at": "2026-07-14T01:30:21+08:00",
+      "updated_at": "2026-07-14T07:22:28.624Z",
+      "operator_ids": "chunk_bwd_dv_local",
+      "recommit_date": "",
+      "done_date": "",
+      "pr_required": 1,
+      "segments": [
+        {
+          "id": "seg-2945c038-6",
+          "start_date": "2026-07-14",
+          "end_date": "2026-07-31",
+          "reason": "任务初始下发",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "task-ca923fc4-9",
+      "title": "dqkwg A5 cv通路使能",
+      "scope": "",
+      "target": "",
+      "owner": "待排人力",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P1",
+      "group_id": "group-cdd987b4-9",
+      "special_id": "special-7a669648-4",
+      "start_date": "2026-07-14",
+      "end_date": "2026-07-31",
+      "evidence": [],
+      "dependencies": [],
+      "pr_link": "",
+      "test_report": "",
+      "notes": "任务初始下发",
+      "position": 54,
+      "created_at": "2026-07-14T01:30:49+08:00",
+      "updated_at": "2026-07-14T07:22:25.876Z",
+      "operator_ids": "chunk_bwd_dqkwg",
+      "recommit_date": "",
+      "done_date": "",
+      "pr_required": 1,
+      "segments": [
+        {
+          "id": "seg-360ccae7-3",
+          "start_date": "2026-07-14",
+          "end_date": "2026-07-31",
+          "reason": "任务初始下发",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "task-1d143d79-6",
+      "title": "KDA正向大融合算子",
+      "scope": "",
+      "target": "",
+      "owner": "魏纳川",
+      "status": "doing",
+      "risk": "中",
+      "priority": "P1",
+      "group_id": "group-cdd987b4-9",
+      "special_id": null,
+      "start_date": "2026-07-01",
+      "end_date": "2026-07-30",
+      "evidence": [],
+      "dependencies": [],
+      "pr_link": "",
+      "test_report": "",
+      "notes": "任务初始下发",
+      "position": 55,
+      "created_at": "2026-07-14T01:32:56+08:00",
+      "updated_at": "2026-07-14T07:20:45.089Z",
+      "operator_ids": "chunk_kda_fwd",
+      "recommit_date": "",
+      "done_date": "",
+      "pr_required": 1,
+      "segments": [
+        {
+          "id": "seg-67b322cd-f",
+          "start_date": "2026-07-01",
+          "end_date": "2026-07-30",
+          "reason": "任务初始下发",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "task-a38b0ff5-5",
+      "title": "KDA反向大融合算子",
+      "scope": "",
+      "target": "",
+      "owner": "方梓阳/吴雨舒",
+      "status": "doing",
+      "risk": "中",
+      "priority": "P1",
+      "group_id": "group-0917b887-5",
+      "special_id": null,
+      "start_date": "2026-07-14",
+      "end_date": "2026-08-14",
+      "evidence": [],
+      "dependencies": [],
+      "pr_link": "",
+      "test_report": "",
+      "notes": "任务初始下发",
+      "position": 56,
+      "created_at": "2026-07-14T01:33:10+08:00",
+      "updated_at": "2026-07-14T07:20:47.715Z",
+      "operator_ids": "chunk_kda_bwd",
+      "recommit_date": "",
+      "done_date": "",
+      "pr_required": 1,
+      "segments": [
+        {
+          "id": "seg-fe443be7-7",
+          "start_date": "2026-07-14",
+          "end_date": "2026-08-14",
+          "reason": "任务初始下发",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "task-1a90ffa7-3",
+      "title": "GDN正向大融合算子",
+      "scope": "",
+      "target": "",
+      "owner": "待排人力",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P1",
+      "group_id": "group-0917b887-5",
+      "special_id": null,
+      "start_date": "2026-07-14",
+      "end_date": "2026-08-31",
+      "evidence": [],
+      "dependencies": [],
+      "pr_link": "",
+      "test_report": "",
+      "notes": "任务初始下发",
+      "position": 57,
+      "created_at": "2026-07-14T01:33:31+08:00",
+      "updated_at": "2026-07-14T02:36:53.591Z",
+      "operator_ids": "",
+      "recommit_date": "",
+      "done_date": "",
+      "pr_required": 1,
+      "segments": [
+        {
+          "id": "seg-6db7c88b-c",
+          "start_date": "2026-07-14",
+          "end_date": "2026-08-31",
+          "reason": "任务初始下发",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "task-51c759bd-0",
+      "title": "GDN反向大融合算子",
+      "scope": "",
+      "target": "",
+      "owner": "待排人力",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P1",
+      "group_id": "group-0917b887-5",
+      "special_id": null,
+      "start_date": "2026-07-14",
+      "end_date": "2026-08-31",
+      "evidence": [],
+      "dependencies": [],
+      "pr_link": "",
+      "test_report": "",
+      "notes": "任务初始下发",
+      "position": 58,
+      "created_at": "2026-07-14T01:33:43+08:00",
+      "updated_at": "2026-07-14T02:37:01.673Z",
+      "operator_ids": "chunk_gdr_bwd",
+      "recommit_date": "",
+      "done_date": "",
+      "pr_required": 1,
+      "segments": [
+        {
+          "id": "seg-b09f202e-f",
+          "start_date": "2026-07-14",
+          "end_date": "2026-08-31",
+          "reason": "任务初始下发",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "task-37e61f4f-4",
+      "title": "GDN2正向大融合算子",
+      "scope": "",
+      "target": "",
+      "owner": "待排人力",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P1",
+      "group_id": "group-0917b887-5",
+      "special_id": null,
+      "start_date": "2026-08-01",
+      "end_date": "2026-08-31",
+      "evidence": [],
+      "dependencies": [],
+      "pr_link": "",
+      "test_report": "",
+      "notes": "任务初始下发",
+      "position": 59,
+      "created_at": "2026-07-14T01:33:56+08:00",
+      "updated_at": "2026-07-14T02:36:56.296Z",
+      "operator_ids": "",
+      "recommit_date": "",
+      "done_date": "",
+      "pr_required": 1,
+      "segments": [
+        {
+          "id": "seg-d8c209d4-3",
+          "start_date": "2026-08-01",
+          "end_date": "2026-08-31",
+          "reason": "任务初始下发",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "id": "task-1c185a99-5",
+      "title": "GDN2反向大融合算子",
+      "scope": "",
+      "target": "",
+      "owner": "待排人力",
+      "status": "todo",
+      "risk": "高",
+      "priority": "P1",
+      "group_id": "group-946fc4c0-2",
+      "special_id": null,
+      "start_date": "2026-09-01",
+      "end_date": "2026-09-30",
+      "evidence": [],
+      "dependencies": [],
+      "pr_link": "",
+      "test_report": "",
+      "notes": "任务初始下发",
+      "position": 60,
+      "created_at": "2026-07-14T01:34:09+08:00",
+      "updated_at": "2026-07-14T02:36:58.983Z",
+      "operator_ids": "",
+      "recommit_date": "",
+      "done_date": "",
+      "pr_required": 1,
+      "segments": [
+        {
+          "id": "seg-c61cc7a2-2",
+          "start_date": "2026-09-01",
+          "end_date": "2026-09-30",
+          "reason": "任务初始下发",
           "position": 0
         }
       ]
