@@ -1,9 +1,33 @@
 {
-  "generatedAt": "2026-07-14T16:02:19+08:00",
+  "generatedAt": "2026-07-15T10:22:40+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 143,
+  "total": 145,
   "items": [
+    {
+      "number": 206,
+      "title": "docs: 补充 fla_npu 解耦运行时架构文档",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/206",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-15T01:35:32Z",
+      "createdAt": "2026-07-14T13:51:20Z",
+      "headRef": "codex/docs-decoupled-runtime-architecture",
+      "labels": []
+    },
+    {
+      "number": 202,
+      "title": "Cum int",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/202",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-14T12:16:36Z",
+      "createdAt": "2026-07-14T10:55:03Z",
+      "headRef": "cum_int",
+      "labels": []
+    },
     {
       "number": 201,
       "title": "perf: improve causal_conv1d_bwd arch32",
@@ -11,7 +35,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T02:32:25Z",
+      "updatedAt": "2026-07-14T08:30:34Z",
       "createdAt": "2026-07-14T02:20:24Z",
       "headRef": "causal_conv1d_bwd_arch32",
       "labels": []
@@ -23,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T02:32:33Z",
+      "updatedAt": "2026-07-15T01:23:27Z",
       "createdAt": "2026-07-14T02:20:06Z",
       "headRef": "v26.6.0",
       "labels": []
@@ -35,21 +59,9 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T07:31:27Z",
+      "updatedAt": "2026-07-15T01:41:33Z",
       "createdAt": "2026-07-14T01:51:39Z",
       "headRef": "kkt_cu",
-      "labels": []
-    },
-    {
-      "number": 198,
-      "title": "feat: 对齐 standalone fla_npu wheel 与 run 包 OPP 安装布局",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/198",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-14T07:59:58Z",
-      "createdAt": "2026-07-13T14:13:40Z",
-      "headRef": "codex/torch-custom-standalone-wheel-run",
       "labels": []
     },
     {
@@ -109,21 +121,9 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T07:17:04Z",
+      "updatedAt": "2026-07-14T12:20:22Z",
       "createdAt": "2026-07-10T08:08:08Z",
       "headRef": "main",
-      "labels": []
-    },
-    {
-      "number": 181,
-      "title": "fix: 补齐 KDA fp16 fwd_h split 中间量路径",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/181",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-10T07:53:47Z",
-      "createdAt": "2026-07-10T06:45:24Z",
-      "headRef": "codex/kda-fwdh-fp16-intermediate",
       "labels": []
     },
     {
@@ -133,7 +133,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T04:09:13Z",
+      "updatedAt": "2026-07-14T12:35:01Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -193,7 +193,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T02:57:56Z",
+      "updatedAt": "2026-07-15T01:44:51Z",
       "createdAt": "2026-07-09T02:48:09Z",
       "headRef": "0708-ci",
       "labels": []
@@ -424,6 +424,30 @@
       "updatedAt": "2026-06-30T20:39:09Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 204,
+      "title": "fix: use base branch ci scripts for npu ci",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/204",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-14T11:59:16Z",
+      "updatedAt": "2026-07-14T12:15:59Z",
+      "createdAt": "2026-07-14T11:15:32Z",
+      "headRef": "codex/fix-npu-ci-base-trusted-ci",
+      "labels": []
+    },
+    {
+      "number": 198,
+      "title": "feat: 对齐 standalone fla_npu wheel 与 run 包 OPP 安装布局",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/198",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-14T08:15:52Z",
+      "updatedAt": "2026-07-14T08:15:53Z",
+      "createdAt": "2026-07-13T14:13:40Z",
+      "headRef": "codex/torch-custom-standalone-wheel-run",
       "labels": []
     },
     {
