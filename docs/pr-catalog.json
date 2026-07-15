@@ -1,17 +1,53 @@
 {
-  "generatedAt": "2026-07-15T10:22:40+08:00",
+  "generatedAt": "2026-07-15T16:07:38+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 145,
+  "total": 152,
   "items": [
     {
+      "number": 215,
+      "title": "blank pr",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/215",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-15T07:58:48Z",
+      "createdAt": "2026-07-15T07:56:56Z",
+      "headRef": "0715-no",
+      "labels": []
+    },
+    {
+      "number": 209,
+      "title": "fix: 修复 Ascend950 GDN 反向算子同步状态异常",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/209",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-15T03:17:01Z",
+      "createdAt": "2026-07-15T02:58:32Z",
+      "headRef": "codex/fix-v266-dhu-sync",
+      "labels": []
+    },
+    {
+      "number": 208,
+      "title": "fix: 修复 Ascend950 GDN 反向算子同步状态异常",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/208",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-15T03:16:53Z",
+      "createdAt": "2026-07-15T02:58:24Z",
+      "headRef": "codex/fix-main-dhu-sync",
+      "labels": []
+    },
+    {
       "number": 206,
-      "title": "docs: 补充 fla_npu 解耦运行时架构文档",
+      "title": "feat: 补充 fla_npu 解耦运行时与 ctypes 状态修改契约",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/206",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-15T01:35:32Z",
+      "updatedAt": "2026-07-15T04:56:12Z",
       "createdAt": "2026-07-14T13:51:20Z",
       "headRef": "codex/docs-decoupled-runtime-architecture",
       "labels": []
@@ -23,7 +59,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T12:16:36Z",
+      "updatedAt": "2026-07-15T06:07:38Z",
       "createdAt": "2026-07-14T10:55:03Z",
       "headRef": "cum_int",
       "labels": []
@@ -47,7 +83,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-15T01:23:27Z",
+      "updatedAt": "2026-07-15T06:49:52Z",
       "createdAt": "2026-07-14T02:20:06Z",
       "headRef": "v26.6.0",
       "labels": []
@@ -59,7 +95,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-15T01:41:33Z",
+      "updatedAt": "2026-07-15T02:56:35Z",
       "createdAt": "2026-07-14T01:51:39Z",
       "headRef": "kkt_cu",
       "labels": []
@@ -133,7 +169,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T12:35:01Z",
+      "updatedAt": "2026-07-15T06:10:21Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -184,18 +220,6 @@
       "updatedAt": "2026-07-09T06:37:14Z",
       "createdAt": "2026-07-09T06:37:04Z",
       "headRef": "codex/kda-stage2-fp32-workspace",
-      "labels": []
-    },
-    {
-      "number": 168,
-      "title": "add a5 compile to ci",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/168",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-15T01:44:51Z",
-      "createdAt": "2026-07-09T02:48:09Z",
-      "headRef": "0708-ci",
       "labels": []
     },
     {
@@ -427,6 +451,54 @@
       "labels": []
     },
     {
+      "number": 214,
+      "title": "blank pr",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/214",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-15T07:46:40Z",
+      "updatedAt": "2026-07-15T07:46:40Z",
+      "createdAt": "2026-07-15T07:42:40Z",
+      "headRef": "0715-blank-pr",
+      "labels": []
+    },
+    {
+      "number": 213,
+      "title": "ci: generate tagged accuracy reports on v26.6.0",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/213",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-15T06:18:35Z",
+      "updatedAt": "2026-07-15T06:18:35Z",
+      "createdAt": "2026-07-15T06:16:24Z",
+      "headRef": "codex/fix-v266-accuracy-run-metadata-env",
+      "labels": []
+    },
+    {
+      "number": 212,
+      "title": "ci: pass explicit accuracy run metadata",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/212",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-15T06:18:21Z",
+      "updatedAt": "2026-07-15T06:18:21Z",
+      "createdAt": "2026-07-15T06:16:20Z",
+      "headRef": "codex/fix-main-accuracy-run-metadata-env",
+      "labels": []
+    },
+    {
+      "number": 211,
+      "title": "fix: pass v26.6.0 accuracy report metadata to CI container",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/211",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-15T05:47:03Z",
+      "updatedAt": "2026-07-15T05:47:03Z",
+      "createdAt": "2026-07-15T05:11:23Z",
+      "headRef": "codex/fix-v266-accuracy-report-metadata",
+      "labels": []
+    },
+    {
       "number": 204,
       "title": "fix: use base branch ci scripts for npu ci",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/204",
@@ -544,6 +616,18 @@
       "updatedAt": "2026-07-10T07:13:00Z",
       "createdAt": "2026-07-09T09:02:45Z",
       "headRef": "causal_conv1d_bwd_950",
+      "labels": []
+    },
+    {
+      "number": 168,
+      "title": "ci增加9.1.0环境用于编译A5",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/168",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-15T07:29:08Z",
+      "updatedAt": "2026-07-15T07:29:09Z",
+      "createdAt": "2026-07-09T02:48:09Z",
+      "headRef": "0708-ci",
       "labels": []
     },
     {
