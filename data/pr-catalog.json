@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-07-15T16:07:38+08:00",
+  "generatedAt": "2026-07-16T10:30:13+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 152,
+  "total": 153,
   "items": [
+    {
+      "number": 216,
+      "title": "feat: fix ascend cumsum and add change example to ascendc",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/216",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-16T02:14:50Z",
+      "createdAt": "2026-07-15T10:12:14Z",
+      "headRef": "exam",
+      "labels": []
+    },
     {
       "number": 215,
       "title": "blank pr",
@@ -11,7 +23,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-15T07:58:48Z",
+      "updatedAt": "2026-07-16T01:44:42Z",
       "createdAt": "2026-07-15T07:56:56Z",
       "headRef": "0715-no",
       "labels": []
@@ -23,7 +35,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-15T03:17:01Z",
+      "updatedAt": "2026-07-15T08:28:49Z",
       "createdAt": "2026-07-15T02:58:32Z",
       "headRef": "codex/fix-v266-dhu-sync",
       "labels": []
@@ -35,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-15T03:16:53Z",
+      "updatedAt": "2026-07-15T08:28:39Z",
       "createdAt": "2026-07-15T02:58:24Z",
       "headRef": "codex/fix-main-dhu-sync",
       "labels": []
@@ -59,7 +71,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-15T06:07:38Z",
+      "updatedAt": "2026-07-15T09:20:15Z",
       "createdAt": "2026-07-14T10:55:03Z",
       "headRef": "cum_int",
       "labels": []
@@ -71,7 +83,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-14T08:30:34Z",
+      "updatedAt": "2026-07-15T08:28:34Z",
       "createdAt": "2026-07-14T02:20:24Z",
       "headRef": "causal_conv1d_bwd_arch32",
       "labels": []
@@ -86,18 +98,6 @@
       "updatedAt": "2026-07-15T06:49:52Z",
       "createdAt": "2026-07-14T02:20:06Z",
       "headRef": "v26.6.0",
-      "labels": []
-    },
-    {
-      "number": 199,
-      "title": "feat: support varlen chunk scaled dot kkt",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/199",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-15T02:56:35Z",
-      "createdAt": "2026-07-14T01:51:39Z",
-      "headRef": "kkt_cu",
       "labels": []
     },
     {
@@ -169,7 +169,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-15T06:10:21Z",
+      "updatedAt": "2026-07-15T09:09:28Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -508,6 +508,18 @@
       "updatedAt": "2026-07-14T12:15:59Z",
       "createdAt": "2026-07-14T11:15:32Z",
       "headRef": "codex/fix-npu-ci-base-trusted-ci",
+      "labels": []
+    },
+    {
+      "number": 199,
+      "title": "feat: support varlen chunk scaled dot kkt",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/199",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-15T08:27:08Z",
+      "updatedAt": "2026-07-15T08:27:08Z",
+      "createdAt": "2026-07-14T01:51:39Z",
+      "headRef": "kkt_cu",
       "labels": []
     },
     {
