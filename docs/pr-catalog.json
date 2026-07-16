@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T10:30:13+08:00",
+  "generatedAt": "2026-07-16T16:10:44+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
   "total": 153,
@@ -11,7 +11,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-16T02:14:50Z",
+      "updatedAt": "2026-07-16T07:13:57Z",
       "createdAt": "2026-07-15T10:12:14Z",
       "headRef": "exam",
       "labels": []
@@ -23,7 +23,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-16T01:44:42Z",
+      "updatedAt": "2026-07-16T06:37:28Z",
       "createdAt": "2026-07-15T07:56:56Z",
       "headRef": "0715-no",
       "labels": []
@@ -50,18 +50,6 @@
       "updatedAt": "2026-07-15T08:28:39Z",
       "createdAt": "2026-07-15T02:58:24Z",
       "headRef": "codex/fix-main-dhu-sync",
-      "labels": []
-    },
-    {
-      "number": 206,
-      "title": "feat: 补充 fla_npu 解耦运行时与 ctypes 状态修改契约",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/206",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-15T04:56:12Z",
-      "createdAt": "2026-07-14T13:51:20Z",
-      "headRef": "codex/docs-decoupled-runtime-architecture",
       "labels": []
     },
     {
@@ -169,7 +157,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-15T09:09:28Z",
+      "updatedAt": "2026-07-16T06:02:23Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -496,6 +484,18 @@
       "updatedAt": "2026-07-15T05:47:03Z",
       "createdAt": "2026-07-15T05:11:23Z",
       "headRef": "codex/fix-v266-accuracy-report-metadata",
+      "labels": []
+    },
+    {
+      "number": 206,
+      "title": "feat: 补充 fla_npu 解耦运行时与 ctypes 状态修改契约",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/206",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-16T06:54:09Z",
+      "updatedAt": "2026-07-16T06:54:09Z",
+      "createdAt": "2026-07-14T13:51:20Z",
+      "headRef": "codex/docs-decoupled-runtime-architecture",
       "labels": []
     },
     {
