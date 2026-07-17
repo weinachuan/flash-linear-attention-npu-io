@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-07-17T10:32:37+08:00",
+  "generatedAt": "2026-07-17T16:08:08+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 155,
+  "total": 156,
   "items": [
+    {
+      "number": 219,
+      "title": "feat: KDA V2 - support C128/V256 forward paths",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/219",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-17T06:53:47Z",
+      "createdAt": "2026-07-17T06:53:38Z",
+      "headRef": "codex/kda-v256-c128-perf",
+      "labels": []
+    },
     {
       "number": 218,
       "title": "feat: add KDA forward AscendC operator v1",
@@ -17,25 +29,13 @@
       "labels": []
     },
     {
-      "number": 217,
-      "title": "revert ci A5 compile",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/217",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-17T02:10:56Z",
-      "createdAt": "2026-07-16T12:37:28Z",
-      "headRef": "0716-blank-pr",
-      "labels": []
-    },
-    {
       "number": 216,
       "title": "feat: fix ascend cumsum and add change example to ascendc",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/216",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-17T01:47:32Z",
+      "updatedAt": "2026-07-17T07:45:34Z",
       "createdAt": "2026-07-15T10:12:14Z",
       "headRef": "exam",
       "labels": []
@@ -145,7 +145,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-16T16:44:32Z",
+      "updatedAt": "2026-07-17T02:48:21Z",
       "createdAt": "2026-07-09T17:13:19Z",
       "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
@@ -424,6 +424,18 @@
       "updatedAt": "2026-06-30T20:39:09Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 217,
+      "title": "revert ci A5 compile",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/217",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T02:48:10Z",
+      "updatedAt": "2026-07-17T02:48:11Z",
+      "createdAt": "2026-07-16T12:37:28Z",
+      "headRef": "0716-blank-pr",
       "labels": []
     },
     {
