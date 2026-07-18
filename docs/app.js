@@ -453,9 +453,10 @@ function render(options = {}) {
   updateEditStatus();
   renderPlanTabs();
   renderTimeAxis();
-  renderGantt(tasks);
-  renderPeopleView(tasks);
-  renderOperatorView(tasks);
+  const timelineTasks = tasks.filter(taskVisibleOnTimeline);
+  renderGantt(timelineTasks);
+  renderPeopleView(timelineTasks);
+  renderOperatorView(timelineTasks);
   if (includeTableFilters) renderTableFilters();
   else updateOwnerFilterSummary();
   renderTableSortHeaders();
@@ -1174,7 +1175,7 @@ function renderPeopleView(tasks) {
     return;
   }
   $("#peopleView").innerHTML = `
-    <div class="view-note">按当前时间窗口展示每日人力占用；同一天多个事项会叠放显示。空闲人员固定排在待排人力下方。</div>
+    <div class="view-note">按当前时间窗口展示每日人力占用；同一天多个事项会叠放显示。任务多的人员靠前，空闲人员靠后，待排人力不展示。</div>
     <div class="people-grid-wrap">
       <table class="people-grid">
         <thead>
@@ -1561,25 +1562,26 @@ function taskPeople(task, referenceDate = "") {
 
 function peopleForTasks(tasks) {
   ensurePeopleCatalog();
+  const visiblePerson = (person) => !isPlaceholderOwner(person.name);
   const selectedOwners = ownerFilterValues();
   if (selectedOwners.length) {
     const selected = new Set(selectedOwners);
     return (state.data.people || [])
-      .filter((person) => selected.has(person.name))
-      .sort(comparePeople);
+      .filter((person) => visiblePerson(person) && selected.has(person.name))
+      .sort((a, b) => comparePeopleForView(a, b, tasks));
   }
   if (state.filters.pl) {
     const selectedPl = normalizePl(state.filters.pl);
     const people = uniqueBy([
       ...(state.data.people || []).filter((person) => normalizePl(person.pl) === selectedPl),
       ...tasks.flatMap(taskPeople).filter((person) => normalizePl(person.pl) === selectedPl),
-    ], "id");
+    ], "id").filter(visiblePerson);
     return people.sort((a, b) => comparePeopleForView(a, b, tasks));
   }
-  const basePeople = isDeveloperEditMode() ? [] : (state.data.people || []);
+  const basePeople = isDeveloperEditMode() ? [] : (state.data.people || []).filter(visiblePerson);
   const people = uniqueBy([
     ...basePeople,
-    ...tasks.flatMap(taskPeople),
+    ...tasks.flatMap(taskPeople).filter(visiblePerson),
   ], "id");
   return people.sort((a, b) => comparePeopleForView(a, b, tasks));
 }
@@ -1591,17 +1593,19 @@ function comparePeople(a, b) {
 }
 
 function comparePeopleForView(a, b, tasks) {
-  const base = comparePeople(a, b);
-  if (a.name === "待排人力" || b.name === "待排人力") return base;
-  const idleA = personIsIdleInView(a, tasks) ? 0 : 1;
-  const idleB = personIsIdleInView(b, tasks) ? 0 : 1;
-  return idleA - idleB || base;
+  const countA = personTaskCountInView(a, tasks);
+  const countB = personTaskCountInView(b, tasks);
+  return countB - countA || comparePeople(a, b);
 }
 
 function personIsIdleInView(person, tasks) {
+  return personTaskCountInView(person, tasks) === 0;
+}
+
+function personTaskCountInView(person, tasks) {
   const days = dateList(state.view.start, state.view.end);
-  return !tasks.some((task) => days.some((day) => taskPeople(task, day).some((item) => item.id === person.id)
-    && taskRenderSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day)));
+  return tasks.filter((task) => days.some((day) => taskPeople(task, day).some((item) => item.id === person.id)
+    && taskRenderSegments(task).some((segment) => segment.start_date <= day && segment.end_date >= day))).length;
 }
 
 function personChipHtml(person) {
@@ -1984,6 +1988,10 @@ function evaluateTaskStatus(task) {
 
 function evaluateTaskDelivery(task) {
   return { risk: evaluateTaskRisk(task), status: evaluateTaskStatus(task) };
+}
+
+function taskVisibleOnTimeline(task) {
+  return evaluateTaskStatus(task) !== "todo";
 }
 
 function syncTaskDeliveryRules(task) {
