@@ -1,31 +1,43 @@
 {
-  "generatedAt": "2026-07-17T16:08:08+08:00",
+  "generatedAt": "2026-07-18T10:24:07+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 156,
+  "total": 159,
   "items": [
     {
-      "number": 219,
-      "title": "feat: KDA V2 - support C128/V256 forward paths",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/219",
+      "number": 224,
+      "title": "feat: 新增 prepare_wy_repr_bwd 融合算子",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/224",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-17T06:53:47Z",
-      "createdAt": "2026-07-17T06:53:38Z",
-      "headRef": "codex/kda-v256-c128-perf",
+      "updatedAt": "2026-07-17T11:17:48Z",
+      "createdAt": "2026-07-17T11:17:34Z",
+      "headRef": "codex/prepare-wy-repr-bwd-a5-vector",
       "labels": []
     },
     {
-      "number": 218,
-      "title": "feat: add KDA forward AscendC operator v1",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/218",
+      "number": 222,
+      "title": "docs: 统一算子开发规范与文档模板",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/222",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-16T18:57:53Z",
-      "createdAt": "2026-07-16T18:57:52Z",
-      "headRef": "codex/kda-forward-v1-milestone",
+      "updatedAt": "2026-07-17T11:04:56Z",
+      "createdAt": "2026-07-17T11:04:56Z",
+      "headRef": "codex/operator-development-standard",
+      "labels": []
+    },
+    {
+      "number": 220,
+      "title": "feat(dqkwg): support A5 RegBase vector fusion",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/220",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-17T10:02:07Z",
+      "createdAt": "2026-07-17T09:39:31Z",
+      "headRef": "feature/a5-regbase-dqkwg",
       "labels": []
     },
     {
@@ -35,33 +47,9 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-17T07:45:34Z",
+      "updatedAt": "2026-07-17T09:00:16Z",
       "createdAt": "2026-07-15T10:12:14Z",
       "headRef": "exam",
-      "labels": []
-    },
-    {
-      "number": 209,
-      "title": "fix: 修复 Ascend950 GDN 反向算子同步状态异常",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/209",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-16T17:39:11Z",
-      "createdAt": "2026-07-15T02:58:32Z",
-      "headRef": "codex/fix-v266-dhu-sync",
-      "labels": []
-    },
-    {
-      "number": 208,
-      "title": "fix: 修复 Ascend950 GDN 反向算子同步状态异常",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/208",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-17T01:40:33Z",
-      "createdAt": "2026-07-15T02:58:24Z",
-      "headRef": "codex/fix-main-dhu-sync",
       "labels": []
     },
     {
@@ -133,21 +121,9 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-16T17:12:02Z",
+      "updatedAt": "2026-07-17T12:21:30Z",
       "createdAt": "2026-07-11T03:36:48Z",
       "headRef": "codex/prepare-wy-repr-bwd-fused",
-      "labels": []
-    },
-    {
-      "number": 178,
-      "title": "fix: specialize KDA gate cumsum safe path",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/178",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-17T02:48:21Z",
-      "createdAt": "2026-07-09T17:13:19Z",
-      "headRef": "codex/kda-safe-gate-template-data",
       "labels": []
     },
     {
@@ -163,18 +139,6 @@
       "labels": []
     },
     {
-      "number": 173,
-      "title": "fix: stabilize KDA gate factorization with local reference",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/173",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-09T16:15:01Z",
-      "createdAt": "2026-07-09T10:09:22Z",
-      "headRef": "codex/kda-refgate-score-stability",
-      "labels": []
-    },
-    {
       "number": 170,
       "title": "gdn_op",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/170",
@@ -184,18 +148,6 @@
       "updatedAt": "2026-07-09T07:17:42Z",
       "createdAt": "2026-07-09T07:07:26Z",
       "headRef": "gdn_op",
-      "labels": []
-    },
-    {
-      "number": 169,
-      "title": "fix: keep KDA stage2 outputs in fp32 workspace",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/169",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-09T06:37:14Z",
-      "createdAt": "2026-07-09T06:37:04Z",
-      "headRef": "codex/kda-stage2-fp32-workspace",
       "labels": []
     },
     {
@@ -259,18 +211,6 @@
       "labels": []
     },
     {
-      "number": 157,
-      "title": "feat: align KDA forward outputs",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/157",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-07T13:44:52Z",
-      "createdAt": "2026-07-07T10:02:51Z",
-      "headRef": "codex/kda-output-g-no-mxh",
-      "labels": []
-    },
-    {
       "number": 152,
       "title": "perf: optimize KDA forward tail block path with MCH solve validation",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/152",
@@ -280,30 +220,6 @@
       "updatedAt": "2026-07-07T07:50:41Z",
       "createdAt": "2026-07-06T18:42:32Z",
       "headRef": "codex/kda-tail-block-mch2-validation",
-      "labels": []
-    },
-    {
-      "number": 151,
-      "title": "perf: optimize KDA forward tail block path with regression validation",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/151",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-06T18:35:42Z",
-      "createdAt": "2026-07-06T18:35:07Z",
-      "headRef": "codex/kda-tail-block-cube-forward-regression",
-      "labels": []
-    },
-    {
-      "number": 150,
-      "title": "perf: optimize KDA forward tail block path",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/150",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-06T18:20:33Z",
-      "createdAt": "2026-07-06T17:47:40Z",
-      "headRef": "codex/kda-tail-block-cube-forward",
       "labels": []
     },
     {
@@ -340,18 +256,6 @@
       "updatedAt": "2026-07-03T08:13:54Z",
       "createdAt": "2026-07-03T08:09:22Z",
       "headRef": "0701-26.6.0-dqkwg-sum",
-      "labels": []
-    },
-    {
-      "number": 114,
-      "title": "feat: add forward KDA AscendC operator",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/114",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-03T08:32:09Z",
-      "createdAt": "2026-07-03T03:16:04Z",
-      "headRef": "codex/kda-fwd-forward-only",
       "labels": []
     },
     {
@@ -427,6 +331,30 @@
       "labels": []
     },
     {
+      "number": 219,
+      "title": "feat: KDA V2 - support C128/V256 forward paths",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/219",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T10:21:48Z",
+      "updatedAt": "2026-07-17T10:21:49Z",
+      "createdAt": "2026-07-17T06:53:38Z",
+      "headRef": "codex/kda-v256-c128-perf",
+      "labels": []
+    },
+    {
+      "number": 218,
+      "title": "feat: add KDA forward AscendC operator v1",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/218",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T10:21:50Z",
+      "updatedAt": "2026-07-17T10:21:50Z",
+      "createdAt": "2026-07-16T18:57:52Z",
+      "headRef": "codex/kda-forward-v1-milestone",
+      "labels": []
+    },
+    {
       "number": 217,
       "title": "revert ci A5 compile",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/217",
@@ -496,6 +424,30 @@
       "updatedAt": "2026-07-15T05:47:03Z",
       "createdAt": "2026-07-15T05:11:23Z",
       "headRef": "codex/fix-v266-accuracy-report-metadata",
+      "labels": []
+    },
+    {
+      "number": 209,
+      "title": "fix: 修复 Ascend950 GDN 反向算子同步状态异常",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/209",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T13:48:59Z",
+      "updatedAt": "2026-07-17T13:48:59Z",
+      "createdAt": "2026-07-15T02:58:32Z",
+      "headRef": "codex/fix-v266-dhu-sync",
+      "labels": []
+    },
+    {
+      "number": 208,
+      "title": "fix: 修复 Ascend950 GDN 反向算子同步状态异常",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/208",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T13:48:51Z",
+      "updatedAt": "2026-07-17T13:48:51Z",
+      "createdAt": "2026-07-15T02:58:24Z",
+      "headRef": "codex/fix-main-dhu-sync",
       "labels": []
     },
     {
@@ -643,6 +595,18 @@
       "labels": []
     },
     {
+      "number": 178,
+      "title": "fix: specialize KDA gate cumsum safe path",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/178",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T10:21:50Z",
+      "updatedAt": "2026-07-17T10:21:50Z",
+      "createdAt": "2026-07-09T17:13:19Z",
+      "headRef": "codex/kda-safe-gate-template-data",
+      "labels": []
+    },
+    {
       "number": 176,
       "title": "test: add disabled long GDR ST cases",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/176",
@@ -655,6 +619,18 @@
       "labels": []
     },
     {
+      "number": 173,
+      "title": "fix: stabilize KDA gate factorization with local reference",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/173",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T10:21:50Z",
+      "updatedAt": "2026-07-17T10:21:50Z",
+      "createdAt": "2026-07-09T10:09:22Z",
+      "headRef": "codex/kda-refgate-score-stability",
+      "labels": []
+    },
+    {
       "number": 172,
       "title": "perf:causal_conv1d_bwd regbase support",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/172",
@@ -664,6 +640,18 @@
       "updatedAt": "2026-07-10T07:13:00Z",
       "createdAt": "2026-07-09T09:02:45Z",
       "headRef": "causal_conv1d_bwd_950",
+      "labels": []
+    },
+    {
+      "number": 169,
+      "title": "fix: keep KDA stage2 outputs in fp32 workspace",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/169",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T10:21:50Z",
+      "updatedAt": "2026-07-17T10:21:51Z",
+      "createdAt": "2026-07-09T06:37:04Z",
+      "headRef": "codex/kda-stage2-fp32-workspace",
       "labels": []
     },
     {
@@ -727,6 +715,18 @@
       "labels": []
     },
     {
+      "number": 157,
+      "title": "feat: align KDA forward outputs",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/157",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T10:21:50Z",
+      "updatedAt": "2026-07-17T10:21:50Z",
+      "createdAt": "2026-07-07T10:02:51Z",
+      "headRef": "codex/kda-output-g-no-mxh",
+      "labels": []
+    },
+    {
       "number": 156,
       "title": "fix: 修复 chunk_bwd_dv_local GVA-FIX4 超时",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/156",
@@ -760,6 +760,30 @@
       "updatedAt": "2026-07-07T10:39:18Z",
       "createdAt": "2026-07-07T07:05:45Z",
       "headRef": "0707-old-gva-fix",
+      "labels": []
+    },
+    {
+      "number": 151,
+      "title": "perf: optimize KDA forward tail block path with regression validation",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/151",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T10:21:50Z",
+      "updatedAt": "2026-07-17T10:21:50Z",
+      "createdAt": "2026-07-06T18:35:07Z",
+      "headRef": "codex/kda-tail-block-cube-forward-regression",
+      "labels": []
+    },
+    {
+      "number": 150,
+      "title": "perf: optimize KDA forward tail block path",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/150",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T10:21:50Z",
+      "updatedAt": "2026-07-17T10:21:50Z",
+      "createdAt": "2026-07-06T17:47:40Z",
+      "headRef": "codex/kda-tail-block-cube-forward",
       "labels": []
     },
     {
@@ -1024,6 +1048,18 @@
       "updatedAt": "2026-07-03T06:35:11Z",
       "createdAt": "2026-07-03T06:28:52Z",
       "headRef": "v26.6.0",
+      "labels": []
+    },
+    {
+      "number": 114,
+      "title": "feat: add forward KDA AscendC operator",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/114",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-17T10:21:50Z",
+      "updatedAt": "2026-07-17T10:21:50Z",
+      "createdAt": "2026-07-03T03:16:04Z",
+      "headRef": "codex/kda-fwd-forward-only",
       "labels": []
     },
     {
