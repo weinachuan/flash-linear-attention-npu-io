@@ -2218,7 +2218,10 @@ function developerTaskRowHtml(task) {
 }
 
 function renderRows(tasks) {
-  $("#rows").innerHTML = tasks.map((task) => {
+  const clearanceRow = tasks.length
+    ? `<tr class="task-filter-clearance" aria-hidden="true"><td colspan="16"></td></tr>`
+    : "";
+  $("#rows").innerHTML = clearanceRow + tasks.map((task) => {
     if (!state.token) {
       return readOnlyTaskRowHtml(task);
     }

@@ -337,6 +337,13 @@ th { position:sticky; top:0; background:#fff6e8; font-size:12px; z-index:30; }
   box-shadow:0 -12px 0 #fffaf1, 0 14px 0 #fffaf1;
 }
 .task-table .filter-row th::before { display:none; }
+.task-table .task-filter-clearance td {
+  height:24px;
+  padding:0;
+  border:0;
+  background:#fffaf1 !important;
+  pointer-events:none;
+}
 .task-table tbody td { background:#fffdf8; }
 .task-table th:last-child,.task-table td:last-child { min-width:118px; }
 .task-table .col-operator { min-width:210px; }
