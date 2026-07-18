@@ -4,7 +4,7 @@ const DEFAULT_PROJECT = {
   baselineDate: "2026-06-15",
   projectOwner: { name: "待填写", email: "待填写" },
 };
-const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟", "陈龙"];
+const PL_OPTIONS = ["陈琳鑫", "赵臣臣", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟", "陈龙"];
 const DEFAULT_PL = PL_OPTIONS[0];
 const UPSTREAM_REPO = "flashserve/flash-linear-attention-npu";
 const GITHUB_API_ROOT = "https://api.github.com";
@@ -283,6 +283,9 @@ async function replaceState(env, state) {
   });
 
   (state.tasks || []).forEach((task, index) => {
+    const fallbackTaskStart = todayBjYmd();
+    const taskStart = task.start_date || fallbackTaskStart;
+    const taskEnd = task.end_date || task.start_date || fallbackTaskStart;
     statements.push(env.DB.prepare(
       `INSERT INTO tasks(
         id, title, scope, target, owner, status, risk, priority, group_id, special_id,
@@ -300,8 +303,8 @@ async function replaceState(env, state) {
       task.priority || "P1",
       task.group_id || "",
       task.special_id || null,
-      task.start_date || "2026-06-25",
-      task.end_date || task.start_date || "2026-06-25",
+      taskStart,
+      taskEnd,
       toJson(task.evidence || []),
       toJson(task.dependencies || []),
       normalizeBooleanFlag(task.pr_required, true),
@@ -319,13 +322,15 @@ async function replaceState(env, state) {
       ? task.segments
       : [{ start_date: task.start_date, end_date: task.end_date, reason: task.notes || "", position: 0 }];
     segments.forEach((segment, segmentIndex) => {
+      const segmentStart = segment.start_date || task.start_date || fallbackTaskStart;
+      const segmentEnd = segment.end_date || task.end_date || task.start_date || fallbackTaskStart;
       statements.push(env.DB.prepare(
         "INSERT INTO task_segments(id, task_id, start_date, end_date, reason, position) VALUES (?, ?, ?, ?, ?, ?)"
       ).bind(
         segment.id || `seg-${task.id}-${segmentIndex}`,
         task.id,
-        segment.start_date || task.start_date || "2026-06-25",
-        segment.end_date || task.end_date || task.start_date || "2026-06-25",
+        segmentStart,
+        segmentEnd,
         segment.reason || "",
         numberOr(segment.position, segmentIndex),
       ));
@@ -437,9 +442,9 @@ function evaluateTaskStatus(task, catalogItems) {
   const pr = prLinkSummary(task.pr_link, catalogItems);
   const completed = taskIsCompletionOverride(task) || (taskHasReport(task) && (!taskRequiresPr(task) || pr.allMerged));
   if (completed) return "done";
-  if (todayBjYmd() > taskDdl(task)) return "delayed";
-  if (task.status === "blocked") return "blocked";
   if (taskHasWaitingOwner(task) || !taskHasClosedSchedule(task)) return "todo";
+  if (task.status === "blocked") return "blocked";
+  if (todayBjYmd() > taskDdl(task)) return "delayed";
   return "doing";
 }
 
@@ -1307,7 +1312,7 @@ async function getTaskById(env, taskId) {
 
 function normalizeTaskForInsert(task) {
   const now = nowIso();
-  const startDate = isYmd(task.start_date) ? task.start_date : "2026-06-25";
+  const startDate = isYmd(task.start_date) ? task.start_date : todayBjYmd();
   const endDate = isYmd(task.end_date) ? task.end_date : startDate;
   const next = {
     id: String(task.id || `task-${crypto.randomUUID().slice(0, 10)}`),

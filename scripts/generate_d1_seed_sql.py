@@ -8,7 +8,7 @@ import base64
 import hashlib
 import json
 import secrets
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -97,6 +97,10 @@ def password_hash(password: str, salt: str) -> str:
     return base64.urlsafe_b64encode(digest).decode().rstrip("=")
 
 
+def today_ymd() -> str:
+    return datetime.now(timezone(timedelta(hours=8))).date().isoformat()
+
+
 def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, Any]) -> None:
     lines.extend([
         "DELETE FROM task_segments;",
@@ -135,10 +139,13 @@ def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, An
             person.get("name") or "待排人力",
             RawSql(sql_int(person.get("position"), index)),
             RawSql("1" if person.get("placeholder") else "0"),
-            person.get("pl") or "赵臣臣",
+            person.get("pl") or "陈琳鑫",
         ]))
 
     for index, task in enumerate(state.get("tasks", [])):
+        fallback_task_start = today_ymd()
+        task_start = task.get("start_date") or fallback_task_start
+        task_end = task.get("end_date") or task.get("start_date") or fallback_task_start
         lines.append(insert("tasks", [
             "id", "title", "scope", "target", "owner", "status", "risk", "priority",
             "group_id", "special_id", "start_date", "end_date", "evidence", "dependencies",
@@ -154,8 +161,8 @@ def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, An
             task.get("priority") or "P1",
             task.get("group_id") or "",
             task.get("special_id"),
-            task.get("start_date") or "2026-06-25",
-            task.get("end_date") or task.get("start_date") or "2026-06-25",
+            task_start,
+            task_end,
             json_text(task.get("evidence") or []),
             json_text(task.get("dependencies") or []),
             RawSql(sql_bool_flag(task.get("pr_required"), True)),
@@ -175,11 +182,13 @@ def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, An
             "position": 0,
         }]
         for segment_index, segment in enumerate(segments):
+            segment_start = segment.get("start_date") or task.get("start_date") or fallback_task_start
+            segment_end = segment.get("end_date") or task.get("end_date") or task.get("start_date") or fallback_task_start
             lines.append(insert("task_segments", ["id", "task_id", "start_date", "end_date", "reason", "position"], [
                 segment.get("id") or f"seg-{task.get('id')}-{segment_index}",
                 task.get("id"),
-                segment.get("start_date") or task.get("start_date") or "2026-06-25",
-                segment.get("end_date") or task.get("end_date") or task.get("start_date") or "2026-06-25",
+                segment_start,
+                segment_end,
                 segment.get("reason") or "",
                 RawSql(sql_int(segment.get("position"), segment_index)),
             ]))

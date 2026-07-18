@@ -54,7 +54,7 @@ const OPERATOR_OWNER_RULES = {
 };
 
 const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "Pending"], ["delayed", "delay"], ["done", "done"]];
-const PL_OPTIONS = ["赵臣臣", "陈琳鑫", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟", "陈龙"];
+const PL_OPTIONS = ["陈琳鑫", "赵臣臣", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟", "陈龙"];
 const DEFAULT_PL = PL_OPTIONS[0];
 const AUDIT_TASK_FIELDS = ["title", "operator_ids", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "recommit_date", "done_date", "pr_required", "pr_link", "test_report", "notes"];
 const AUDIT_FIELD_LABELS = {
@@ -1970,14 +1970,14 @@ function evaluateTaskStatus(task) {
   if (completed) {
     return "done";
   }
-  if (taskPastDdlMidnight(task)) {
-    return "delayed";
+  if (taskHasWaitingOwner(task) || !taskHasClosedSchedule(task)) {
+    return "todo";
   }
   if (task.status === "blocked") {
     return "blocked";
   }
-  if (taskHasWaitingOwner(task) || !taskHasClosedSchedule(task)) {
-    return "todo";
+  if (taskPastDdlMidnight(task)) {
+    return "delayed";
   }
   return "doing";
 }
@@ -2643,6 +2643,7 @@ async function addTask() {
   const title = prompt("任务名称：", "新任务");
   if (!title) return;
   const firstGroup = state.data.groups[0];
+  const today = todayBjYmd();
   const task = {
     id: `task-${crypto.randomUUID().slice(0, 10)}`,
     title,
@@ -2654,8 +2655,8 @@ async function addTask() {
     priority: "P1",
     group_id: firstGroup?.id || "",
     special_id: null,
-    start_date: firstGroup?.due_date || "2026-06-25",
-    end_date: firstGroup?.due_date || "2026-06-25",
+    start_date: today,
+    end_date: today,
     evidence: [],
     dependencies: [],
     pr_required: 1,

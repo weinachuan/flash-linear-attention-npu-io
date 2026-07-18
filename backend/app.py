@@ -17,6 +17,7 @@ try:
         list_audit_entries,
         load_repo_state_or_seed,
         make_id,
+        now_iso,
         seed_audit_if_empty,
         seed_if_empty,
         task_to_dict,
@@ -34,6 +35,7 @@ except ImportError:
         list_audit_entries,
         load_repo_state_or_seed,
         make_id,
+        now_iso,
         seed_audit_if_empty,
         seed_if_empty,
         task_to_dict,
@@ -162,12 +164,12 @@ class Handler(BaseHTTPRequestHandler):
         task_id = payload.get("id") or make_id("task")
         payload = {key: payload.get(key) for key in ALLOWED_TASK_FIELDS if key in payload}
         payload.setdefault("title", "新任务")
-        payload.setdefault("owner", "待填写")
+        payload.setdefault("owner", "待排人力")
         payload.setdefault("status", "todo")
         payload.setdefault("risk", "中")
         payload.setdefault("priority", "P1")
         payload.setdefault("group_id", first_group_id(conn))
-        payload.setdefault("start_date", today_group_date(conn, payload["group_id"]))
+        payload.setdefault("start_date", now_iso()[:10])
         payload.setdefault("end_date", payload["start_date"])
         payload["id"] = task_id
         upsert_task(conn, payload)

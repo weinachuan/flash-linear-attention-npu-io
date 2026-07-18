@@ -633,18 +633,6 @@
                                                                   "0618-FWD-H-FWD-O-PERF",
                                                                   "0618-PREPARE-WY-REPR-BWD-FULL-REGBASE-A5"
                                                               ]
-                                         },
-                                         {
-                                             "id":  "0715-KDA-TRITON",
-                                             "title":  "KDA triton 算子回合",
-                                             "scope":  "KDA triton 算子",
-                                             "target":  "待确认",
-                                             "owner":  "待确认",
-                                             "status":  "todo",
-                                             "evidence":  "待补充准确范围、目标和验收口径",
-                                             "dependencies":  [
-
-                                                              ]
                                          }
                                      ]
                        }

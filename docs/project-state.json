@@ -2334,41 +2334,6 @@
       ]
     },
     {
-      "id": "t43",
-      "title": "KDA triton 算子回合",
-      "scope": "",
-      "target": "",
-      "owner": "待填写",
-      "status": "delayed",
-      "risk": "高",
-      "priority": "P2",
-      "group_id": "M-2026-07-15",
-      "special_id": "",
-      "start_date": "2026-06-26",
-      "end_date": "2026-07-15",
-      "evidence": [],
-      "dependencies": [],
-      "pr_link": "https://github.com/flashserve/flash-linear-attention-npu/pull/53",
-      "test_report": "",
-      "notes": "",
-      "position": 46,
-      "created_at": "2026-06-16T09:22:27+08:00",
-      "updated_at": "2026-07-16T02:30:14.721Z",
-      "operator_ids": "kimi_delta_attention_triton",
-      "recommit_date": "",
-      "done_date": "",
-      "pr_required": 1,
-      "segments": [
-        {
-          "id": "seg-4e2c4c818c",
-          "start_date": "2026-06-26",
-          "end_date": "2026-07-15",
-          "reason": "",
-          "position": 0
-        }
-      ]
-    },
-    {
       "id": "task-99783b7d-9",
       "title": "GDNv26.6.0版本性能信息统计",
       "scope": "",
