@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-07-19T16:14:57+08:00",
+  "generatedAt": "2026-07-20T10:51:02+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 158,
+  "total": 159,
   "items": [
+    {
+      "number": 228,
+      "title": "feat: 完善 KDA 正向算子的 A5、模板化与直调交付",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/228",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-20T02:26:46Z",
+      "createdAt": "2026-07-20T00:38:30Z",
+      "headRef": "codex/kda-pr222-compliance",
+      "labels": []
+    },
     {
       "number": 224,
       "title": "feat: 新增 prepare_wy_repr_bwd 融合算子",
