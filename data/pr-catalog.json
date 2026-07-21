@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-07-20T16:55:52+08:00",
+  "generatedAt": "2026-07-21T10:34:05+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 161,
+  "total": 162,
   "items": [
+    {
+      "number": 233,
+      "title": "fix: align GDN risky intra path with triton-ascend",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/233",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-21T00:29:03Z",
+      "createdAt": "2026-07-20T23:44:43Z",
+      "headRef": "codex/gdn-fla-org-triton",
+      "labels": []
+    },
     {
       "number": 231,
       "title": "feat: support recurrent KDA API",
@@ -11,7 +23,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-20T08:46:12Z",
+      "updatedAt": "2026-07-20T17:51:20Z",
       "createdAt": "2026-07-20T06:40:59Z",
       "headRef": "codex/kda-recurrent-api",
       "labels": []
@@ -35,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-20T03:36:26Z",
+      "updatedAt": "2026-07-20T10:49:40Z",
       "createdAt": "2026-07-20T00:38:30Z",
       "headRef": "codex/kda-pr222-compliance",
       "labels": []
@@ -59,7 +71,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-20T06:59:03Z",
+      "updatedAt": "2026-07-20T12:55:45Z",
       "createdAt": "2026-07-17T11:04:56Z",
       "headRef": "codex/operator-development-standard",
       "labels": []
@@ -74,18 +86,6 @@
       "updatedAt": "2026-07-17T10:02:07Z",
       "createdAt": "2026-07-17T09:39:31Z",
       "headRef": "feature/a5-regbase-dqkwg",
-      "labels": []
-    },
-    {
-      "number": 216,
-      "title": "feat: fix ascend cumsum and add change example to ascendc",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/216",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-07-20T07:26:56Z",
-      "createdAt": "2026-07-15T10:12:14Z",
-      "headRef": "exam",
       "labels": []
     },
     {
@@ -386,6 +386,18 @@
       "updatedAt": "2026-07-17T02:48:11Z",
       "createdAt": "2026-07-16T12:37:28Z",
       "headRef": "0716-blank-pr",
+      "labels": []
+    },
+    {
+      "number": 216,
+      "title": "feat: fix ascend cumsum and add change example to ascendc",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/216",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-07-21T01:56:29Z",
+      "updatedAt": "2026-07-21T01:56:29Z",
+      "createdAt": "2026-07-15T10:12:14Z",
+      "headRef": "exam",
       "labels": []
     },
     {
