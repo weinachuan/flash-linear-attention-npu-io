@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-07-22T16:27:00+08:00",
+  "generatedAt": "2026-07-23T10:37:50+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 162,
+  "total": 163,
   "items": [
+    {
+      "number": 235,
+      "title": "fix conv1d torch",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/235",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-22T09:21:31Z",
+      "createdAt": "2026-07-22T09:01:29Z",
+      "headRef": "0722-fix-torch-conv1d",
+      "labels": []
+    },
     {
       "number": 233,
       "title": "fix: align GDN risky intra path with triton-ascend",
@@ -23,7 +35,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-22T07:31:36Z",
+      "updatedAt": "2026-07-23T02:17:33Z",
       "createdAt": "2026-07-20T06:40:59Z",
       "headRef": "codex/kda-recurrent-api",
       "labels": []
@@ -143,7 +155,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-18T06:37:04Z",
+      "updatedAt": "2026-07-22T13:33:44Z",
       "createdAt": "2026-07-11T03:36:48Z",
       "headRef": "codex/prepare-wy-repr-bwd-fused",
       "labels": []
