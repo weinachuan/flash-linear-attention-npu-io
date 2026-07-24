@@ -1,9 +1,33 @@
 {
-  "generatedAt": "2026-07-24T10:34:40+08:00",
+  "generatedAt": "2026-07-24T16:25:41+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 165,
+  "total": 167,
   "items": [
+    {
+      "number": 241,
+      "title": "GDN fwd_h AscendC 优化",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/241",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-24T08:24:06Z",
+      "createdAt": "2026-07-24T07:27:30Z",
+      "headRef": "26.1.0",
+      "labels": []
+    },
+    {
+      "number": 240,
+      "title": "针对fwd_o做了适配A5的性能优化",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/240",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-24T07:00:00Z",
+      "createdAt": "2026-07-24T06:42:31Z",
+      "headRef": "zdy_repo_v26.1.0",
+      "labels": []
+    },
     {
       "number": 239,
       "title": "feat: 支持 v26.6.0 方式 A 离线编译",
@@ -35,7 +59,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-23T07:39:23Z",
+      "updatedAt": "2026-07-24T08:23:36Z",
       "createdAt": "2026-07-20T06:40:59Z",
       "headRef": "codex/kda-recurrent-api",
       "labels": []
