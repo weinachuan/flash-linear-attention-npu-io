@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-07-23T16:27:55+08:00",
+  "generatedAt": "2026-07-24T10:34:40+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 164,
+  "total": 165,
   "items": [
+    {
+      "number": 239,
+      "title": "feat: 支持 v26.6.0 方式 A 离线编译",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/239",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-07-23T08:33:36Z",
+      "createdAt": "2026-07-23T08:33:36Z",
+      "headRef": "codex/v26.6.0-offline-wheel",
+      "labels": []
+    },
     {
       "number": 233,
       "title": "fix: align GDN risky intra path with triton-ascend",
@@ -143,7 +155,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-07-22T13:33:44Z",
+      "updatedAt": "2026-07-24T01:35:07Z",
       "createdAt": "2026-07-11T03:36:48Z",
       "headRef": "codex/prepare-wy-repr-bwd-fused",
       "labels": []
