@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-07T15:13:19+08:00",
+  "generatedAt": "2026-08-08T09:26:05+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
   "total": 197,
@@ -11,7 +11,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-08-07T06:51:27Z",
+      "updatedAt": "2026-08-07T09:39:59Z",
       "createdAt": "2026-08-07T06:51:16Z",
       "headRef": "main",
       "labels": []
@@ -23,7 +23,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-08-07T03:47:56Z",
+      "updatedAt": "2026-08-07T09:40:08Z",
       "createdAt": "2026-08-07T03:47:46Z",
       "headRef": "v26.6.0",
       "labels": []
@@ -35,7 +35,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-08-07T02:37:51Z",
+      "updatedAt": "2026-08-07T07:15:38Z",
       "createdAt": "2026-08-07T02:37:41Z",
       "headRef": "perf",
       "labels": []
