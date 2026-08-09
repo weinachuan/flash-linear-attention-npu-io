@@ -1,9 +1,33 @@
 {
-  "generatedAt": "2026-08-08T14:50:26+08:00",
+  "generatedAt": "2026-08-09T09:38:30+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 198,
+  "total": 201,
   "items": [
+    {
+      "number": 291,
+      "title": "feat(dhu): 完善反向状态递推并补充 A5 实现",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/291",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-08-08T10:26:23Z",
+      "createdAt": "2026-08-08T10:08:46Z",
+      "headRef": "dhu-final-main",
+      "labels": []
+    },
+    {
+      "number": 288,
+      "title": "improve recurrent_kda performance",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/288",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-08-08T09:29:32Z",
+      "createdAt": "2026-08-08T09:29:05Z",
+      "headRef": "recurrent_kda_perf",
+      "labels": []
+    },
     {
       "number": 286,
       "title": "fix: avoid OOB read when loading chunk_gdn_fwd solve_tri tail tiles",
@@ -59,7 +83,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-08-08T06:43:24Z",
+      "updatedAt": "2026-08-08T10:40:47Z",
       "createdAt": "2026-08-06T13:02:19Z",
       "headRef": "20260806_204500_docs-README-usability",
       "labels": []
@@ -518,6 +542,18 @@
       "updatedAt": "2026-06-30T20:39:09Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 292,
+      "title": "fix: 修复 causal_conv1d_bwd ctypes ABI 参数错位",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/292",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-08-08T10:57:02Z",
+      "updatedAt": "2026-08-08T10:57:02Z",
+      "createdAt": "2026-08-08T10:16:49Z",
+      "headRef": "codex/fix-causal-conv1d-bwd-ctypes-abi",
       "labels": []
     },
     {
