@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-09T14:53:53+08:00",
+  "generatedAt": "2026-08-10T09:41:33+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
   "total": 201,
@@ -11,7 +11,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-08-09T06:06:05Z",
+      "updatedAt": "2026-08-10T01:11:46Z",
       "createdAt": "2026-08-08T10:08:46Z",
       "headRef": "dhu-final-main",
       "labels": []
@@ -26,30 +26,6 @@
       "updatedAt": "2026-08-09T06:06:05Z",
       "createdAt": "2026-08-08T09:29:05Z",
       "headRef": "recurrent_kda_perf",
-      "labels": []
-    },
-    {
-      "number": 286,
-      "title": "fix: avoid OOB read when loading chunk_gdn_fwd solve_tri tail tiles",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/286",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-08-07T09:39:59Z",
-      "createdAt": "2026-08-07T06:51:16Z",
-      "headRef": "main",
-      "labels": []
-    },
-    {
-      "number": 284,
-      "title": "fix: avoid OOB read when loading solve_tri tail diagonal tiles",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/284",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-08-07T09:40:08Z",
-      "createdAt": "2026-08-07T03:47:46Z",
-      "headRef": "v26.6.0",
       "labels": []
     },
     {
@@ -566,6 +542,30 @@
       "updatedAt": "2026-08-08T06:32:08Z",
       "createdAt": "2026-08-08T06:25:53Z",
       "headRef": "codex/fix-issue-285-a5-dqkwg-option",
+      "labels": []
+    },
+    {
+      "number": 286,
+      "title": "fix: avoid OOB read when loading chunk_gdn_fwd solve_tri tail tiles",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/286",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-08-10T01:28:58Z",
+      "updatedAt": "2026-08-10T01:28:58Z",
+      "createdAt": "2026-08-07T06:51:16Z",
+      "headRef": "main",
+      "labels": []
+    },
+    {
+      "number": 284,
+      "title": "fix: avoid OOB read when loading solve_tri tail diagonal tiles",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/284",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-08-10T01:29:03Z",
+      "updatedAt": "2026-08-10T01:29:03Z",
+      "createdAt": "2026-08-07T03:47:46Z",
+      "headRef": "v26.6.0",
       "labels": []
     },
     {
