@@ -1,9 +1,57 @@
 {
-  "generatedAt": "2026-09-01T19:08:37+08:00",
+  "generatedAt": "2026-09-02T11:00:37+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 295,
+  "total": 298,
   "items": [
+    {
+      "number": 438,
+      "title": "feat(causal_conv1d): add fn/update APIs and device metadata",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/438",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-02T02:58:58Z",
+      "createdAt": "2026-09-02T02:58:49Z",
+      "headRef": "causal-conv1d-v26.9.0",
+      "labels": []
+    },
+    {
+      "number": 436,
+      "title": "新增chunk_kda_bwd_recompute算子",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/436",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-02T02:19:09Z",
+      "createdAt": "2026-09-01T13:15:47Z",
+      "headRef": "main",
+      "labels": []
+    },
+    {
+      "number": 435,
+      "title": "Chunk fwd o a5",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/435",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-01T12:25:28Z",
+      "createdAt": "2026-09-01T12:25:16Z",
+      "headRef": "chunk-fwd-o-a5",
+      "labels": []
+    },
+    {
+      "number": 434,
+      "title": "AscendC fwd_o A5 optimize",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/434",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-02T02:09:08Z",
+      "createdAt": "2026-09-01T12:21:21Z",
+      "headRef": "zdy_fwd_o_pr",
+      "labels": []
+    },
     {
       "number": 433,
       "title": "fix(v26.9.0): backport #429 OPP env hints from main",
@@ -11,7 +59,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-01T10:43:48Z",
+      "updatedAt": "2026-09-02T02:45:58Z",
       "createdAt": "2026-09-01T04:10:54Z",
       "headRef": "fix/v26.9.0-opp-env-hints",
       "labels": []
@@ -35,19 +83,19 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-01T10:43:53Z",
+      "updatedAt": "2026-09-02T02:46:03Z",
       "createdAt": "2026-09-01T02:12:46Z",
       "headRef": "fix/issue-429-opp-env-warning",
       "labels": []
     },
     {
       "number": 430,
-      "title": "fix(chunk_kda_fwd): 修复 A5 Prepare 卡死并补齐 ATK 覆盖",
+      "title": "fix(chunk_kda_fwd): 稳定 A5 尾块同步并补齐现代精度验证",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/430",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-08-31T21:18:36Z",
+      "updatedAt": "2026-09-02T02:06:18Z",
       "createdAt": "2026-08-31T20:46:12Z",
       "headRef": "codex/chunk-kda-fwd-atk-modern-200",
       "labels": []
@@ -59,7 +107,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-08-31T11:47:04Z",
+      "updatedAt": "2026-09-02T02:09:20Z",
       "createdAt": "2026-08-31T11:45:55Z",
       "headRef": "gdn_fwd_h_optim",
       "labels": []
@@ -83,19 +131,19 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-01T04:10:47Z",
+      "updatedAt": "2026-09-01T14:23:10Z",
       "createdAt": "2026-08-31T08:19:08Z",
       "headRef": "fix/v26.1.0-build-dup-and-py-path",
       "labels": []
     },
     {
       "number": 423,
-      "title": "A2、A5 GDNFwd算子",
+      "title": "feat(chunk_gated_delta_rule_fwd): 支持 A2/A3/A5 Phase6 融合实现",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/423",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-01T07:33:11Z",
+      "updatedAt": "2026-09-01T14:09:13Z",
       "createdAt": "2026-08-31T08:11:59Z",
       "headRef": "chw_a2_a5",
       "labels": []
@@ -143,7 +191,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-01T04:41:43Z",
+      "updatedAt": "2026-09-01T14:50:41Z",
       "createdAt": "2026-08-29T03:56:28Z",
       "headRef": "feat/chunk-gdn-bwd-finalize",
       "labels": []
@@ -167,7 +215,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-01T10:43:43Z",
+      "updatedAt": "2026-09-01T14:38:26Z",
       "createdAt": "2026-08-28T03:52:51Z",
       "headRef": "fix/v26.6.0-build-dup-and-py-path",
       "labels": []
@@ -215,7 +263,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-08-31T07:04:24Z",
+      "updatedAt": "2026-09-02T00:53:56Z",
       "createdAt": "2026-08-26T09:02:48Z",
       "headRef": "causal-conv1d",
       "labels": []
@@ -275,7 +323,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-08-29T04:01:32Z",
+      "updatedAt": "2026-09-02T01:37:56Z",
       "createdAt": "2026-08-24T14:59:12Z",
       "headRef": "chw_new_cumsum_kkt_solve_tri_simple",
       "labels": []
@@ -431,7 +479,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-01T08:34:53Z",
+      "updatedAt": "2026-09-02T00:20:49Z",
       "createdAt": "2026-08-19T01:16:48Z",
       "headRef": "kda_bwd_v2",
       "labels": []
@@ -494,18 +542,6 @@
       "updatedAt": "2026-08-17T01:29:01Z",
       "createdAt": "2026-08-17T01:28:59Z",
       "headRef": "fix/kkt-varlen-tail-oob",
-      "labels": []
-    },
-    {
-      "number": 322,
-      "title": "fix(v26.6.0): 隔离 FLA 与 CANN opapi 动态符号",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/322",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-08-26T10:12:37Z",
-      "createdAt": "2026-08-15T08:51:17Z",
-      "headRef": "fix/v26.6.0-opapi-symbol-isolation",
       "labels": []
     },
     {
