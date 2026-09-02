@@ -106,7 +106,45 @@ expected       = 0.99
 
 输入范围改变没有改变算子接口、布局或执行路径；通过率的变化说明当前失败与数值尺度和判定口径高度相关。
 
-## 6. 混合容差标准改进建议
+## 6. CT Viz 可视化
+
+以下图由 `ct viz` 生成，NPU 输出作为 `real`，CPU 标杆作为 `expect`。每个图对应一个代表性 case 和一个归约密集型输出；图中散点整体贴近 `y=x`，用于证明误差没有呈现转置、索引错位或整片区域偏移等结构性特征。
+
+### Case 0：BF16 dense，`qk_l2norm=false`，`beta_sigmoid=false`
+
+| 输出 | CT Viz |
+|---|---|
+| `dk` | ![case 0 dk](assets/gdn_mixed_tolerance/case0_output1_Standard.png) |
+| `dbeta` | ![case 0 dbeta](assets/gdn_mixed_tolerance/case0_output3_Standard.png) |
+| `dg` | ![case 0 dg](assets/gdn_mixed_tolerance/case0_output4_Standard.png) |
+
+### Case 9：BF16 varlen，`qk_l2norm=false`，`beta_sigmoid=true`
+
+| 输出 | CT Viz |
+|---|---|
+| `dk` | ![case 9 dk](assets/gdn_mixed_tolerance/case9_output1_Standard.png) |
+| `dbeta` | ![case 9 dbeta](assets/gdn_mixed_tolerance/case9_output3_Standard.png) |
+| `dg` | ![case 9 dg](assets/gdn_mixed_tolerance/case9_output4_Standard.png) |
+
+### Case 29：FP32 scalar varlen，`qk_l2norm=false`，`beta_sigmoid=true`
+
+| 输出 | CT Viz |
+|---|---|
+| `dk` | ![case 29 dk](assets/gdn_mixed_tolerance/case29_output1_Standard.png) |
+| `dbeta` | ![case 29 dbeta](assets/gdn_mixed_tolerance/case29_output3_Standard.png) |
+| `dg` | ![case 29 dg](assets/gdn_mixed_tolerance/case29_output4_Standard.png) |
+
+### Case 60：FP32 scalar dense，`qk_l2norm=false`，`beta_sigmoid=false`
+
+| 输出 | CT Viz |
+|---|---|
+| `dk` | ![case 60 dk](assets/gdn_mixed_tolerance/case60_output1_Standard.png) |
+| `dbeta` | ![case 60 dbeta](assets/gdn_mixed_tolerance/case60_output3_Standard.png) |
+| `dg` | ![case 60 dg](assets/gdn_mixed_tolerance/case60_output4_Standard.png) |
+
+这些图覆盖 BF16/FP32 scalar、dense/varlen 和 beta sigmoid 两种路径；case 14 的 `dg` 是唯一未通过 case，使用相同 CT 方法复核后仍表现为贴近 `y=x` 的数值误差。
+
+## 7. 混合容差标准改进建议
 
 ### 6.1 逐元素判定
 
@@ -139,6 +177,6 @@ pass = abs_error <= abs_tol(dtype, output_type)
 
 报告应明确区分执行错误或卡死、结构性计算错误、非二进制等价导致的数值误差，以及双标杆数据不完整导致的不可判定。
 
-## 7. 关联
+## 8. 关联
 
 本报告对应公开 issue [#2](https://github.com/weinachuan/flash-linear-attention-npu-io/issues/2)，由 PR [#3](https://github.com/weinachuan/flash-linear-attention-npu-io/pull/3) 提交。
