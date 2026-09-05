@@ -1,19 +1,43 @@
 {
-  "generatedAt": "2026-09-04T18:38:35+08:00",
+  "generatedAt": "2026-09-05T11:03:48+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 314,
+  "total": 317,
   "items": [
     {
-      "number": 464,
-      "title": "fix(opapi): align L2 DFX arguments with API signatures",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/464",
+      "number": 467,
+      "title": "docs: 完善 Ascend C 算子 Agent 工作流规则",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/467",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-04T10:04:41Z",
-      "createdAt": "2026-09-04T10:04:39Z",
-      "headRef": "codex/fix-issue445-dfx-args",
+      "updatedAt": "2026-09-05T02:25:00Z",
+      "createdAt": "2026-09-05T02:24:59Z",
+      "headRef": "codex/positive-agent-workflow-rules",
+      "labels": []
+    },
+    {
+      "number": 466,
+      "title": "fix(chunk_bwd_dv_local): align gate benchmark semantics",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/466",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-05T02:18:20Z",
+      "createdAt": "2026-09-05T02:17:48Z",
+      "headRef": "codex/fix-issue456-gate-semantics",
+      "labels": []
+    },
+    {
+      "number": 465,
+      "title": "fix: 修复 chunk_bwd_dv_local 特定 GQA 配置 kernel hang",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/465",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-05T01:55:57Z",
+      "createdAt": "2026-09-05T01:55:55Z",
+      "headRef": "codex/fix-issue462-chunk-dv-hang",
       "labels": []
     },
     {
@@ -23,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-04T08:25:12Z",
+      "updatedAt": "2026-09-05T01:15:14Z",
       "createdAt": "2026-09-04T07:25:38Z",
       "headRef": "woey/fix-recurrent-kda-k128-ub",
       "labels": []
@@ -143,7 +167,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-04T08:18:14Z",
+      "updatedAt": "2026-09-05T02:17:01Z",
       "createdAt": "2026-09-02T02:58:49Z",
       "headRef": "causal-conv1d-v26.9.0",
       "labels": []
@@ -239,7 +263,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-04T04:35:33Z",
+      "updatedAt": "2026-09-05T02:25:29Z",
       "createdAt": "2026-08-30T19:19:10Z",
       "headRef": "codex/restrict-agent-workflow-sources",
       "labels": []
@@ -311,7 +335,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-04T09:41:58Z",
+      "updatedAt": "2026-09-05T02:17:47Z",
       "createdAt": "2026-08-26T09:02:48Z",
       "headRef": "causal-conv1d",
       "labels": []
@@ -1106,6 +1130,18 @@
       "updatedAt": "2026-06-30T20:39:09Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 464,
+      "title": "fix(opapi): align L2 DFX arguments with API signatures",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/464",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-04T14:40:11Z",
+      "updatedAt": "2026-09-04T14:40:12Z",
+      "createdAt": "2026-09-04T10:04:39Z",
+      "headRef": "codex/fix-issue445-dfx-args",
       "labels": []
     },
     {
