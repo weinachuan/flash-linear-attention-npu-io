@@ -4,6 +4,7 @@ import argparse
 import importlib.util
 import json
 import sqlite3
+import subprocess
 import tempfile
 from datetime import date
 from pathlib import Path
@@ -12,7 +13,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 PLAN_MIGRATION = "0010_close_legacy_and_add_2026_09_plan.sql"
+CORRECTION_MIGRATION = "0011_separate_gdn2_status.sql"
 PLAN_TS = "2026-09-10T08:30:00.000Z"
+CORRECTION_TS = "2026-09-10T11:56:00.000Z"
 SNAPSHOT_PATHS = [ROOT / "data" / "project-state.json", ROOT / "docs" / "project-state.json"]
 NEW_GROUP_IDS = [
     "group-2026-09-15", "group-2026-09-22", "group-2026-10-30",
@@ -30,6 +33,11 @@ LEGACY_GDN_ALIASES = {
 PLANNED_GDN_ALIASES = {
     "chunk_gdr_fwd": ["chunk_gdr_fwd", "gdr_fwd", "gdn_fwd", "chunk_gated_delta_rule_fwd"],
     "chunk_gdr_bwd": ["chunk_gdr_bwd", "gdr_bwd", "gdn_bwd", "chunk_gated_delta_rule_bwd"],
+}
+PRE_CORRECTION_GDN_TASKS = {
+    "task-1a90ffa7-3": ("GDN正向大融合算子", "unclassified", ""),
+    "task-37e61f4f-4": ("GDN2正向大融合算子", "unclassified", ""),
+    "task-1c185a99-5": ("GDN2反向大融合算子", "unclassified", ""),
 }
 
 EXPECTED_NEW_TASKS = {
@@ -121,6 +129,53 @@ def verify_task_type_backfill() -> None:
         connection.close()
 
 
+def extract_js_function(path: Path, name: str) -> str:
+    source = path.read_text(encoding="utf-8")
+    start = source.index(f"function {name}(")
+    opening = source.index("{", start)
+    depth = 0
+    for index in range(opening, len(source)):
+        if source[index] == "{":
+            depth += 1
+        elif source[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return source[start:index + 1]
+    raise AssertionError(f"Unclosed JavaScript function: {name} in {path}")
+
+
+def verify_js_done_date_rules() -> None:
+    worker_path = ROOT / "cloudflare" / "worker.js"
+    frontend_path = ROOT / "docs" / "app.js"
+    worker_helper = extract_js_function(worker_path, "taskNextDoneDate")
+    frontend_helper = extract_js_function(frontend_path, "taskNextDoneDate")
+    assert worker_helper == frontend_helper
+    frontend_sync = extract_js_function(frontend_path, "syncTaskDeliveryRules")
+    assert "const nextDoneDate = taskNextDoneDate(task, next.status);" in frontend_sync
+    assert worker_path.read_text(encoding="utf-8").count(
+        "taskNextDoneDate(task, next.status)"
+    ) == 2
+
+    script = """
+const isYmd = (value) => /^\\d{4}-\\d{2}-\\d{2}$/.test(String(value || ""));
+const todayBjYmd = () => "2026-12-01";
+""" + worker_helper + "\n" + """
+const cases = [
+  [{ status: "done", done_date: "2026-09-15" }, "done", "2026-09-15"],
+  [{ status: "done", done_date: "2027-01-31" }, "done", ""],
+  [{ status: "doing", done_date: "2027-01-31" }, "done", "2026-12-01"],
+  [{ status: "done", done_date: "invalid" }, "done", ""],
+  [{ status: "doing", done_date: "" }, "done", "2026-12-01"],
+  [{ status: "done", done_date: "2026-09-15" }, "doing", ""],
+];
+for (const [task, nextStatus, expected] of cases) {
+  const actual = taskNextDoneDate(task, nextStatus);
+  if (actual !== expected) throw new Error(`${JSON.stringify(task)}: ${actual} !== ${expected}`);
+}
+"""
+    subprocess.run(["node", "-e", script], check=True, capture_output=True, text=True)
+
+
 def seed_database(connection: sqlite3.Connection, seed: Any, state: dict[str, Any], catalog: dict[str, Any], audit: list[dict[str, Any]]) -> None:
     lines: list[str] = []
     seed.emit_state(lines, state, catalog)
@@ -138,14 +193,14 @@ def assert_plan(connection: sqlite3.Connection, legacy_ids: list[str], *, total:
               AND done_date = CASE WHEN TRIM(recommit_date) <> '' THEN recommit_date ELSE end_date END""",
         legacy_ids,
     ).fetchone()[0]
-    assert old_done == 61
+    assert old_done == 60
     assert connection.execute("SELECT COUNT(*) FROM tasks").fetchone()[0] == total
     assert connection.execute("SELECT COUNT(*) FROM operators").fetchone()[0] == 23
     assert connection.execute("SELECT COUNT(*) FROM people").fetchone()[0] == 26
     assert connection.execute("SELECT COUNT(*) FROM groups").fetchone()[0] == 13
     assert connection.execute("SELECT COUNT(*) FROM tasks WHERE task_type = 'engineering'").fetchone()[0] == 8
-    assert connection.execute("SELECT COUNT(*) FROM tasks WHERE task_type = 'operator'").fetchone()[0] == 65
-    assert connection.execute("SELECT COUNT(*) FROM tasks WHERE task_type = 'unclassified'").fetchone()[0] == 5
+    assert connection.execute("SELECT COUNT(*) FROM tasks WHERE task_type = 'operator'").fetchone()[0] == 68
+    assert connection.execute("SELECT COUNT(*) FROM tasks WHERE task_type = 'unclassified'").fetchone()[0] == 2
     assert connection.execute("SELECT COUNT(*) FROM tasks WHERE task_type <> 'operator' AND operator_ids <> ''").fetchone()[0] == 0
     assert connection.execute("SELECT COUNT(*) FROM tasks WHERE id LIKE 'plan-%' AND end_date = ''").fetchone()[0] == 6
     unscheduled_group = connection.execute(
@@ -155,6 +210,22 @@ def assert_plan(connection: sqlite3.Connection, legacy_ids: list[str], *, total:
     for operator_id, expected_aliases in PLANNED_GDN_ALIASES.items():
         aliases = connection.execute("SELECT aliases FROM operators WHERE id = ?", (operator_id,)).fetchone()[0]
         assert json.loads(aliases) == expected_aliases
+
+    expected_legacy_gdn = {
+        "task-1a90ffa7-3": ("GDN正向大融合算子", "done", "低", "2026-08-31", "operator", "chunk_gdr_fwd"),
+        "task-51c759bd-0": ("GDN反向大融合算子", "done", "低", "2026-08-31", "operator", "chunk_gdr_bwd"),
+        "task-37e61f4f-4": ("GDN-2正向大融合算子", "done", "低", "2026-08-31", "operator", "chunk_gdn2_fwd"),
+        "task-1c185a99-5": ("GDN-2反向大融合算子", "todo", "高", "", "operator", "chunk_gdn2_bwd"),
+    }
+    for task_id, expected in expected_legacy_gdn.items():
+        actual = connection.execute(
+            "SELECT title, status, risk, done_date, task_type, operator_ids FROM tasks WHERE id = ?",
+            (task_id,),
+        ).fetchone()
+        assert tuple(actual) == expected, (task_id, tuple(actual), expected)
+    assert connection.execute(
+        "SELECT COUNT(*) FROM tasks WHERE done_date > '2026-09-10'"
+    ).fetchone()[0] == 0
 
     for task_id, expected in EXPECTED_NEW_TASKS.items():
         actual = connection.execute(
@@ -200,10 +271,11 @@ def export_state(connection: sqlite3.Connection) -> dict[str, Any]:
         task["dependencies"] = json_value(task["dependencies"], [])
         task["segments"] = segment_map.get(task["id"], [])
 
+    state_version = meta.get("stateVersion", CORRECTION_TS)
     return {
         "storageVersion": 2,
-        "generatedAt": PLAN_TS,
-        "version": meta.get("stateVersion", PLAN_TS),
+        "generatedAt": state_version,
+        "version": state_version,
         "project": json_value(meta.get("project"), {}),
         "repoScan": json_value(meta.get("repoScan"), {}),
         "groups": rows(connection, "SELECT * FROM groups ORDER BY position, due_date"),
@@ -227,6 +299,7 @@ def main() -> None:
     legacy_ids = [task["id"] for task in state["tasks"] if not task["id"].startswith("plan-")]
     assert len(legacy_ids) == 61
     verify_task_type_backfill()
+    verify_js_done_date_rules()
 
     sync.today_bj = lambda: date(2026, 12, 1)
     manual_done = sync.evaluate_task_delivery({
@@ -239,6 +312,66 @@ def main() -> None:
         "pr_required": 1,
     }, [])
     assert manual_done == {"risk": "低", "status": "done", "done_date": "2026-09-15"}
+    future_done = sync.evaluate_task_delivery({
+        "title": "未来完成日期任务",
+        "owner": "陈昊文",
+        "start_date": "2026-12-02",
+        "end_date": "2027-01-31",
+        "done_date": "2027-01-31",
+        "status": "done",
+        "pr_required": 1,
+    }, [])
+    assert future_done["status"] == "doing"
+    assert future_done["done_date"] == ""
+    completed_with_future_date = [
+        ({
+            "title": "仅报告任务",
+            "owner": "陈昊文",
+            "start_date": "2026-09-10",
+            "end_date": "2027-01-31",
+            "done_date": "2027-01-31",
+            "status": "done",
+            "pr_required": 0,
+            "test_report": "已提供转测报告",
+        }, []),
+        ({
+            "title": "PR 和报告均完成任务",
+            "owner": "陈昊文",
+            "start_date": "2026-09-10",
+            "end_date": "2027-01-31",
+            "done_date": "2027-01-31",
+            "status": "done",
+            "pr_required": 1,
+            "pr_link": "#1",
+            "test_report": "已提供转测报告",
+        }, [{"number": 1, "url": "https://example.invalid/pull/1", "status": "merged"}]),
+        ({
+            "title": "ops 目录整改",
+            "owner": "陈昊文",
+            "start_date": "2026-09-10",
+            "end_date": "2027-01-31",
+            "done_date": "2027-01-31",
+            "status": "done",
+            "pr_required": 1,
+        }, []),
+    ]
+    for task, catalog_items in completed_with_future_date:
+        normalized = sync.evaluate_task_delivery(task, catalog_items)
+        assert normalized["status"] == "done"
+        assert normalized["done_date"] == ""
+    transitioned_with_future_date = sync.evaluate_task_delivery({
+        "title": "本次由报告结项任务",
+        "owner": "陈昊文",
+        "start_date": "2026-09-10",
+        "end_date": "2027-01-31",
+        "done_date": "2027-01-31",
+        "status": "doing",
+        "pr_required": 0,
+        "test_report": "已提供转测报告",
+    }, [])
+    assert transitioned_with_future_date == {
+        "risk": "低", "status": "done", "done_date": "2026-12-01"
+    }
     unscheduled = sync.evaluate_task_delivery({
         "title": "待排期任务",
         "owner": "黄浚哲",
@@ -300,14 +433,21 @@ def main() -> None:
             connection.execute("UPDATE operators SET aliases = ? WHERE id = ?", (aliases, operator_id))
         connection.execute(
             """DELETE FROM audit_entries
-               WHERE entity = 'project' AND entity_id = 'plan-2026-09-10'
-                 AND action = 'project.plan_refresh'"""
+               WHERE entity = 'project'
+                 AND ((entity_id = 'plan-2026-09-10' AND action = 'project.plan_refresh')
+                   OR (entity_id = 'gdn2-separation-2026-09-10'
+                       AND action = 'project.gdn2_correction'))"""
         )
         placeholders = ",".join("?" for _ in legacy_ids)
         connection.execute(
             f"UPDATE tasks SET status = 'todo', risk = '高', done_date = '' WHERE id IN ({placeholders})",
             legacy_ids,
         )
+        for task_id, (title, task_type, operator_ids) in PRE_CORRECTION_GDN_TASKS.items():
+            connection.execute(
+                "UPDATE tasks SET title = ?, task_type = ?, operator_ids = ? WHERE id = ?",
+                (title, task_type, operator_ids, task_id),
+            )
         assert connection.execute("SELECT COUNT(*) FROM groups").fetchone()[0] == 7
         assert connection.execute("SELECT COUNT(*) FROM people").fetchone()[0] == 23
         assert connection.execute("SELECT COUNT(*) FROM operators").fetchone()[0] == 16
@@ -321,6 +461,19 @@ def main() -> None:
             (state["groups"][0]["id"], PLAN_TS, PLAN_TS),
         )
         connection.executescript((ROOT / "migrations" / PLAN_MIGRATION).read_text(encoding="utf-8-sig"))
+        old_done_before_correction = connection.execute(
+            f"""SELECT COUNT(*) FROM tasks
+                WHERE id IN ({placeholders}) AND status = 'done' AND risk = '低'
+                  AND done_date = CASE WHEN TRIM(recommit_date) <> '' THEN recommit_date ELSE end_date END""",
+            legacy_ids,
+        ).fetchone()[0]
+        assert old_done_before_correction == 61
+        for task_id, expected in PRE_CORRECTION_GDN_TASKS.items():
+            actual = connection.execute(
+                "SELECT title, task_type, operator_ids FROM tasks WHERE id = ?", (task_id,)
+            ).fetchone()
+            assert tuple(actual) == expected
+        connection.executescript((ROOT / "migrations" / CORRECTION_MIGRATION).read_text(encoding="utf-8-sig"))
         unrelated = connection.execute(
             "SELECT status, risk, done_date FROM tasks WHERE id = 'unrelated-preexisting'"
         ).fetchone()
@@ -336,9 +489,13 @@ def main() -> None:
             (later_version,),
         )
         connection.execute("UPDATE tasks SET status = 'blocked', risk = '高' WHERE id = ?", (legacy_ids[0],))
+        connection.execute(
+            "UPDATE tasks SET status = 'blocked' WHERE id = 'task-1c185a99-5'"
+        )
         custom_aliases = '["chunk_gdr_fwd","custom_after_migration"]'
         connection.execute("UPDATE operators SET aliases = ? WHERE id = 'chunk_gdr_fwd'", (custom_aliases,))
         connection.executescript((ROOT / "migrations" / PLAN_MIGRATION).read_text(encoding="utf-8-sig"))
+        connection.executescript((ROOT / "migrations" / CORRECTION_MIGRATION).read_text(encoding="utf-8-sig"))
         preserved = connection.execute("SELECT status, risk FROM tasks WHERE id = ?", (legacy_ids[0],)).fetchone()
         assert tuple(preserved) == ("blocked", "高")
         assert connection.execute(
@@ -347,13 +504,23 @@ def main() -> None:
         assert connection.execute(
             "SELECT aliases FROM operators WHERE id = 'chunk_gdr_fwd'"
         ).fetchone()[0] == custom_aliases
+        assert connection.execute(
+            "SELECT status FROM tasks WHERE id = 'task-1c185a99-5'"
+        ).fetchone()[0] == "blocked"
         connection.execute(
             "UPDATE tasks SET status = ?, risk = ?, done_date = ?, updated_at = ? WHERE id = ?",
             (*legacy_state, legacy_ids[0]),
         )
         connection.execute(
             "UPDATE project_meta SET value = ? WHERE key = 'stateVersion'",
-            (PLAN_TS,),
+            (CORRECTION_TS,),
+        )
+        connection.execute(
+            """UPDATE tasks
+               SET title = 'GDN-2反向大融合算子', status = 'todo', risk = '高', done_date = '',
+                   task_type = 'operator', operator_ids = 'chunk_gdn2_bwd', updated_at = ?
+               WHERE id = 'task-1c185a99-5'""",
+            (CORRECTION_TS,),
         )
         connection.execute(
             "UPDATE operators SET aliases = ? WHERE id = 'chunk_gdr_fwd'",
@@ -363,6 +530,11 @@ def main() -> None:
             """SELECT COUNT(*) FROM audit_entries
                WHERE entity = 'project' AND entity_id = 'plan-2026-09-10'
                  AND action = 'project.plan_refresh'"""
+        ).fetchone()[0] == 1
+        assert connection.execute(
+            """SELECT COUNT(*) FROM audit_entries
+               WHERE entity = 'project' AND entity_id = 'gdn2-separation-2026-09-10'
+                 AND action = 'project.gdn2_correction'"""
         ).fetchone()[0] == 1
         assert_plan(connection, legacy_ids)
         snapshot = export_state(connection)
@@ -381,7 +553,7 @@ def main() -> None:
             path.write_text(text, encoding="utf-8")
 
     print(json.dumps({
-        "legacyCompleted": 61,
+        "legacyCompleted": 60,
         "tasks": 78,
         "newTasks": len(EXPECTED_NEW_TASKS),
         "operators": 23,

@@ -1994,7 +1994,8 @@ function taskRequiresPr(task) {
 }
 
 function taskIsCompletionOverride(task) {
-  return isYmd(task.done_date) || /ops\s*目录整改/i.test(String(task.title || ""));
+  return (isYmd(task.done_date) && task.done_date <= todayBjYmd())
+    || /ops\s*目录整改/i.test(String(task.title || ""));
 }
 
 function taskDdl(task) {
@@ -2086,13 +2087,19 @@ function evaluateTaskDelivery(task) {
   return { risk: evaluateTaskRisk(task), status: evaluateTaskStatus(task) };
 }
 
+function taskNextDoneDate(task, nextStatus) {
+  if (nextStatus !== "done") return "";
+  if (isYmd(task.done_date) && task.done_date <= todayBjYmd()) return task.done_date;
+  return task.status === "done" ? "" : todayBjYmd();
+}
+
 function taskVisibleOnTimeline(task) {
   return evaluateTaskStatus(task) !== "todo";
 }
 
 function syncTaskDeliveryRules(task) {
-  const previousStatus = task.status;
   const next = evaluateTaskDelivery(task);
+  const nextDoneDate = taskNextDoneDate(task, next.status);
   const changed = [];
   if (task.risk !== next.risk) {
     changed.push("risk");
@@ -2102,12 +2109,9 @@ function syncTaskDeliveryRules(task) {
     changed.push("status");
     task.status = next.status;
   }
-  if (next.status !== "done" && task.done_date) {
+  if ((task.done_date || "") !== nextDoneDate) {
     changed.push("done_date");
-    task.done_date = "";
-  } else if (next.status === "done" && previousStatus !== "done" && !isYmd(task.done_date)) {
-    changed.push("done_date");
-    task.done_date = todayBjYmd();
+    task.done_date = nextDoneDate;
   }
   return changed;
 }

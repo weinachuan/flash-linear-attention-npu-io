@@ -206,7 +206,9 @@ def task_requires_pr(task):
 
 
 def completion_override(task):
-    return is_ymd(task.get("done_date")) or bool(re.search(r"ops\s*目录整改", str(task.get("title") or ""), re.I))
+    done_date = task.get("done_date")
+    completed_by_date = is_ymd(done_date) and datetime.strptime(done_date, "%Y-%m-%d").date() <= today_bj()
+    return completed_by_date or bool(re.search(r"ops\s*目录整改", str(task.get("title") or ""), re.I))
 
 
 def is_ymd(value):
@@ -262,8 +264,12 @@ def evaluate_task_delivery(task, catalog_items):
     done_date = task.get("done_date") or ""
     if status != "done":
         done_date = ""
-    elif task.get("status") != "done" and not done_date:
+    elif is_ymd(done_date) and datetime.strptime(done_date, "%Y-%m-%d").date() <= today_bj():
+        pass
+    elif task.get("status") != "done":
         done_date = today_bj().isoformat()
+    else:
+        done_date = ""
 
     return {"risk": risk, "status": status, "done_date": done_date}
 

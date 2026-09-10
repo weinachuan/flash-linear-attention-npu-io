@@ -453,7 +453,7 @@ function evaluateTaskDelivery(task, catalogItems) {
 
 function taskNextDoneDate(task, nextStatus) {
   if (nextStatus !== "done") return "";
-  if (isYmd(task.done_date)) return task.done_date;
+  if (isYmd(task.done_date) && task.done_date <= todayBjYmd()) return task.done_date;
   return task.status === "done" ? "" : todayBjYmd();
 }
 
@@ -529,7 +529,8 @@ function taskRequiresPr(task) {
 }
 
 function taskIsCompletionOverride(task) {
-  return isYmd(task.done_date) || /ops\s*目录整改/i.test(String(task.title || ""));
+  return (isYmd(task.done_date) && task.done_date <= todayBjYmd())
+    || /ops\s*目录整改/i.test(String(task.title || ""));
 }
 
 function taskHasWaitingOwner(task) {
