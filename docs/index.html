@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>flash-linear-attention-npu 项目看板</title>
-  <link rel="stylesheet" href="./styles.css?v=20260718-tight-spacing">
+  <link rel="stylesheet" href="./styles.css?v=20260910-project-plan">
 </head>
 <body>
   <main class="shell">
@@ -58,7 +58,7 @@
           <h3>状态</h3>
           <ul>
             <li><span class="status-pill delayed">delay</span><span>超过 DDL，且交付件未完备。</span></li>
-            <li><span class="status-pill done">done</span><span>交付件完备；“仅报告”任务只要求转测报告。</span></li>
+            <li><span class="status-pill done">done</span><span>交付件完备，或管理员已填写有效完成日期确认结项；“仅报告”任务只要求转测报告。</span></li>
             <li><span class="status-pill doing">doing</span><span>未超过 DDL，且已规定起始闭环时间、正在推进。</span></li>
             <li><span class="status-pill todo">todo</span><span>待排人力，或只有事项但未规定闭环时间。</span></li>
             <li><span class="status-pill blocked">Pending</span><span>更高优先级事项插入，导致任务因人力问题挂起。</span></li>
@@ -90,7 +90,7 @@
         <div class="view-switch" role="tablist" aria-label="计划视图切换">
           <button type="button" class="active" data-plan-tab="timeline">甘特计划</button>
           <button type="button" data-plan-tab="people">人力视图</button>
-          <button type="button" data-plan-tab="operator">算子视图</button>
+          <button type="button" data-plan-tab="operator">分类视图</button>
         </div>
       </div>
       <div id="timeAxis" class="time-axis"></div>
@@ -114,7 +114,7 @@
               <th><button type="button" class="sort-button" data-sort-field="risk">风险 <span data-sort-indicator>↓</span></button></th>
               <th><button type="button" class="sort-button" data-sort-field="priority">优先级 <span data-sort-indicator>↕</span></button></th>
               <th><button type="button" class="sort-button" data-sort-field="title">事项 <span data-sort-indicator>↕</span></button></th>
-              <th class="col-operator"><button type="button" class="sort-button" data-sort-field="operator_ids">算子 <span data-sort-indicator>↕</span></button></th>
+              <th class="col-operator"><button type="button" class="sort-button" data-sort-field="operator_ids">任务分类 <span data-sort-indicator>↕</span></button></th>
               <th class="col-owner"><button type="button" class="sort-button" data-sort-field="owner">责任人 <span data-sort-indicator>↕</span></button></th>
               <th class="col-pl"><button type="button" class="sort-button" data-sort-field="owner_pl">责任人分组 <span data-sort-indicator>↕</span></button></th>
               <th class="col-group"><button type="button" class="sort-button" data-sort-field="group_id">转测迭代计划排期 <span data-sort-indicator>↕</span></button></th>
@@ -162,7 +162,7 @@
       <div id="audit" class="audit"></div>
     </section>
   </main>
-  <script src="./config.js?v=20260718-tight-spacing"></script>
-  <script src="./app.js?v=20260718-tight-spacing"></script>
+  <script src="./config.js?v=20260910-project-plan"></script>
+  <script src="./app.js?v=20260910-project-plan"></script>
 </body>
 </html>

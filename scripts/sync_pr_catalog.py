@@ -206,27 +206,38 @@ def task_requires_pr(task):
 
 
 def completion_override(task):
-    return bool(re.search(r"ops\s*目录整改", str(task.get("title") or ""), re.I))
+    return is_ymd(task.get("done_date")) or bool(re.search(r"ops\s*目录整改", str(task.get("title") or ""), re.I))
+
+
+def is_ymd(value):
+    try:
+        datetime.strptime(str(value or ""), "%Y-%m-%d")
+        return True
+    except Exception:
+        return False
+
+
+def task_has_closed_schedule(task):
+    return is_ymd(task.get("start_date")) and is_ymd(task.get("end_date"))
 
 
 def task_ddl(task):
     value = task.get("end_date") or task.get("start_date")
-    try:
-        return datetime.strptime(value, "%Y-%m-%d").date()
-    except Exception:
-        return today_bj()
+    return datetime.strptime(value, "%Y-%m-%d").date() if is_ymd(value) else today_bj()
 
 
 def evaluate_task_delivery(task, catalog_items):
     pr = evaluate_pr_links(task.get("pr_link", ""), catalog_items)
     ddl = task_ddl(task)
     workdays_until_ddl = workdays_until(today_bj(), ddl)
+    closed_schedule = task_has_closed_schedule(task)
     report = has_report(task)
     requires_pr = task_requires_pr(task)
     completed = completion_override(task) or (report and (not requires_pr or pr["allMerged"]))
-    delayed = not completed and today_bj() > ddl
 
-    if has_waiting_owner(task):
+    if completed:
+        risk = "低"
+    elif has_waiting_owner(task):
         risk = "高"
     elif not requires_pr:
         risk = "低" if report else ("高" if workdays_until_ddl <= 6 else "中")
@@ -237,13 +248,16 @@ def evaluate_task_delivery(task, catalog_items):
     else:
         risk = "高" if workdays_until_ddl <= 6 else "中"
 
-    status = task.get("status") or "todo"
     if completed:
         status = "done"
-    elif delayed:
-        status = "delayed"
-    elif status in ("done", "delayed"):
+    elif has_waiting_owner(task) or not closed_schedule:
         status = "todo"
+    elif task.get("status") == "blocked":
+        status = "blocked"
+    elif today_bj() > ddl:
+        status = "delayed"
+    else:
+        status = "doing"
 
     done_date = task.get("done_date") or ""
     if status != "done":

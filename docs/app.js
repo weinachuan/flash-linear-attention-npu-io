@@ -54,12 +54,15 @@ const OPERATOR_OWNER_RULES = {
 };
 
 const STATUS_OPTIONS = [["todo", "todo"], ["doing", "doing"], ["blocked", "Pending"], ["delayed", "delay"], ["done", "done"]];
+const TASK_TYPE_OPTIONS = [["operator", "算子"], ["engineering", "工程任务"], ["unclassified", "待分类"]];
+const TASK_TYPE_LABELS = Object.fromEntries(TASK_TYPE_OPTIONS);
 const PL_OPTIONS = ["陈琳鑫", "赵臣臣", "唐超", "马越", "黄俊健", "龚翔宇", "周亭亭", "孙伟伟", "陈龙"];
 const DEFAULT_PL = PL_OPTIONS[0];
-const AUDIT_TASK_FIELDS = ["title", "operator_ids", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "recommit_date", "done_date", "pr_required", "pr_link", "test_report", "notes"];
+const AUDIT_TASK_FIELDS = ["title", "task_type", "operator_ids", "owner", "risk", "priority", "status", "group_id", "special_id", "start_date", "end_date", "recommit_date", "done_date", "pr_required", "pr_link", "test_report", "notes"];
 const AUDIT_FIELD_LABELS = {
   title: "事项",
-  operator_ids: "算子",
+  task_type: "任务分类",
+  operator_ids: "关联算子",
   owner: "责任人",
   risk: "风险",
   priority: "优先级",
@@ -80,7 +83,7 @@ const TABLE_SORT_LABELS = {
   risk: "风险",
   priority: "优先级",
   title: "事项",
-  operator_ids: "算子",
+  operator_ids: "任务分类",
   owner: "责任人",
   owner_pl: "责任人分组",
   group_id: "转测迭代计划排期",
@@ -161,6 +164,7 @@ async function load() {
       state.audit = audit;
       state.prCatalog = prCatalog || { generatedAt: "", sourceRepo: "", total: 0, items: [] };
       ensureOperatorCatalog();
+      ensureTaskTypes();
       ensurePeopleCatalog();
       syncAllTaskDeliveryRules();
       render();
@@ -180,6 +184,7 @@ async function load() {
     state.taskBaselines.clear();
     state.personBaselines.clear();
     ensureOperatorCatalog();
+    ensureTaskTypes();
     ensurePeopleCatalog();
     syncAllTaskDeliveryRules();
     render();
@@ -271,6 +276,7 @@ function formatAuditValue(field, value) {
   const text = normalizeAuditValue(value);
   if (!text) return "空";
   if (field === "status") return statusLabel(text);
+  if (field === "task_type") return TASK_TYPE_LABELS[text] || "待分类";
   if (field === "pr_required") return taskRequiresPr({ pr_required: text }) ? "需 PR" : "仅报告";
   if (field === "operator_ids") return operatorLabelsForIds(text).join(" / ") || "空";
   if (field === "group_id") return groupTitle(text) || text;
@@ -300,18 +306,26 @@ function filteredTasks() {
     const ownerFilters = ownerFilterValues();
     const plNames = taskPlNames(task);
     const operatorNames = taskOperators(task).map((operator) => operator.label).join(" ");
-    return (!q || [task.title, task.owner, task.scope, ownerNames.join(" "), plNames.join(" "), operatorNames].some((value) => String(value || "").toLowerCase().includes(q)))
+    const classificationName = taskOperatorLabelText(task);
+    return (!q || [task.title, task.owner, task.scope, ownerNames.join(" "), plNames.join(" "), operatorNames, classificationName].some((value) => String(value || "").toLowerCase().includes(q)))
       && (!state.filters.risk || task.risk === state.filters.risk)
       && (!state.filters.priority || task.priority === state.filters.priority)
       && (!ownerFilters.length || ownerFilters.some((name) => ownerNames.includes(name)))
       && (!state.filters.pl || plNames.includes(state.filters.pl))
-      && (!state.filters.operator_id || (state.filters.operator_id === "__none__"
-        ? !taskOperators(task).length
-        : taskOperators(task).some((operator) => operator.id === state.filters.operator_id)))
+      && taskMatchesClassificationFilter(task, state.filters.operator_id)
       && (!state.filters.group_id || task.group_id === state.filters.group_id)
       && (!state.filters.special_id || (state.filters.special_id === "__none__" ? !task.special_id : task.special_id === state.filters.special_id))
       && (!state.filters.status || task.status === state.filters.status);
   });
+}
+
+function taskMatchesClassificationFilter(task, filterValue) {
+  if (!filterValue) return true;
+  const type = taskType(task);
+  if (filterValue === "__engineering__") return type === "engineering";
+  if (filterValue === "__unclassified__") return type === "unclassified";
+  if (filterValue === "__operator_none__") return type === "operator" && !taskOperators(task).length;
+  return type === "operator" && taskOperators(task).some((operator) => operator.id === filterValue);
 }
 
 function sortTasksForTable(tasks) {
@@ -425,7 +439,7 @@ function render(options = {}) {
   ensureTimelineView();
   const scoped = visibleTasksForCurrentUser();
   const filtered = filteredTasks();
-  const tasks = filtered.filter(taskIntersectsView);
+  const tasks = filtered.filter((task) => !taskHasClosedSchedule(task) || taskIntersectsView(task));
   const high = tasks.filter((task) => task.risk === "高").length;
   const medium = tasks.filter((task) => task.risk === "中").length;
   const done = tasks.filter((task) => task.status === "done").length;
@@ -456,7 +470,7 @@ function render(options = {}) {
   const timelineTasks = tasks.filter(taskVisibleOnTimeline);
   renderGantt(timelineTasks);
   renderPeopleView(timelineTasks);
-  renderOperatorView(timelineTasks);
+  renderOperatorView(tasks);
   if (includeTableFilters) renderTableFilters();
   else updateOwnerFilterSummary();
   renderTableSortHeaders();
@@ -492,7 +506,13 @@ function renderTableFilters() {
     tableFilterSelect("risk", [["", "全部"], ["高", "高"], ["中", "中"], ["低", "低"]]),
     tableFilterSelect("priority", [["", "全部"], ["P0", "P0"], ["P1", "P1"], ["P2", "P2"]]),
     `<th><input data-table-filter="q" type="search" placeholder="筛事项" value="${escapeAttr(state.filters.q)}"></th>`,
-    tableFilterSelect("operator_id", [["", "全部"], ["__none__", "未关联算子"], ...operators.map((operator) => [operator.id, operator.label])], "col-operator"),
+    tableFilterSelect("operator_id", [
+      ["", "全部"],
+      ["__engineering__", "工程任务"],
+      ["__unclassified__", "待分类"],
+      ["__operator_none__", "算子（未关联）"],
+      ...operators.map((operator) => [operator.id, operator.label]),
+    ], "col-operator"),
     ownerFilterDropdown(),
     tableFilterSelect("pl", [["", "全部"], ...plFilterOptions().map((pl) => [pl, pl])], "col-pl"),
     tableFilterSelect("group_id", [["", "全部"], ...groups.map((group) => [group.id, group.title])], "col-group"),
@@ -1249,14 +1269,15 @@ function peopleLaneCellHtml(plan, day) {
 function renderOperatorView(tasks) {
   const rows = operatorRows(tasks);
   if (!rows.length) {
-    $("#operatorView").innerHTML = `<p class="empty">当前时间窗口内没有符合筛选条件的算子事项。</p>`;
+    $("#operatorView").innerHTML = `<p class="empty">当前时间窗口内没有符合筛选条件的分类事项。</p>`;
     return;
   }
   const { start, end, total } = state.timeline;
   $("#operatorView").innerHTML = `
-    <div class="view-note">按源仓算子全名聚合；每个算子一行，行内展示该算子的多个特性交付条。</div>
+    <div class="view-note">按任务分类聚合；工程任务与各算子同级展示，算子事项按源仓算子全名分行。</div>
     <div class="operator-gantt">
       ${rows.map((row) => {
+        const unscheduledCount = row.items.filter((item) => !taskHasClosedSchedule(item.task)).length;
         const bars = row.items.map((item, index) => taskRenderSegments(item.task).map((segment, segmentIndex) => {
           if (!datesOverlap(segment.start_date, segment.end_date, start, end)) return "";
           const clippedStart = maxDate(segment.start_date, start);
@@ -1267,17 +1288,25 @@ function renderOperatorView(tasks) {
           const titleSuffix = isDelaySegment ? " · 自动延长段，交付件完备后停止延长" : "";
           return `
             <span class="operator-bar ${isDelaySegment ? "delay-chip" : riskClass(item.task.risk)}" style="left:${left}%;width:${width}%;top:${index * 26 + 6}px" title="${escapeAttr(displayTaskTitle(item.task))} · ${escapeAttr(segment.start_date)} ~ ${escapeAttr(segment.end_date)}${titleSuffix}">
-              ${isDelaySegment ? `<small>${escapeHtml(formatMonthDay(segment.end_date))}</small>` : `<b>${escapeHtml(featureTitle(item.task, item.operator))}</b><small>${escapeHtml(formatMonthDay(segment.end_date))}</small>`}
+              ${isDelaySegment ? `<small>${escapeHtml(formatMonthDay(segment.end_date))}</small>` : `<b>${escapeHtml(item.operator ? featureTitle(item.task, item.operator) : compactTaskTitle(item.task))}</b><small>${escapeHtml(formatMonthDay(segment.end_date))}</small>`}
             </span>
           `;
         }).join("")).join("");
+        const unscheduledBars = row.items.map((item, index) => {
+          if (taskHasClosedSchedule(item.task)) return "";
+          return `
+            <span class="operator-bar unscheduled-bar" style="top:${index * 26 + 6}px" title="${escapeAttr(displayTaskTitle(item.task))} · 待排期">
+              <b>${escapeHtml(compactTaskTitle(item.task))}</b><small>待排期</small>
+            </span>
+          `;
+        }).join("");
         return `
           <div class="operator-gantt-row" style="--lane-count:${Math.max(1, row.items.length)}">
             <div class="operator-name">
-              <strong>${escapeHtml(row.operator.label)}</strong>
-              <span>${row.items.length} 项</span>
+              <strong>${escapeHtml(row.classification.label)}</strong>
+              <span>${row.items.length} 项${unscheduledCount ? ` · ${unscheduledCount} 待排期` : ""}</span>
             </div>
-            <div class="operator-track">${bars}</div>
+            <div class="operator-track">${bars}${unscheduledBars}</div>
           </div>
         `;
       }).join("")}
@@ -1287,16 +1316,33 @@ function renderOperatorView(tasks) {
 
 function operatorRows(tasks) {
   const rows = new Map();
+  const addItem = (classification, task, operator = null) => {
+    if (!rows.has(classification.id)) rows.set(classification.id, { classification, items: [] });
+    rows.get(classification.id).items.push({ task, operator });
+  };
   tasks.forEach((task) => {
-    taskOperators(task).forEach((operator) => {
-      if (!rows.has(operator.id)) rows.set(operator.id, { operator, items: [] });
-      rows.get(operator.id).items.push({ task, operator });
-    });
+    const type = taskType(task);
+    if (type === "engineering") {
+      addItem({ id: "__engineering__", label: "工程任务", kind: "engineering" }, task);
+      return;
+    }
+    if (type === "unclassified") {
+      addItem({ id: "__unclassified__", label: "待分类", kind: "unclassified" }, task);
+      return;
+    }
+    const operators = taskOperators(task);
+    if (!operators.length) {
+      addItem({ id: "__operator_none__", label: "算子（未关联）", kind: "operator" }, task);
+      return;
+    }
+    operators.forEach((operator) => addItem({ id: operator.id, label: operator.label, kind: "operator" }, task, operator));
   });
-  return [...rows.values()].sort((a, b) => a.operator.label.localeCompare(b.operator.label, "zh-CN"))
+  const kindOrder = { engineering: 0, operator: 1, unclassified: 2 };
+  return [...rows.values()].sort((a, b) => (kindOrder[a.classification.kind] ?? 9) - (kindOrder[b.classification.kind] ?? 9)
+      || a.classification.label.localeCompare(b.classification.label, "zh-CN"))
     .map((row) => ({
       ...row,
-      items: [...row.items].sort((a, b) => a.task.end_date.localeCompare(b.task.end_date) || displayTaskTitle(a.task).localeCompare(displayTaskTitle(b.task), "zh-CN")),
+      items: [...row.items].sort((a, b) => String(a.task.end_date || "").localeCompare(String(b.task.end_date || "")) || displayTaskTitle(a.task).localeCompare(displayTaskTitle(b.task), "zh-CN")),
     }));
 }
 
@@ -1309,25 +1355,30 @@ function tasksForPerson(person) {
 }
 
 function taskChipHtml(task, segment = null) {
-  const operators = taskOperators(task);
-  const operatorLabel = operators.length ? operators.map((operator) => operator.label).join(" / ") : specialTitle(task.special_id);
+  const classificationLabel = taskOperatorLabelText(task);
   const isDelaySegment = Boolean(segment?.auto_extended);
   const titleSuffix = isDelaySegment ? "；自动延长段，交付件完备后停止延长" : "";
   return `<span class="work-chip ${isDelaySegment ? "delay-chip" : riskClass(task.risk)}" title="${escapeAttr(displayTaskTitle(task))}${titleSuffix}">
-    <em>${escapeHtml(operatorLabel || groupTitle(task.group_id))}</em>
+    <em>${escapeHtml(classificationLabel || groupTitle(task.group_id))}</em>
     <b>${escapeHtml(compactTaskTitle(task))}</b>
   </span>`;
 }
 
 function taskOperatorLabelText(task) {
-  return taskOperators(task).map((operator) => operator.label).join(" / ");
+  const type = taskType(task);
+  if (type === "engineering") return "工程任务";
+  if (type === "unclassified") return "待分类";
+  return taskOperators(task).map((operator) => operator.label).join(" / ") || "算子（未关联）";
 }
 
 function operatorChipsHtml(task) {
+  const type = taskType(task);
+  if (type === "engineering") return `<span class="classification-chip engineering">工程任务</span>`;
+  if (type === "unclassified") return `<span class="classification-chip unclassified">待分类</span>`;
   const labels = taskOperators(task).map((operator) => operator.label);
   return labels.length
     ? labels.map((label) => `<span class="operator-chip">${escapeHtml(label)}</span>`).join("")
-    : `<span class="muted-cell">-</span>`;
+    : `<span class="classification-chip unclassified">算子（未关联）</span>`;
 }
 
 function featureTitle(task, operator = taskOperators(task)[0]) {
@@ -1342,8 +1393,30 @@ function featureTitle(task, operator = taskOperators(task)[0]) {
 }
 
 function taskOperators(task) {
+  if (taskType(task) !== "operator") return [];
   const explicitIds = parseOperatorIds(task?.operator_ids);
   return explicitIds.map(operatorById).filter(Boolean);
+}
+
+function normalizeTaskType(value, operatorIds = "") {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(TASK_TYPE_LABELS, normalized)) return normalized;
+  return parseOperatorIds(operatorIds).length ? "operator" : "unclassified";
+}
+
+function taskType(task) {
+  return normalizeTaskType(task?.task_type, task?.operator_ids);
+}
+
+function normalizeTaskClassification(task) {
+  if (!task) return task;
+  task.task_type = taskType(task);
+  task.operator_ids = task.task_type === "operator" ? normalizeOperatorIdsText(task.operator_ids) : "";
+  return task;
+}
+
+function ensureTaskTypes() {
+  (state.data?.tasks || []).forEach(normalizeTaskClassification);
 }
 
 function operatorById(id) {
@@ -1682,6 +1755,7 @@ function ownerEditorHtml(task) {
 }
 
 function operatorEditorHtml(task) {
+  const type = taskType(task);
   const selected = parseOperatorIds(task.operator_ids);
   const selectedSet = new Set(selected);
   const options = operatorCatalog().map((operator) => `
@@ -1694,11 +1768,14 @@ function operatorEditorHtml(task) {
     ? "已显式关联算子，可多选；不选则不强制关联"
     : "未关联算子，可保持为空";
   return `
-    <div class="operator-editor">
-      <input type="hidden" data-field="operator_ids" value="${escapeAttr(normalizeOperatorIdsText(task.operator_ids))}">
-      <button type="button" class="owner-picker-toggle" data-operator-picker-toggle>选择算子</button>
-      <div class="owner-picker-panel">${options}</div>
-      <div class="owner-hint">${escapeHtml(hint)}</div>
+    <div class="operator-editor classification-editor" data-task-type="${escapeAttr(type)}">
+      <div class="classification-type-control">${selectHtml("task_type", TASK_TYPE_OPTIONS, type)}</div>
+      <div class="classification-picker-controls">
+        <input type="hidden" data-field="operator_ids" value="${escapeAttr(normalizeOperatorIdsText(task.operator_ids))}">
+        <button type="button" class="owner-picker-toggle" data-operator-picker-toggle>选择算子</button>
+        <div class="owner-picker-panel">${options}</div>
+        <div class="owner-hint" data-operator-hint>${escapeHtml(hint)}</div>
+      </div>
       <div class="operator-preview">${operatorChipsHtml(task)}</div>
     </div>
   `;
@@ -1741,7 +1818,7 @@ function closeOwnerPickers(event = null, except = null) {
 
 function toggleOperatorPicker(button) {
   const editor = button.closest(".operator-editor");
-  if (!editor) return;
+  if (!editor || editor.dataset.taskType !== "operator") return;
   const willOpen = !editor.classList.contains("open");
   closeOwnerPickers(null, editor);
   editor.classList.toggle("open", willOpen);
@@ -1750,12 +1827,29 @@ function toggleOperatorPicker(button) {
 
 function syncOperatorFromPicker(control) {
   const row = control.closest("tr");
+  const editor = control.closest(".classification-editor");
+  if (editor?.dataset.taskType !== "operator") return;
   const input = row?.querySelector('[data-field="operator_ids"]');
   if (!input) return;
   const selected = [...row.querySelectorAll("[data-operator-picker-value]:checked")].map((option) => option.value).filter(Boolean);
   input.value = selected.join("/");
   markTaskDirty(input);
   syncOperatorPreview(row);
+}
+
+function syncTaskTypeEditor(control) {
+  const row = control.closest("tr");
+  const editor = control.closest(".classification-editor");
+  if (!row || !editor) return;
+  const type = normalizeTaskType(control.value);
+  control.value = type;
+  editor.dataset.taskType = type;
+  editor.classList.remove("open", "drop-up");
+  const input = editor.querySelector('[data-field="operator_ids"]');
+  if (type !== "operator") {
+    if (input) input.value = "";
+    editor.querySelectorAll("[data-operator-picker-value]").forEach((option) => { option.checked = false; });
+  }
 }
 
 function syncOperatorPreview(row) {
@@ -1900,7 +1994,7 @@ function taskRequiresPr(task) {
 }
 
 function taskIsCompletionOverride(task) {
-  return /ops\s*目录整改/i.test(String(task.title || ""));
+  return isYmd(task.done_date) || /ops\s*目录整改/i.test(String(task.title || ""));
 }
 
 function taskDdl(task) {
@@ -1925,6 +2019,7 @@ function taskDdlWorkdayDelta(task) {
 }
 
 function taskDdlCountdownHtml(task) {
+  if (!isYmd(task.end_date)) return `<span class="muted-cell">待排期</span>`;
   const ddl = taskDdl(task);
   const delta = taskDdlWorkdayDelta(task);
   const stateClass = delta < 0 ? "overdue" : (delta === 0 ? "today" : "upcoming");
@@ -1951,6 +2046,7 @@ function taskHasClosedSchedule(task) {
 }
 
 function evaluateTaskRisk(task) {
+  if (taskIsCompletionOverride(task)) return "低";
   const pr = prLinkSummary(task.pr_link);
   const workdaysUntilDdl = taskWorkdaysUntilDdl(task);
   if (taskHasWaitingOwner(task)) {
@@ -2159,7 +2255,7 @@ function appendPrFromSearch(control) {
 
 function readOnlyTaskRowHtml(task, className = "") {
   return `
-    <tr class="${escapeAttr(className)}">
+    <tr data-task-id="${escapeAttr(task.id)}" class="${escapeAttr(className)}">
       <td><span class="tag ${riskClass(task.risk)}">${escapeHtml(task.risk)}</span></td>
       <td><span class="tag ${String(task.priority).toLowerCase()}">${escapeHtml(task.priority)}</span></td>
       <td>${escapeHtml(displayTaskTitle(task))}</td>
@@ -2256,7 +2352,11 @@ function renderRows(tasks) {
     `;
   }).join("");
   document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => handleTaskAction(button).catch(showError)));
-  document.querySelectorAll("#rows [data-field]").forEach((control) => control.addEventListener("change", () => markTaskDirty(control)));
+  document.querySelectorAll("#rows [data-field]").forEach((control) => control.addEventListener("change", () => {
+    if (control.dataset.field === "task_type") syncTaskTypeEditor(control);
+    markTaskDirty(control);
+    if (control.dataset.field === "task_type") syncOperatorPreview(control.closest("tr"));
+  }));
   document.querySelectorAll('#rows [data-field="owner"]').forEach((control) => control.addEventListener("change", () => syncOwnerPickerFromInput(control)));
   document.querySelectorAll("#rows [data-owner-picker-toggle]").forEach((control) => control.addEventListener("click", () => toggleOwnerPicker(control)));
   document.querySelectorAll("#rows [data-owner-picker-value]").forEach((control) => control.addEventListener("change", () => syncOwnerFromPicker(control)));
@@ -2490,8 +2590,11 @@ function applyRowToTask(row, normalizeSegments = true) {
   const task = state.data.tasks.find((item) => item.id === row.dataset.taskId);
   if (!task) return null;
   row.querySelectorAll("[data-field]").forEach((input) => {
-    task[input.dataset.field] = input.dataset.field === "operator_ids" ? normalizeOperatorIdsText(input.value) : input.value.trim();
+    if (input.dataset.field === "operator_ids") task.operator_ids = normalizeOperatorIdsText(input.value);
+    else if (input.dataset.field === "task_type") task.task_type = normalizeTaskType(input.value);
+    else task[input.dataset.field] = input.value.trim();
   });
+  normalizeTaskClassification(task);
   const changed = syncTaskDeliveryRules(task);
   if (changed.includes("risk")) {
     const riskControl = row.querySelector('[data-field="risk"]');
@@ -2676,6 +2779,7 @@ async function addTask() {
     notes: "",
     recommit_date: "",
     done_date: "",
+    task_type: "unclassified",
     operator_ids: "",
     position: state.data.tasks.length,
     created_at: nowIso(),
@@ -3149,6 +3253,7 @@ async function patchTask(task, fields, auditEntry) {
 }
 
 function mergeTask(nextTask) {
+  normalizeTaskClassification(nextTask);
   const index = (state.data.tasks || []).findIndex((task) => task.id === nextTask.id);
   if (index >= 0) state.data.tasks[index] = nextTask;
 }
@@ -3182,6 +3287,7 @@ function applyCloudflareMutationResult(result) {
 async function saveRepository(summary, action, entity, id, detail = {}) {
   requireToken();
   ensureOperatorCatalog();
+  ensureTaskTypes();
   ensurePeopleCatalog();
   syncAllTaskDeliveryRules();
   state.data.generatedAt = nowIso();
@@ -3397,7 +3503,12 @@ function logout() {
 }
 
 function normalizeTaskSegments(task) {
-  task.segments = [{ id: task.segments?.[0]?.id || `seg-${crypto.randomUUID().slice(0, 10)}`, start_date: task.start_date, end_date: task.end_date, reason: task.notes || "", position: 0 }];
+  if (!isYmd(task.start_date) || !isYmd(task.end_date)) {
+    task.segments = [];
+    return;
+  }
+  const current = task.segments?.[0];
+  task.segments = [{ id: current?.id || `seg-${crypto.randomUUID().slice(0, 10)}`, start_date: task.start_date, end_date: task.end_date, reason: current?.reason || "", position: 0 }];
 }
 
 function syncAllTaskDeliveryRules() {

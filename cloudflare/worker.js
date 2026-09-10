@@ -51,6 +51,19 @@ const OPERATOR_OWNER_RULES = {
   prepare_wy_repr_bwd_da: [{ owner: "杨子奇" }],
   prepare_wy_repr_bwd_full: [{ until: "2026-06-30", owner: "张硕累" }, { owner: "周云飞" }],
 };
+const TASK_TYPES = new Set(["operator", "engineering", "unclassified"]);
+const LEGACY_ENGINEERING_TASK_IDS = new Set(["t12", "t24", "t25"]);
+const LEGACY_ENGINEERING_TASK_TITLES = new Set([
+  "ops 目录整改",
+  "性能看板",
+  "一键编包",
+  "ATK用例整改",
+  "CI整改",
+  "readme引导整改",
+  "README引导整改",
+  "ctypes性能优化",
+  "release出包",
+]);
 const PASSWORD_HASH_ITERATIONS = 100000;
 
 export default {
@@ -223,7 +236,7 @@ async function exportState(env) {
       ...task,
       evidence: parseJson(task.evidence, []),
       dependencies: parseJson(task.dependencies, []),
-      operator_ids: task.operator_ids || "",
+      ...normalizeTaskClassification(task.task_type, task.operator_ids),
       segments: segmentMap.get(task.id) || [],
     })),
   };
@@ -244,14 +257,15 @@ async function replaceState(env, state) {
   ];
 
   (state.groups || []).forEach((group, index) => {
+    const unscheduled = group.id === "group-unscheduled";
     statements.push(env.DB.prepare(
       "INSERT INTO groups(id, title, due_date, start_date, end_date, position) VALUES (?, ?, ?, ?, ?, ?)"
     ).bind(
       group.id,
       group.title || "未命名分组",
-      group.due_date || group.end_date || "2026-06-25",
-      group.start_date || group.due_date || "2026-06-25",
-      group.end_date || group.due_date || "2026-06-25",
+      unscheduled ? "" : (group.due_date || group.end_date || "2026-06-25"),
+      unscheduled ? "" : (group.start_date || group.due_date || "2026-06-25"),
+      unscheduled ? "" : (group.end_date || group.due_date || "2026-06-25"),
       numberOr(group.position, index),
     ));
   });
@@ -296,15 +310,15 @@ async function replaceState(env, state) {
   });
 
   (state.tasks || []).forEach((task, index) => {
-    const fallbackTaskStart = todayBjYmd();
-    const taskStart = task.start_date || fallbackTaskStart;
-    const taskEnd = task.end_date || task.start_date || fallbackTaskStart;
+    const taskStart = isYmd(task.start_date) ? task.start_date : "";
+    const taskEnd = isYmd(task.end_date) ? task.end_date : "";
+    const classification = normalizeTaskClassification(legacyTaskTypeForPayload(task), task.operator_ids);
     statements.push(env.DB.prepare(
       `INSERT INTO tasks(
         id, title, scope, target, owner, status, risk, priority, group_id, special_id,
         start_date, end_date, evidence, dependencies, pr_required, pr_link, test_report, notes,
-        recommit_date, done_date, operator_ids, position, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        recommit_date, done_date, task_type, operator_ids, position, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       task.id,
       task.title || "未命名任务",
@@ -326,17 +340,19 @@ async function replaceState(env, state) {
       task.notes || "",
       task.recommit_date || "",
       task.done_date || "",
-      normalizeOperatorIdsText(task.operator_ids),
+      classification.task_type,
+      classification.operator_ids,
       numberOr(task.position, index),
       task.created_at || nowIso(),
       task.updated_at || nowIso(),
     ));
     const segments = Array.isArray(task.segments) && task.segments.length
       ? task.segments
-      : [{ start_date: task.start_date, end_date: task.end_date, reason: task.notes || "", position: 0 }];
+      : (taskStart && taskEnd ? [{ start_date: taskStart, end_date: taskEnd, reason: task.notes || "", position: 0 }] : []);
     segments.forEach((segment, segmentIndex) => {
-      const segmentStart = segment.start_date || task.start_date || fallbackTaskStart;
-      const segmentEnd = segment.end_date || task.end_date || task.start_date || fallbackTaskStart;
+      const segmentStart = isYmd(segment.start_date) ? segment.start_date : taskStart;
+      const segmentEnd = isYmd(segment.end_date) ? segment.end_date : taskEnd;
+      if (!segmentStart || !segmentEnd) return;
       statements.push(env.DB.prepare(
         "INSERT INTO task_segments(id, task_id, start_date, end_date, reason, position) VALUES (?, ?, ?, ?, ?, ?)"
       ).bind(
@@ -442,6 +458,7 @@ function taskNextDoneDate(task, nextStatus) {
 }
 
 function evaluateTaskRisk(task, catalogItems) {
+  if (taskIsCompletionOverride(task)) return "低";
   const pr = prLinkSummary(task.pr_link, catalogItems);
   const workdaysUntilDdl = workdaysUntil(todayBjYmd(), taskDdl(task));
   if (taskHasWaitingOwner(task)) return "高";
@@ -512,7 +529,7 @@ function taskRequiresPr(task) {
 }
 
 function taskIsCompletionOverride(task) {
-  return /ops\s*目录整改/i.test(String(task.title || ""));
+  return isYmd(task.done_date) || /ops\s*目录整改/i.test(String(task.title || ""));
 }
 
 function taskHasWaitingOwner(task) {
@@ -1169,7 +1186,7 @@ async function changePassword(request, env) {
 const TASK_PATCH_FIELDS = new Set([
   "title", "scope", "target", "owner", "status", "risk", "priority", "group_id", "special_id",
   "start_date", "end_date", "evidence", "dependencies", "pr_required", "pr_link", "test_report", "notes",
-  "recommit_date", "done_date", "operator_ids", "position", "segments",
+  "recommit_date", "done_date", "task_type", "operator_ids", "position", "segments",
 ]);
 const TASK_JSON_PATCH_FIELDS = new Set(["evidence", "dependencies"]);
 
@@ -1179,7 +1196,7 @@ async function patchTask(request, env, taskId) {
   await assertExpectedVersion(env, payload.expectedVersion);
   const oldTask = await getTaskById(env, taskId);
   if (!oldTask) throw withStatus(404, "task not found");
-  const fields = normalizeTaskPatchFields(payload.fields || {});
+  const fields = normalizeTaskPatchFields(payload.fields || {}, oldTask);
   const changedFields = Object.keys(fields).filter((field) => {
     if (field === "segments") return !sameJson(oldTask.segments || [], fields.segments || []);
     return !sameJson(oldTask[field], fields[field]);
@@ -1241,11 +1258,23 @@ function assertSchedulePatchHasReason(oldTask, fields, changedFields) {
   throw withStatus(400, `schedule change reason is required for task: ${oldTask.title || oldTask.id}`);
 }
 
-function normalizeTaskPatchFields(fields) {
+function normalizeTaskPatchFields(fields, oldTask = {}) {
   const next = {};
   for (const [field, value] of Object.entries(fields || {})) {
     if (!TASK_PATCH_FIELDS.has(field)) throw withStatus(400, `unsupported task field: ${field}`);
     next[field] = value;
+  }
+  const hasTaskType = Object.prototype.hasOwnProperty.call(next, "task_type");
+  const hasOperatorIds = Object.prototype.hasOwnProperty.call(next, "operator_ids");
+  if (hasTaskType || hasOperatorIds) {
+    const classification = normalizeTaskClassification(
+      hasTaskType ? next.task_type : oldTask.task_type,
+      hasOperatorIds ? next.operator_ids : oldTask.operator_ids,
+    );
+    if (hasTaskType) next.task_type = classification.task_type;
+    if (hasOperatorIds || classification.task_type !== "operator") {
+      next.operator_ids = classification.operator_ids;
+    }
   }
   return next;
 }
@@ -1253,6 +1282,7 @@ function normalizeTaskPatchFields(fields) {
 function normalizePatchValue(field, value) {
   if (TASK_JSON_PATCH_FIELDS.has(field)) return Array.isArray(value) ? value : [];
   if (field === "special_id") return value || null;
+  if (field === "task_type") return normalizeTaskType(value);
   if (field === "operator_ids") return normalizeOperatorIdsText(value);
   if (field === "pr_required") return normalizeBooleanFlag(value, true);
   if (field === "recommit_date" || field === "done_date") return isYmd(value) ? value : "";
@@ -1261,13 +1291,14 @@ function normalizePatchValue(field, value) {
 }
 
 function normalizePatchSegments(value, task) {
-  const raw = Array.isArray(value) && value.length
+  const raw = Array.isArray(value)
     ? value
     : [{ start_date: task.start_date, end_date: task.end_date, reason: task.notes || "", position: 0 }];
   return raw
     .map((segment, index) => {
-      const start = isYmd(segment.start_date) ? segment.start_date : task.start_date;
-      const end = isYmd(segment.end_date) ? segment.end_date : start;
+      const start = isYmd(segment.start_date) ? segment.start_date : (isYmd(task.start_date) ? task.start_date : "");
+      const end = isYmd(segment.end_date) ? segment.end_date : (isYmd(task.end_date) ? task.end_date : "");
+      if (!start || !end) return null;
       return {
         id: String(segment.id || `seg-${task.id}-${index}`),
         start_date: start,
@@ -1276,6 +1307,7 @@ function normalizePatchSegments(value, task) {
         position: numberOr(segment.position, index),
       };
     })
+    .filter(Boolean)
     .sort((a, b) => a.start_date.localeCompare(b.start_date))
     .map((segment, index) => ({ ...segment, position: index }));
 }
@@ -1313,6 +1345,7 @@ async function getTaskById(env, taskId) {
     ...task,
     evidence: parseJson(task.evidence, []),
     dependencies: parseJson(task.dependencies, []),
+    ...normalizeTaskClassification(task.task_type, task.operator_ids),
     segments: segments.map((segment) => ({
       id: segment.id,
       start_date: segment.start_date,
@@ -1325,8 +1358,9 @@ async function getTaskById(env, taskId) {
 
 function normalizeTaskForInsert(task) {
   const now = nowIso();
-  const startDate = isYmd(task.start_date) ? task.start_date : todayBjYmd();
-  const endDate = isYmd(task.end_date) ? task.end_date : startDate;
+  const startDate = isYmd(task.start_date) ? task.start_date : "";
+  const endDate = isYmd(task.end_date) ? task.end_date : "";
+  const classification = normalizeTaskClassification(legacyTaskTypeForPayload(task), task.operator_ids);
   const next = {
     id: String(task.id || `task-${crypto.randomUUID().slice(0, 10)}`),
     title: String(task.title || "未命名任务").trim(),
@@ -1339,7 +1373,7 @@ function normalizeTaskForInsert(task) {
     group_id: String(task.group_id || ""),
     special_id: task.special_id || null,
     start_date: startDate,
-    end_date: endDate < startDate ? startDate : endDate,
+    end_date: startDate && endDate && endDate < startDate ? startDate : endDate,
     evidence: Array.isArray(task.evidence) ? task.evidence : [],
     dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
     pr_required: normalizeBooleanFlag(task.pr_required, true),
@@ -1348,7 +1382,8 @@ function normalizeTaskForInsert(task) {
     notes: String(task.notes || ""),
     recommit_date: isYmd(task.recommit_date) ? task.recommit_date : "",
     done_date: isYmd(task.done_date) ? task.done_date : "",
-    operator_ids: normalizeOperatorIdsText(task.operator_ids),
+    task_type: classification.task_type,
+    operator_ids: classification.operator_ids,
     position: numberOr(task.position, 0),
     created_at: task.created_at || now,
     updated_at: task.updated_at || now,
@@ -1362,8 +1397,8 @@ async function insertTask(env, task) {
     `INSERT INTO tasks(
       id, title, scope, target, owner, status, risk, priority, group_id, special_id,
       start_date, end_date, evidence, dependencies, pr_required, pr_link, test_report, notes,
-      recommit_date, done_date, operator_ids, position, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      recommit_date, done_date, task_type, operator_ids, position, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     task.id,
     task.title,
@@ -1385,6 +1420,7 @@ async function insertTask(env, task) {
     task.notes,
     task.recommit_date,
     task.done_date,
+    task.task_type,
     task.operator_ids,
     task.position,
     task.created_at,
@@ -1807,6 +1843,31 @@ function parseOperatorIds(value) {
 
 function normalizeOperatorIdsText(value) {
   return parseOperatorIds(value).join("/");
+}
+
+function normalizeTaskType(value, operatorIds = "") {
+  const type = String(value || "").trim().toLowerCase();
+  if (!type) return normalizeOperatorIdsText(operatorIds) ? "operator" : "unclassified";
+  if (!TASK_TYPES.has(type)) {
+    throw withStatus(400, "task_type must be operator, engineering, or unclassified");
+  }
+  return type;
+}
+
+function legacyTaskTypeForPayload(task) {
+  if (String(task?.task_type || "").trim()) return task.task_type;
+  if (LEGACY_ENGINEERING_TASK_IDS.has(String(task?.id || ""))) return "engineering";
+  if (LEGACY_ENGINEERING_TASK_TITLES.has(String(task?.title || "").trim())) return "engineering";
+  return "";
+}
+
+function normalizeTaskClassification(taskType, operatorIds) {
+  const normalizedOperatorIds = normalizeOperatorIdsText(operatorIds);
+  const normalizedTaskType = normalizeTaskType(taskType, normalizedOperatorIds);
+  return {
+    task_type: normalizedTaskType,
+    operator_ids: normalizedTaskType === "operator" ? normalizedOperatorIds : "",
+  };
 }
 
 function uniqueStrings(items) {

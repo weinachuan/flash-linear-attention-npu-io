@@ -7,14 +7,24 @@ import argparse
 import base64
 import hashlib
 import json
+import re
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
 PASSWORD_HASH_ITERATIONS = 100000
+LEGACY_ENGINEERING_TASK_IDS = {"t12", "t24", "t25"}
+LEGACY_ENGINEERING_TASK_TITLES = {
+    "ATK用例整改",
+    "CI整改",
+    "readme引导整改",
+    "README引导整改",
+    "ctypes性能优化",
+    "release出包",
+}
 
 
 def read_json(path: Path, fallback: Any = None) -> Any:
@@ -82,6 +92,20 @@ def json_text(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
 
+def normalize_operator_ids_text(value: Any) -> str:
+    items = [item.strip() for item in re.split(r"[、/,，;；\s]+", str(value or "")) if item.strip()]
+    return "/".join(dict.fromkeys(items))
+
+
+def normalize_task_type(task: dict[str, Any], operator_ids: str) -> str:
+    explicit = str(task.get("task_type") or "").strip().lower()
+    if explicit in {"operator", "engineering", "unclassified"}:
+        return explicit
+    if task.get("id") in LEGACY_ENGINEERING_TASK_IDS or task.get("title") in LEGACY_ENGINEERING_TASK_TITLES:
+        return "engineering"
+    return "operator" if operator_ids else "unclassified"
+
+
 def insert(table: str, columns: list[str], values: list[Any]) -> str:
     quoted = ", ".join(sql_string(value) if not isinstance(value, RawSql) else value.value for value in values)
     return f"INSERT INTO {table}({', '.join(columns)}) VALUES ({quoted});"
@@ -97,15 +121,12 @@ def password_hash(password: str, salt: str) -> str:
     return base64.urlsafe_b64encode(digest).decode().rstrip("=")
 
 
-def today_ymd() -> str:
-    return datetime.now(timezone(timedelta(hours=8))).date().isoformat()
-
-
 def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, Any]) -> None:
     lines.extend([
         "DELETE FROM task_segments;",
         "DELETE FROM tasks;",
         "DELETE FROM people;",
+        "DELETE FROM operators;",
         "DELETE FROM specials;",
         "DELETE FROM groups;",
         "DELETE FROM project_meta WHERE key IN ('project', 'repoScan', 'prCatalog');",
@@ -115,12 +136,13 @@ def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, An
     lines.append(insert("project_meta", ["key", "value"], ["prCatalog", json_text(pr_catalog)]))
 
     for index, group in enumerate(state.get("groups", [])):
+        unscheduled = group.get("id") == "group-unscheduled"
         lines.append(insert("groups", ["id", "title", "due_date", "start_date", "end_date", "position"], [
             group.get("id"),
             group.get("title") or "未命名分组",
-            group.get("due_date") or group.get("end_date") or "2026-06-25",
-            group.get("start_date") or group.get("due_date") or "2026-06-25",
-            group.get("end_date") or group.get("due_date") or "2026-06-25",
+            "" if unscheduled else (group.get("due_date") or group.get("end_date") or "2026-06-25"),
+            "" if unscheduled else (group.get("start_date") or group.get("due_date") or "2026-06-25"),
+            "" if unscheduled else (group.get("end_date") or group.get("due_date") or "2026-06-25"),
             RawSql(sql_int(group.get("position"), index)),
         ]))
 
@@ -142,14 +164,27 @@ def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, An
             person.get("pl") or "陈琳鑫",
         ]))
 
+    for index, operator in enumerate(state.get("operators", [])):
+        lines.append(insert("operators", ["id", "label", "aliases", "owner_rules", "position", "active"], [
+            operator.get("id"),
+            operator.get("label") or operator.get("id") or "未命名算子",
+            json_text(operator.get("aliases") or []),
+            json_text(operator.get("owner_rules") or []),
+            RawSql(sql_int(operator.get("position"), index)),
+            RawSql("0" if operator.get("active") is False else "1"),
+        ]))
+
     for index, task in enumerate(state.get("tasks", [])):
-        fallback_task_start = today_ymd()
-        task_start = task.get("start_date") or fallback_task_start
-        task_end = task.get("end_date") or task.get("start_date") or fallback_task_start
+        task_start = task.get("start_date") or ""
+        task_end = task.get("end_date") or ""
+        operator_ids = normalize_operator_ids_text(task.get("operator_ids"))
+        task_type = normalize_task_type(task, operator_ids)
+        operator_ids = operator_ids if task_type == "operator" else ""
         lines.append(insert("tasks", [
             "id", "title", "scope", "target", "owner", "status", "risk", "priority",
             "group_id", "special_id", "start_date", "end_date", "evidence", "dependencies",
-            "pr_required", "pr_link", "test_report", "notes", "recommit_date", "done_date", "position", "created_at", "updated_at",
+            "pr_required", "pr_link", "test_report", "notes", "recommit_date", "done_date",
+            "task_type", "operator_ids", "position", "created_at", "updated_at",
         ], [
             task.get("id"),
             task.get("title") or "未命名任务",
@@ -171,19 +206,23 @@ def emit_state(lines: list[str], state: dict[str, Any], pr_catalog: dict[str, An
             task.get("notes") or "",
             task.get("recommit_date") or "",
             task.get("done_date") or "",
+            task_type,
+            operator_ids,
             RawSql(sql_int(task.get("position"), index)),
             task.get("created_at") or now_iso(),
             task.get("updated_at") or now_iso(),
         ]))
-        segments = task.get("segments") or [{
-            "start_date": task.get("start_date"),
-            "end_date": task.get("end_date") or task.get("start_date"),
+        segments = task.get("segments") or ([{
+            "start_date": task_start,
+            "end_date": task_end,
             "reason": task.get("notes") or "",
             "position": 0,
-        }]
+        }] if task_start and task_end else [])
         for segment_index, segment in enumerate(segments):
-            segment_start = segment.get("start_date") or task.get("start_date") or fallback_task_start
-            segment_end = segment.get("end_date") or task.get("end_date") or task.get("start_date") or fallback_task_start
+            segment_start = segment.get("start_date") or task_start
+            segment_end = segment.get("end_date") or task_end
+            if not segment_start or not segment_end:
+                continue
             lines.append(insert("task_segments", ["id", "task_id", "start_date", "end_date", "reason", "position"], [
                 segment.get("id") or f"seg-{task.get('id')}-{segment_index}",
                 task.get("id"),
