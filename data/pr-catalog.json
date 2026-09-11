@@ -1,19 +1,55 @@
 {
-  "generatedAt": "2026-09-11T11:08:17+08:00",
+  "generatedAt": "2026-09-11T18:39:17+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 351,
+  "total": 356,
   "items": [
     {
-      "number": 528,
-      "title": "fix(gdn): 接入 A2 分层 FP32 Solve 并修复流水同步",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/528",
+      "number": 537,
+      "title": "fix: always call l0op::Contiguous in DataContiguous",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/537",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-11T02:57:44Z",
-      "createdAt": "2026-09-11T02:12:28Z",
-      "headRef": "chw_a2_a5_triton",
+      "updatedAt": "2026-09-11T10:36:46Z",
+      "createdAt": "2026-09-11T10:36:17Z",
+      "headRef": "dhu",
+      "labels": []
+    },
+    {
+      "number": 536,
+      "title": "fix(chunk_local_cumsum): register Ascend950 op config (v26.9.0)",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/536",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-11T10:16:07Z",
+      "createdAt": "2026-09-11T10:16:06Z",
+      "headRef": "codex/fix-chunk-local-cumsum-v26.9.0",
+      "labels": []
+    },
+    {
+      "number": 535,
+      "title": "fix(chunk_local_cumsum): register Ascend950 op config",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/535",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-11T10:15:51Z",
+      "createdAt": "2026-09-11T10:15:50Z",
+      "headRef": "codex/fix-chunk-local-cumsum-main",
+      "labels": []
+    },
+    {
+      "number": 532,
+      "title": "feat(gdn): 新增 ChunkGatedDeltaRuleBwd 融合接口",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/532",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-11T09:38:37Z",
+      "createdAt": "2026-09-11T07:51:36Z",
+      "headRef": "add_op_gdn_bwd",
       "labels": []
     },
     {
@@ -23,7 +59,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-11T02:17:32Z",
+      "updatedAt": "2026-09-11T04:15:58Z",
       "createdAt": "2026-09-11T02:11:00Z",
       "headRef": "codex/a5-ci-deployment",
       "labels": []
@@ -54,12 +90,12 @@
     },
     {
       "number": 518,
-      "title": "perf(gdn): 优化 A5 Phase6 推理流水并修复同步与尾块读取",
+      "title": "perf(gdn): 优化 A5 Phase6 推理并修复路由、同步与输出语义",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/518",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-11T01:33:36Z",
+      "updatedAt": "2026-09-11T10:13:16Z",
       "createdAt": "2026-09-10T02:00:50Z",
       "headRef": "chw_a2_a5_simple_A5",
       "labels": []
@@ -95,7 +131,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-10T01:49:35Z",
+      "updatedAt": "2026-09-11T06:05:33Z",
       "createdAt": "2026-09-08T13:32:41Z",
       "headRef": "pypi-v2690",
       "labels": []
@@ -191,7 +227,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-11T02:14:55Z",
+      "updatedAt": "2026-09-11T09:42:16Z",
       "createdAt": "2026-09-04T04:29:07Z",
       "headRef": "codex/chunk-kda-fwd-prepare-pseudocode",
       "labels": []
@@ -1082,6 +1118,30 @@
       "updatedAt": "2026-06-30T20:39:09Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 530,
+      "title": "chunk_kda_bwd_recompute编译问题",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/530",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-11T09:07:33Z",
+      "updatedAt": "2026-09-11T09:07:33Z",
+      "createdAt": "2026-09-11T07:09:24Z",
+      "headRef": "lyq/chunk_kda_bwd_recompute",
+      "labels": []
+    },
+    {
+      "number": 528,
+      "title": "fix(gdn): 接入 arch22 分层 FP32 Solve 并修复流水同步",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/528",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-11T08:59:25Z",
+      "updatedAt": "2026-09-11T08:59:25Z",
+      "createdAt": "2026-09-11T02:12:28Z",
+      "headRef": "chw_a2_a5_triton",
       "labels": []
     },
     {
