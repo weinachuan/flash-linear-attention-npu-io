@@ -1,9 +1,45 @@
 {
-  "generatedAt": "2026-09-10T18:40:18+08:00",
+  "generatedAt": "2026-09-11T11:08:17+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 348,
+  "total": 351,
   "items": [
+    {
+      "number": 528,
+      "title": "fix(gdn): 接入 A2 分层 FP32 Solve 并修复流水同步",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/528",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-11T02:57:44Z",
+      "createdAt": "2026-09-11T02:12:28Z",
+      "headRef": "chw_a2_a5_triton",
+      "labels": []
+    },
+    {
+      "number": 527,
+      "title": "ci: 新增 A5 双平台 NPU 验证",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/527",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-11T02:17:32Z",
+      "createdAt": "2026-09-11T02:11:00Z",
+      "headRef": "codex/a5-ci-deployment",
+      "labels": []
+    },
+    {
+      "number": 523,
+      "title": "refactor(gdn): 重命名前向输出算子",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/523",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-10T11:27:41Z",
+      "createdAt": "2026-09-10T11:16:59Z",
+      "headRef": "codex/rename-chunk-gated-delta-rule-o",
+      "labels": []
+    },
     {
       "number": 522,
       "title": "ChunkGdnFwdPrepare Support use_qk_l2norm_in_kernel=False",
@@ -18,12 +54,12 @@
     },
     {
       "number": 518,
-      "title": "Chw a2 a5 simple a5",
+      "title": "perf(gdn): 优化 A5 Phase6 推理流水并修复同步与尾块读取",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/518",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-10T02:01:02Z",
+      "updatedAt": "2026-09-11T01:33:36Z",
       "createdAt": "2026-09-10T02:00:50Z",
       "headRef": "chw_a2_a5_simple_A5",
       "labels": []
@@ -50,18 +86,6 @@
       "updatedAt": "2026-09-10T06:54:45Z",
       "createdAt": "2026-09-09T07:10:43Z",
       "headRef": "feat/fla-npu-thin-launcher-390",
-      "labels": []
-    },
-    {
-      "number": 509,
-      "title": "Lyq/chunk kda bwd recompute",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/509",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-10T09:18:37Z",
-      "createdAt": "2026-09-09T03:13:20Z",
-      "headRef": "lyq/chunk_kda_bwd_recompute",
       "labels": []
     },
     {
@@ -119,7 +143,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-10T09:57:31Z",
+      "updatedAt": "2026-09-10T14:04:41Z",
       "createdAt": "2026-09-08T07:24:25Z",
       "headRef": "feat/fla-npu-thin-launcher",
       "labels": []
@@ -162,12 +186,12 @@
     },
     {
       "number": 460,
-      "title": "docs(kda): 完善 A2/A3/A5 chunk_kda_fwd_prepare 设计伪代码",
+      "title": "feat(kda): 实现 A2/A3/A5 chunk_kda_fwd_prepare",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/460",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-10T10:34:56Z",
+      "updatedAt": "2026-09-11T02:14:55Z",
       "createdAt": "2026-09-04T04:29:07Z",
       "headRef": "codex/chunk-kda-fwd-prepare-pseudocode",
       "labels": []
@@ -209,18 +233,6 @@
       "labels": []
     },
     {
-      "number": 438,
-      "title": "feat(causal_conv1d): add fn/update APIs and device metadata. And performance improvement on 950 for v26.9.0.",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/438",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-09T06:46:04Z",
-      "createdAt": "2026-09-02T02:58:49Z",
-      "headRef": "causal-conv1d-v26.9.0",
-      "labels": []
-    },
-    {
       "number": 430,
       "title": "fix: 修复 chunk_kda_fwd 边界流水同步与状态累加问题",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/430",
@@ -251,21 +263,9 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-08-31T09:31:32Z",
+      "updatedAt": "2026-09-10T13:07:42Z",
       "createdAt": "2026-08-31T02:02:05Z",
       "headRef": "feat/chunk-kda-bwd-prepare-a5-regbase",
-      "labels": []
-    },
-    {
-      "number": 419,
-      "title": "feat: 新增 ChunkGdnBwdIntra 融合算子",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/419",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-09T18:05:01Z",
-      "createdAt": "2026-08-30T19:19:10Z",
-      "headRef": "codex/restrict-agent-workflow-sources",
       "labels": []
     },
     {
@@ -314,18 +314,6 @@
       "updatedAt": "2026-08-27T08:07:18Z",
       "createdAt": "2026-08-27T08:03:58Z",
       "headRef": "codex/fix-issue312-state-shapes",
-      "labels": []
-    },
-    {
-      "number": 390,
-      "title": "feat(causal_conv1d): add fn/update APIs and device metadata. And performance improvement on 950.",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/390",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-09T06:27:40Z",
-      "createdAt": "2026-08-26T09:02:48Z",
-      "headRef": "causal-conv1d",
       "labels": []
     },
     {
@@ -1157,6 +1145,18 @@
       "labels": []
     },
     {
+      "number": 509,
+      "title": "Lyq/chunk kda bwd recompute",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/509",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-11T02:02:08Z",
+      "updatedAt": "2026-09-11T02:02:08Z",
+      "createdAt": "2026-09-09T03:13:20Z",
+      "headRef": "lyq/chunk_kda_bwd_recompute",
+      "labels": []
+    },
+    {
       "number": 506,
       "title": "fix(example): 移除GDN大融合输出的transpose",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/506",
@@ -1553,6 +1553,18 @@
       "labels": []
     },
     {
+      "number": 438,
+      "title": "feat(causal_conv1d): add fn/update APIs and device metadata. And performance improvement on 950 for v26.9.0.",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/438",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-11T02:18:47Z",
+      "updatedAt": "2026-09-11T02:18:47Z",
+      "createdAt": "2026-09-02T02:58:49Z",
+      "headRef": "causal-conv1d-v26.9.0",
+      "labels": []
+    },
+    {
       "number": 435,
       "title": "Chunk fwd o a5",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/435",
@@ -1658,6 +1670,18 @@
       "updatedAt": "2026-08-31T06:21:44Z",
       "createdAt": "2026-08-31T01:35:02Z",
       "headRef": "ChunkBwdDqkwg",
+      "labels": []
+    },
+    {
+      "number": 419,
+      "title": "feat: 新增 ChunkGdnBwdIntra 融合算子",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/419",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-10T12:19:41Z",
+      "updatedAt": "2026-09-10T12:19:41Z",
+      "createdAt": "2026-08-30T19:19:10Z",
+      "headRef": "codex/restrict-agent-workflow-sources",
       "labels": []
     },
     {
@@ -1850,6 +1874,18 @@
       "updatedAt": "2026-08-26T12:37:07Z",
       "createdAt": "2026-08-26T09:32:09Z",
       "headRef": "fix/pr311-embed-opp",
+      "labels": []
+    },
+    {
+      "number": 390,
+      "title": "feat(causal_conv1d): add fn/update APIs and device metadata. And performance improvement on 950.",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/390",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-11T02:18:51Z",
+      "updatedAt": "2026-09-11T02:18:52Z",
+      "createdAt": "2026-08-26T09:02:48Z",
+      "headRef": "causal-conv1d",
       "labels": []
     },
     {
