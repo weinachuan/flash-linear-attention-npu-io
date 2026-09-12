@@ -1,43 +1,43 @@
 {
-  "generatedAt": "2026-09-12T11:14:44+08:00",
+  "generatedAt": "2026-09-12T18:08:45+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 356,
+  "total": 359,
   "items": [
     {
+      "number": 542,
+      "title": "fix(gdn): 隔离融合私有 WU/H/O tiling 类型与 FwdH 注册",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/542",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-12T09:09:54Z",
+      "createdAt": "2026-09-12T08:00:27Z",
+      "headRef": "fix/gdn-private-tiling-isolation",
+      "labels": []
+    },
+    {
+      "number": 541,
+      "title": "perf: remove redundant chunk metadata validation",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/541",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-12T09:39:11Z",
+      "createdAt": "2026-09-12T06:13:25Z",
+      "headRef": "codex/remove-chunk-gdn-metadata-check",
+      "labels": []
+    },
+    {
       "number": 540,
-      "title": "feat: GDN 新路径支持 use_exp2=false",
+      "title": "feat: GDN A5 拼接路径支持 use_exp2=false",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/540",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-12T02:27:43Z",
+      "updatedAt": "2026-09-12T07:53:20Z",
       "createdAt": "2026-09-12T01:51:29Z",
       "headRef": "codex/gdn-new-path-exp",
-      "labels": []
-    },
-    {
-      "number": 536,
-      "title": "fix(chunk_local_cumsum): register Ascend950 op config (v26.9.0)",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/536",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-11T12:21:40Z",
-      "createdAt": "2026-09-11T10:16:06Z",
-      "headRef": "codex/fix-chunk-local-cumsum-v26.9.0",
-      "labels": []
-    },
-    {
-      "number": 535,
-      "title": "fix(chunk_local_cumsum): register Ascend950 op config",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/535",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-11T12:22:09Z",
-      "createdAt": "2026-09-11T10:15:50Z",
-      "headRef": "codex/fix-chunk-local-cumsum-main",
       "labels": []
     },
     {
@@ -47,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-11T09:38:37Z",
+      "updatedAt": "2026-09-12T10:01:24Z",
       "createdAt": "2026-09-11T07:51:36Z",
       "headRef": "add_op_gdn_bwd",
       "labels": []
@@ -59,7 +59,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-11T04:15:58Z",
+      "updatedAt": "2026-09-12T09:04:13Z",
       "createdAt": "2026-09-11T02:11:00Z",
       "headRef": "codex/a5-ci-deployment",
       "labels": []
@@ -215,7 +215,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-11T22:52:24Z",
+      "updatedAt": "2026-09-12T09:01:34Z",
       "createdAt": "2026-09-04T04:29:07Z",
       "headRef": "codex/chunk-kda-fwd-prepare-pseudocode",
       "labels": []
@@ -1106,6 +1106,42 @@
       "updatedAt": "2026-06-30T20:39:09Z",
       "createdAt": "2026-06-03T07:10:32Z",
       "headRef": "github-cherry-zhang-e-old-dqkwg",
+      "labels": []
+    },
+    {
+      "number": 545,
+      "title": "docs: enforce run package install verification",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/545",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-12T09:06:11Z",
+      "updatedAt": "2026-09-12T09:06:12Z",
+      "createdAt": "2026-09-12T09:00:16Z",
+      "headRef": "codex/enforce-run-install-verification",
+      "labels": []
+    },
+    {
+      "number": 536,
+      "title": "fix(chunk_local_cumsum): register Ascend950 op config (v26.9.0)",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/536",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-12T10:05:42Z",
+      "updatedAt": "2026-09-12T10:05:42Z",
+      "createdAt": "2026-09-11T10:16:06Z",
+      "headRef": "codex/fix-chunk-local-cumsum-v26.9.0",
+      "labels": []
+    },
+    {
+      "number": 535,
+      "title": "fix(chunk_local_cumsum): register Ascend950 op config",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/535",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-12T10:05:18Z",
+      "updatedAt": "2026-09-12T10:05:18Z",
+      "createdAt": "2026-09-11T10:15:50Z",
+      "headRef": "codex/fix-chunk-local-cumsum-main",
       "labels": []
     },
     {
