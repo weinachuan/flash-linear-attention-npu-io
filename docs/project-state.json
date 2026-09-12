@@ -1,7 +1,7 @@
 {
   "storageVersion": 2,
-  "generatedAt": "2026-09-11T20:35:20.110Z",
-  "version": "2026-09-11T10:39:17.931Z",
+  "generatedAt": "2026-09-12T20:16:33.274Z",
+  "version": "2026-09-12T10:08:45.469Z",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
