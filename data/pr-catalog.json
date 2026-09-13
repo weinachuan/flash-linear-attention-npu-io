@@ -1,9 +1,21 @@
 {
-  "generatedAt": "2026-09-12T18:08:45+08:00",
+  "generatedAt": "2026-09-13T11:18:42+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 359,
+  "total": 360,
   "items": [
+    {
+      "number": 546,
+      "title": "fix(ascendc): correct KKT event initialization and lifecycle (v26.9.0)",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/546",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-12T10:16:11Z",
+      "createdAt": "2026-09-12T10:16:09Z",
+      "headRef": "9_8_sf",
+      "labels": []
+    },
     {
       "number": 542,
       "title": "fix(gdn): 隔离融合私有 WU/H/O tiling 类型与 FwdH 注册",
@@ -17,39 +29,15 @@
       "labels": []
     },
     {
-      "number": 541,
-      "title": "perf: remove redundant chunk metadata validation",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/541",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-12T09:39:11Z",
-      "createdAt": "2026-09-12T06:13:25Z",
-      "headRef": "codex/remove-chunk-gdn-metadata-check",
-      "labels": []
-    },
-    {
       "number": 540,
-      "title": "feat: GDN A5 拼接路径支持 use_exp2=false",
+      "title": "feat: GDN A5 拼接路径支持 use_exp2=false 和关闭 QK L2Norm",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/540",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-12T07:53:20Z",
+      "updatedAt": "2026-09-12T10:51:14Z",
       "createdAt": "2026-09-12T01:51:29Z",
       "headRef": "codex/gdn-new-path-exp",
-      "labels": []
-    },
-    {
-      "number": 532,
-      "title": "feat(gdn): 新增 ChunkGatedDeltaRuleBwd 融合接口",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/532",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-12T10:01:24Z",
-      "createdAt": "2026-09-11T07:51:36Z",
-      "headRef": "add_op_gdn_bwd",
       "labels": []
     },
     {
@@ -59,7 +47,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-12T09:04:13Z",
+      "updatedAt": "2026-09-12T12:43:23Z",
       "createdAt": "2026-09-11T02:11:00Z",
       "headRef": "codex/a5-ci-deployment",
       "labels": []
@@ -83,7 +71,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-11T16:21:03Z",
+      "updatedAt": "2026-09-12T10:18:42Z",
       "createdAt": "2026-09-10T08:19:39Z",
       "headRef": "gdn_fwd_prepare",
       "labels": []
@@ -95,7 +83,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-10T08:27:12Z",
+      "updatedAt": "2026-09-12T10:16:29Z",
       "createdAt": "2026-09-09T08:09:18Z",
       "headRef": "9_8",
       "labels": []
@@ -215,7 +203,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-12T09:01:34Z",
+      "updatedAt": "2026-09-12T11:05:35Z",
       "createdAt": "2026-09-04T04:29:07Z",
       "headRef": "codex/chunk-kda-fwd-prepare-pseudocode",
       "labels": []
@@ -1121,6 +1109,18 @@
       "labels": []
     },
     {
+      "number": 541,
+      "title": "perf: remove redundant chunk metadata validation",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/541",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-12T13:19:09Z",
+      "updatedAt": "2026-09-12T13:19:09Z",
+      "createdAt": "2026-09-12T06:13:25Z",
+      "headRef": "codex/remove-chunk-gdn-metadata-check",
+      "labels": []
+    },
+    {
       "number": 536,
       "title": "fix(chunk_local_cumsum): register Ascend950 op config (v26.9.0)",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/536",
@@ -1142,6 +1142,18 @@
       "updatedAt": "2026-09-12T10:05:18Z",
       "createdAt": "2026-09-11T10:15:50Z",
       "headRef": "codex/fix-chunk-local-cumsum-main",
+      "labels": []
+    },
+    {
+      "number": 532,
+      "title": "feat(gdn): 新增 ChunkGatedDeltaRuleBwd 融合接口",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/532",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-12T15:23:45Z",
+      "updatedAt": "2026-09-12T15:23:45Z",
+      "createdAt": "2026-09-11T07:51:36Z",
+      "headRef": "add_op_gdn_bwd",
       "labels": []
     },
     {
