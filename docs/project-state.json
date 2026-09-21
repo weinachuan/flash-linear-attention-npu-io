@@ -1,7 +1,7 @@
 {
   "storageVersion": 2,
-  "generatedAt": "2026-09-21T11:27:21+08:00",
-  "version": "2026-09-20T10:40:43.671Z",
+  "generatedAt": "2026-09-21T21:46:05.962Z",
+  "version": "2026-09-21T12:04:00.641Z",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -3403,7 +3403,7 @@
       "notes": "关联三个GDN/KDA共用算子",
       "position": 72,
       "created_at": "2026-09-10T08:30:00.000Z",
-      "updated_at": "2026-09-21T11:27:21+08:00",
+      "updated_at": "2026-09-21T03:27:22.197Z",
       "operator_ids": "pre_process_fwd_kernel_merged/merge_fwd_bwd_kernel/pre_process_bwd_kernel_merged",
       "recommit_date": "",
       "done_date": "",
@@ -3511,7 +3511,7 @@
       "notes": "",
       "position": 75,
       "created_at": "2026-09-10T08:30:00.000Z",
-      "updated_at": "2026-09-21T11:27:21+08:00",
+      "updated_at": "2026-09-21T03:27:22.197Z",
       "operator_ids": "solve_tril",
       "recommit_date": "",
       "done_date": "",
