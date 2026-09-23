@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-09-22T19:00:14+08:00",
+  "generatedAt": "2026-09-23T11:27:11+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 447,
+  "total": 450,
   "items": [
     {
-      "number": 730,
-      "title": "fix tips",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/730",
+      "number": 735,
+      "title": "chunk_kda_bwd_recompute尾块精度问题",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/735",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-22T08:17:36Z",
-      "createdAt": "2026-09-22T08:17:11Z",
-      "headRef": "0922-fix-tips-9.0",
+      "updatedAt": "2026-09-23T01:56:17Z",
+      "createdAt": "2026-09-22T13:24:43Z",
+      "headRef": "lyq/chunk_kda_bwd_recompute",
       "labels": []
     },
     {
@@ -23,7 +23,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-22T07:30:44Z",
+      "updatedAt": "2026-09-23T03:22:42Z",
       "createdAt": "2026-09-22T07:22:30Z",
       "headRef": "codex/docs-engineering-reference",
       "labels": []
@@ -35,7 +35,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-22T06:54:45Z",
+      "updatedAt": "2026-09-22T11:34:28Z",
       "createdAt": "2026-09-22T03:32:26Z",
       "headRef": "backport/gdn-megakernel-v26.9.0",
       "labels": []
@@ -50,30 +50,6 @@
       "updatedAt": "2026-09-22T06:26:54Z",
       "createdAt": "2026-09-22T03:00:29Z",
       "headRef": "perf/gdn-a2-native-tnd-o",
-      "labels": []
-    },
-    {
-      "number": 713,
-      "title": "Fix solve-tri A3 NTD AicError 26.9.0",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/713",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-22T10:04:46Z",
-      "createdAt": "2026-09-21T11:35:08Z",
-      "headRef": "solve-tri-atk-26.9.0",
-      "labels": []
-    },
-    {
-      "number": 711,
-      "title": "perf(chunk_fwd_o): A5 arch35 拆相流水线重构与跨 Cube 重叠优化",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/711",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-22T07:12:32Z",
-      "createdAt": "2026-09-21T08:47:00Z",
-      "headRef": "fwd_o_v2690_perf",
       "labels": []
     },
     {
@@ -143,7 +119,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-22T09:28:04Z",
+      "updatedAt": "2026-09-23T02:52:40Z",
       "createdAt": "2026-09-21T01:45:48Z",
       "headRef": "fix/fwd-h-nt-first-kda-recompute",
       "labels": []
@@ -218,18 +194,6 @@
       "updatedAt": "2026-09-20T12:27:19Z",
       "createdAt": "2026-09-20T12:27:09Z",
       "headRef": "0920-9.0-blank2",
-      "labels": []
-    },
-    {
-      "number": 650,
-      "title": "ChunkGdnFwdPrepare cumsum Sklansky 1D && add ATK cases",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/650",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-22T03:38:17Z",
-      "createdAt": "2026-09-20T12:08:07Z",
-      "headRef": "gdn_fwd_prepare_26.9.1",
       "labels": []
     },
     {
@@ -458,18 +422,6 @@
       "updatedAt": "2026-09-10T11:27:41Z",
       "createdAt": "2026-09-10T11:16:59Z",
       "headRef": "codex/rename-chunk-gated-delta-rule-o",
-      "labels": []
-    },
-    {
-      "number": 522,
-      "title": "ChunkGdnFwdPrepare cumsum Sklansky 1D && add ATK cases",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/522",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-09-22T03:09:11Z",
-      "createdAt": "2026-09-10T08:19:39Z",
-      "headRef": "gdn_fwd_prepare",
       "labels": []
     },
     {
@@ -1337,6 +1289,42 @@
       "labels": []
     },
     {
+      "number": 734,
+      "title": "fix: 移除 KDA 反向重计算的序列长度对齐限制",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/734",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-23T01:07:16Z",
+      "updatedAt": "2026-09-23T01:07:16Z",
+      "createdAt": "2026-09-22T12:59:41Z",
+      "headRef": "fix/kda-bwd-recompute-tail-v26.9.1",
+      "labels": []
+    },
+    {
+      "number": 732,
+      "title": "fix: 移除 KDA 反向重计算的序列长度对齐限制",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/732",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-23T01:06:58Z",
+      "updatedAt": "2026-09-23T01:06:58Z",
+      "createdAt": "2026-09-22T12:42:36Z",
+      "headRef": "fix/kda-bwd-recompute-tail",
+      "labels": []
+    },
+    {
+      "number": 730,
+      "title": "增加报错时提示信息",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/730",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-23T02:04:01Z",
+      "updatedAt": "2026-09-23T02:04:01Z",
+      "createdAt": "2026-09-22T08:17:11Z",
+      "headRef": "0922-fix-tips-9.0",
+      "labels": []
+    },
+    {
       "number": 719,
       "title": "dv_local fix 26.9.1",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/719",
@@ -1409,6 +1397,30 @@
       "labels": []
     },
     {
+      "number": 713,
+      "title": "Fix solve-tri A3 NTD AicError 26.9.0",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/713",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-23T03:04:45Z",
+      "updatedAt": "2026-09-23T03:04:46Z",
+      "createdAt": "2026-09-21T11:35:08Z",
+      "headRef": "solve-tri-atk-26.9.0",
+      "labels": []
+    },
+    {
+      "number": 711,
+      "title": "perf(chunk_fwd_o): A5 arch35 拆相流水线重构与跨 Cube 重叠优化",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/711",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-23T02:01:09Z",
+      "updatedAt": "2026-09-23T02:01:09Z",
+      "createdAt": "2026-09-21T08:47:00Z",
+      "headRef": "fwd_o_v2690_perf",
+      "labels": []
+    },
+    {
       "number": 705,
       "title": "feat(kda): 回移 #696/#702 到 v26.9.1（保存值导出、prepare 入口、A2/A3 修复、看护用例与 API 文档）",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/705",
@@ -1478,6 +1490,18 @@
       "updatedAt": "2026-09-21T01:50:57Z",
       "createdAt": "2026-09-20T14:34:23Z",
       "headRef": "codex/kda-saved-values-export",
+      "labels": []
+    },
+    {
+      "number": 650,
+      "title": "ChunkGdnFwdPrepare cumsum Sklansky 1D && add ATK cases",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/650",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-23T03:05:24Z",
+      "updatedAt": "2026-09-23T03:05:25Z",
+      "createdAt": "2026-09-20T12:08:07Z",
+      "headRef": "gdn_fwd_prepare_26.9.1",
       "labels": []
     },
     {
@@ -2174,6 +2198,18 @@
       "updatedAt": "2026-09-15T14:53:56Z",
       "createdAt": "2026-09-11T02:11:00Z",
       "headRef": "codex/a5-ci-deployment",
+      "labels": []
+    },
+    {
+      "number": 522,
+      "title": "ChunkGdnFwdPrepare cumsum Sklansky 1D && add ATK cases",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/522",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-23T03:05:09Z",
+      "updatedAt": "2026-09-23T03:05:10Z",
+      "createdAt": "2026-09-10T08:19:39Z",
+      "headRef": "gdn_fwd_prepare",
       "labels": []
     },
     {
