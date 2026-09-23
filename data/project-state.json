@@ -1,7 +1,7 @@
 {
   "storageVersion": 2,
-  "generatedAt": "2026-09-23T11:27:11+08:00",
-  "version": "2026-09-22T11:00:15.687Z",
+  "generatedAt": "2026-09-23T21:11:39.240Z",
+  "version": "2026-09-23T10:49:01.329Z",
   "project": {
     "name": "flash-linear-attention-npu",
     "repository": "https://github.com/flashserve/flash-linear-attention-npu",
@@ -3191,7 +3191,7 @@
       "notes": "新阶段任务；旧阶段已按原承诺结项",
       "position": 65,
       "created_at": "2026-09-10T08:30:00.000Z",
-      "updated_at": "2026-09-23T11:27:11+08:00",
+      "updated_at": "2026-09-23T03:27:12.918Z",
       "operator_ids": "chunk_kda_fwd",
       "recommit_date": "",
       "done_date": "",
@@ -3227,7 +3227,7 @@
       "notes": "新阶段任务；旧阶段已按原承诺结项",
       "position": 66,
       "created_at": "2026-09-10T08:30:00.000Z",
-      "updated_at": "2026-09-23T11:27:11+08:00",
+      "updated_at": "2026-09-23T03:27:12.918Z",
       "operator_ids": "chunk_kda_bwd",
       "recommit_date": "",
       "done_date": "",
