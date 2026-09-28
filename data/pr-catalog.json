@@ -1,19 +1,91 @@
 {
-  "generatedAt": "2026-09-27T19:27:09+08:00",
+  "generatedAt": "2026-09-28T11:48:21+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 479,
+  "total": 486,
   "items": [
     {
-      "number": 776,
-      "title": "fix(kda): 回移 #700 到 v26.9.1（补齐 Gate 标量暂存区读后写依赖，消除 chunk_kda_fwd UB WAR hazard）",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/776",
+      "number": 789,
+      "title": "fix(legacy): drop npu_fast_gelu_custom from the legacy extension",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/789",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-27T07:37:01Z",
-      "createdAt": "2026-09-27T07:04:39Z",
-      "headRef": "codex/backport-700-v26.9.1",
+      "updatedAt": "2026-09-28T03:37:16Z",
+      "createdAt": "2026-09-28T03:37:15Z",
+      "headRef": "fix/773-drop-legacy-fast-gelu-custom-v26.9.0",
+      "labels": []
+    },
+    {
+      "number": 788,
+      "title": "fix(legacy): drop npu_fast_gelu_custom from the legacy extension",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/788",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-28T03:37:11Z",
+      "createdAt": "2026-09-28T03:37:10Z",
+      "headRef": "fix/773-drop-legacy-fast-gelu-custom-v26.9.1",
+      "labels": []
+    },
+    {
+      "number": 787,
+      "title": "fix(legacy): drop npu_fast_gelu_custom from the legacy extension",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/787",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-28T03:37:04Z",
+      "createdAt": "2026-09-28T03:37:03Z",
+      "headRef": "fix/773-drop-legacy-fast-gelu-custom",
+      "labels": []
+    },
+    {
+      "number": 786,
+      "title": "fix(v26.9.1): 按当前构建配置准确定位 wheel 安装路径",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/786",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-28T03:30:28Z",
+      "createdAt": "2026-09-28T03:30:27Z",
+      "headRef": "fix/783-current-build-wheel-v26.9.1",
+      "labels": []
+    },
+    {
+      "number": 785,
+      "title": "fix: validate recurrent_gated_delta_rule inputs",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/785",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-28T03:42:11Z",
+      "createdAt": "2026-09-28T03:22:19Z",
+      "headRef": "26.9.0bak",
+      "labels": []
+    },
+    {
+      "number": 784,
+      "title": "fix: 按当前构建配置准确定位 wheel 安装路径",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/784",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-28T03:30:22Z",
+      "createdAt": "2026-09-28T02:13:12Z",
+      "headRef": "fix/783-current-build-wheel",
+      "labels": []
+    },
+    {
+      "number": 781,
+      "title": "fix: handle empty tensors in chunk gated delta rule bwd",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/781",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-09-28T02:11:53Z",
+      "createdAt": "2026-09-28T01:51:46Z",
+      "headRef": "fix/chunk-gdn-bwd-empty-tensor",
       "labels": []
     },
     {
@@ -23,7 +95,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-27T05:58:27Z",
+      "updatedAt": "2026-09-28T02:27:31Z",
       "createdAt": "2026-09-27T05:58:17Z",
       "headRef": "fix/install-opp-merge-load-priority",
       "labels": []
@@ -35,7 +107,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-24T17:20:11Z",
+      "updatedAt": "2026-09-28T03:16:43Z",
       "createdAt": "2026-09-24T15:53:48Z",
       "headRef": "feat/gdn-a2a3-h-export-0924",
       "labels": []
@@ -47,7 +119,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-09-27T06:12:12Z",
+      "updatedAt": "2026-09-28T02:58:31Z",
       "createdAt": "2026-09-24T10:45:31Z",
       "headRef": "kda-bwd-opt-w1",
       "labels": []
@@ -1298,6 +1370,18 @@
       "updatedAt": "2026-09-27T08:54:51Z",
       "createdAt": "2026-09-27T07:04:41Z",
       "headRef": "codex/backport-698-v26.9.1",
+      "labels": []
+    },
+    {
+      "number": 776,
+      "title": "fix(kda): 回移 #700 到 v26.9.1（补齐 Gate 标量暂存区读后写依赖，消除 chunk_kda_fwd UB WAR hazard）",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/776",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-09-28T03:14:53Z",
+      "updatedAt": "2026-09-28T03:14:53Z",
+      "createdAt": "2026-09-27T07:04:39Z",
+      "headRef": "codex/backport-700-v26.9.1",
       "labels": []
     },
     {
