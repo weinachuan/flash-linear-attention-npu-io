@@ -1,9 +1,81 @@
 {
-  "generatedAt": "2026-10-10T12:27:32+08:00",
+  "generatedAt": "2026-10-10T19:57:13+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 511,
+  "total": 517,
   "items": [
+    {
+      "number": 865,
+      "title": "fix(kda): ChunkKdaFwdPrepare 拆开 V6→C7 RHS 与 V1 payload 的地址复用 + 跨核读侧失效（Arch22）",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/865",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-10-10T10:50:55Z",
+      "createdAt": "2026-10-10T10:50:55Z",
+      "headRef": "codex/kda-prepare-rhs-dedicated",
+      "labels": []
+    },
+    {
+      "number": 864,
+      "title": "fix: use optional input stride for causal conv1d states",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/864",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-10-10T10:55:15Z",
+      "createdAt": "2026-10-10T10:27:16Z",
+      "headRef": "lzy1-v26.9.1",
+      "labels": []
+    },
+    {
+      "number": 863,
+      "title": "fix: use optional input stride for causal conv1d states",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/863",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-10-10T10:55:17Z",
+      "createdAt": "2026-10-10T10:26:43Z",
+      "headRef": "lzy1-v26.9.0",
+      "labels": []
+    },
+    {
+      "number": 860,
+      "title": "fix(kda): ChunkKdaFwdPrepare 的 V6→C7 relay 交接补保守可见性同步（Arch22，临时验证）",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/860",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-10-10T10:37:46Z",
+      "createdAt": "2026-10-10T09:33:09Z",
+      "headRef": "codex/kda-prepare-relay-sync",
+      "labels": []
+    },
+    {
+      "number": 858,
+      "title": "fix: use optional input stride for causal conv1d states",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/858",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-10-10T10:55:53Z",
+      "createdAt": "2026-10-10T08:14:15Z",
+      "headRef": "lzy1",
+      "labels": []
+    },
+    {
+      "number": 856,
+      "title": "perf:chunk_gated_delta_rule_bwd_dhu（A2）性能优化",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/856",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-10-10T08:34:50Z",
+      "createdAt": "2026-10-10T07:01:10Z",
+      "headRef": "main",
+      "labels": []
+    },
     {
       "number": 846,
       "title": "centralize host validation and report predefined parameter errors",
@@ -35,7 +107,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-10-09T08:32:36Z",
+      "updatedAt": "2026-10-10T06:18:23Z",
       "createdAt": "2026-10-09T08:32:36Z",
       "headRef": "fix/issue-615-original-shape-v26.9.1",
       "labels": []
@@ -143,7 +215,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-10-10T04:08:48Z",
+      "updatedAt": "2026-10-10T07:24:48Z",
       "createdAt": "2026-09-28T03:30:27Z",
       "headRef": "fix/783-current-build-wheel-v26.9.1",
       "labels": []
@@ -155,7 +227,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-10-10T04:08:45Z",
+      "updatedAt": "2026-10-10T08:05:33Z",
       "createdAt": "2026-09-28T02:13:12Z",
       "headRef": "fix/783-current-build-wheel",
       "labels": []
