@@ -1,31 +1,43 @@
 {
-  "generatedAt": "2026-10-26T20:18:03+08:00",
+  "generatedAt": "2026-10-27T11:49:04+08:00",
   "sourceRepo": "flashserve/flash-linear-attention-npu",
   "rule": "仅包含已合入 PR 和仍开放 PR；关闭且未合入的 PR 不进入候选池。",
-  "total": 574,
+  "total": 578,
   "items": [
     {
-      "number": 968,
-      "title": "feat(kda): add A2 kda chunk bwd implement",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/968",
+      "number": 974,
+      "title": "FLA NPU 日落算子 deprecation 拦截告警",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/974",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-10-26T09:40:42Z",
-      "createdAt": "2026-10-26T08:05:29Z",
-      "headRef": "kda_bwd",
+      "updatedAt": "2026-10-27T03:33:03Z",
+      "createdAt": "2026-10-27T03:32:47Z",
+      "headRef": "main",
       "labels": []
     },
     {
-      "number": 967,
-      "title": "feat(agents): 新增四层算子检视 skill 与历史 issue 看护",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/967",
+      "number": 973,
+      "title": "fix(ci): 隔离 A2/A5 存储目录并统一限制 16 并发编译",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/973",
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-10-26T09:11:40Z",
-      "createdAt": "2026-10-26T07:14:12Z",
-      "headRef": "codex/operator-review-skill-dfx",
+      "updatedAt": "2026-10-27T03:23:08Z",
+      "createdAt": "2026-10-27T03:23:07Z",
+      "headRef": "fix/ci-runner-storage-permissions",
+      "labels": []
+    },
+    {
+      "number": 972,
+      "title": "perf(gdn): 优化 A2/A3 Finalize 反向 scan 与满行向量流水",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/972",
+      "status": "open",
+      "statusText": "未合入",
+      "mergedAt": null,
+      "updatedAt": "2026-10-27T02:26:15Z",
+      "createdAt": "2026-10-27T02:26:15Z",
+      "headRef": "perf/gdn-finalize-a2a3-modelcase-20261027",
       "labels": []
     },
     {
@@ -38,18 +50,6 @@
       "updatedAt": "2026-10-24T06:06:40Z",
       "createdAt": "2026-10-23T12:20:53Z",
       "headRef": "refactor/stable-only-main",
-      "labels": []
-    },
-    {
-      "number": 960,
-      "title": "perf(kda): optimize A2 prepare and consolidate tiling keys",
-      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/960",
-      "status": "open",
-      "statusText": "未合入",
-      "mergedAt": null,
-      "updatedAt": "2026-10-26T10:48:53Z",
-      "createdAt": "2026-10-23T06:44:33Z",
-      "headRef": "exp-c3next-latest",
       "labels": []
     },
     {
@@ -431,7 +431,7 @@
       "status": "open",
       "statusText": "未合入",
       "mergedAt": null,
-      "updatedAt": "2026-10-26T09:16:12Z",
+      "updatedAt": "2026-10-27T00:51:23Z",
       "createdAt": "2026-10-09T02:26:30Z",
       "headRef": "perf/gdn-a2-forward-pipeline-1009",
       "labels": []
@@ -1625,6 +1625,18 @@
       "labels": []
     },
     {
+      "number": 971,
+      "title": "fix(kda): stabilize A2 recompute tail handling",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/971",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-10-27T03:03:05Z",
+      "updatedAt": "2026-10-27T03:03:05Z",
+      "createdAt": "2026-10-26T14:31:24Z",
+      "headRef": "fix/kda-recompute-stability-964",
+      "labels": []
+    },
+    {
       "number": 969,
       "title": "fix(kda): 取消 prepare 变长序列数量上限",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/969",
@@ -1637,6 +1649,30 @@
       "labels": []
     },
     {
+      "number": 968,
+      "title": "feat(kda): add A2 kda chunk bwd implement",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/968",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-10-26T14:48:36Z",
+      "updatedAt": "2026-10-26T14:48:37Z",
+      "createdAt": "2026-10-26T08:05:29Z",
+      "headRef": "kda_bwd",
+      "labels": []
+    },
+    {
+      "number": 967,
+      "title": "feat(agents): 新增四层算子检视 skill 与历史 issue 看护",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/967",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-10-27T01:52:58Z",
+      "updatedAt": "2026-10-27T01:52:58Z",
+      "createdAt": "2026-10-26T07:14:12Z",
+      "headRef": "codex/operator-review-skill-dfx",
+      "labels": []
+    },
+    {
       "number": 962,
       "title": "A2A3chunk_kda_bwd_finalize优化版适配",
       "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/962",
@@ -1646,6 +1682,18 @@
       "updatedAt": "2026-10-26T12:16:50Z",
       "createdAt": "2026-10-24T02:06:18Z",
       "headRef": "kda-finalize-a2-s24-pr",
+      "labels": []
+    },
+    {
+      "number": 960,
+      "title": "perf(kda): optimize A2 prepare and consolidate tiling keys",
+      "url": "https://github.com/flashserve/flash-linear-attention-npu/pull/960",
+      "status": "merged",
+      "statusText": "已合入",
+      "mergedAt": "2026-10-26T12:44:38Z",
+      "updatedAt": "2026-10-26T12:44:38Z",
+      "createdAt": "2026-10-23T06:44:33Z",
+      "headRef": "exp-c3next-latest",
       "labels": []
     },
     {
